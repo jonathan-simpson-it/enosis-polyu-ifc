@@ -54,7 +54,17 @@ PolyU IFC 2026 Hackathon Demo.
 - Docker Desktop (optional, for containerized deployment)
 - DeepSeek API key ([platform.deepseek.com](https://platform.deepseek.com))
 
-### Local Development
+### One-Click Run
+
+```bash
+# Local (creates venv, installs deps, starts all services, runs demo)
+./scripts/run.sh
+
+# Docker (builds containers, starts services, runs demo)
+./scripts/run-docker.sh
+```
+
+### Manual Setup
 
 ```bash
 # Clone and enter
@@ -78,13 +88,14 @@ cp .env.example .env
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Docker
+### Docker (Manual)
 
 ```bash
 # Build and start
 docker-compose up --build
 
 # Run the demo script
+docker-compose exec api python scripts/seed_database.py
 docker-compose exec api python scripts/run_demo.py
 ```
 
