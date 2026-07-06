@@ -22,11 +22,15 @@ fi
 if [ ! -d .venv ]; then
   echo "→ Creating virtual environment..."
   python3 -m venv .venv
-  source .venv/bin/activate
+fi
+
+source .venv/bin/activate
+
+if [ ! -f .venv/.installed ]; then
+  echo "→ Installing dependencies..."
   pip install -q -r requirements.txt
   playwright install chromium
-else
-  source .venv/bin/activate
+  touch .venv/.installed
 fi
 
 # ── Start mock CMS ──
