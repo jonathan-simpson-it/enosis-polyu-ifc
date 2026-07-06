@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enosis — Translation Demo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.5}
+  .top-bar{background:#1e293b;border-bottom:1px solid #334155;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .top-bar h1{font-size:20px;color:#f8fafc}
+  .top-bar h1 span{color:#38bdf8}
+  .top-bar .sub{font-size:13px;color:#94a3b8}
+  .container{max-width:1100px;margin:0 auto;padding:24px}
+  .tabs{display:flex;gap:8px;margin-bottom:24px}
+  .tab{padding:12px 24px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#94a3b8;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s}
+  .tab:hover{border-color:#38bdf8;color:#e2e8f0}
+  .tab.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+  .panel{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;margin-bottom:24px}
+  .panel h2{font-size:16px;color:#38bdf8;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .panel h2 .step{background:#38bdf8;color:#0f172a;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .panel h2 .badge-success{background:#22c55e;color:#0f172a;font-size:11px;padding:2px 10px;border-radius:12px;margin-left:auto}
+  .panel h2 .badge-pending{background:#f59e0b;color:#0f172a;font-size:11px;padding:2px 10px;border-radius:12px;margin-left:auto}
+  .data-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .data-grid.single{grid-template-columns:1fr}
+  .data-card{background:#0f172a;border-radius:8px;padding:16px}
+  .data-card h3{font-size:13px;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+  .data-card .value{font-size:14px;color:#f1f5f9}
+  .data-card table{width:100%;border-collapse:collapse;font-size:13px}
+  .data-card th{text-align:left;color:#64748b;padding:6px 4px;border-bottom:1px solid #1e293b;font-weight:500}
+  .data-card td{padding:6px 4px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-primary{background:#38bdf8;color:#0f172a}
+  .btn-primary:hover{background:#7dd3fc;transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn-success{background:#22c55e;color:#0f172a}
+  .btn-success:disabled{opacity:.4;cursor:not-allowed}
+  .btn-group{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .translation-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1e293b}
+  .translation-row:last-child{border-bottom:none}
+  .translation-row .original{flex:0 0 180px;font-size:13px;color:#94a3b8}
+  .translation-row .arrow{flex:0 0 20px;color:#38bdf8;font-size:16px}
+  .translation-row .result{flex:1;font-size:14px;color:#f1f5f9}
+  .translation-row .confidence{flex:0 0 160px}
+  .confidence-bar{height:8px;border-radius:4px;background:#334155;overflow:hidden;margin-bottom:2px}
+  .confidence-bar .fill{height:100%;border-radius:4px;transition:width .8s ease}
+  .confidence-bar .fill.high{background:#22c55e}
+  .confidence-bar .fill.medium{background:#f59e0b}
+  .confidence-bar .fill.low{background:#ef4444}
+  .confidence-text{font-size:11px;color:#64748b;text-align:right}
+  .fhir-tree{font-family:'SF Mono',Monaco,monospace;font-size:13px;background:#0f172a;border-radius:8px;padding:16px;max-height:300px;overflow-y:auto;line-height:1.8}
+  .fhir-tree .key{color:#38bdf8}
+  .fhir-tree .string{color:#a78bfa}
+  .fhir-tree .number{color:#f59e0b}
+  .fhir-tree .collapsible{cursor:pointer;user-select:none}
+  .fhir-tree .collapsible::before{content:'▶ ';color:#64748b;font-size:10px}
+  .fhir-tree .collapsible.open::before{content:'▼ '}
+  .fhir-tree .hidden{display:none}
+  .result-banner{text-align:center;padding:32px;border-radius:12px;background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #22c55e}
+  .result-banner .icon{font-size:48px;margin-bottom:8px}
+  .result-banner h3{color:#22c55e;font-size:20px;margin-bottom:4px}
+  .result-banner p{color:#94a3b8;font-size:14px}
+  .result-banner .ref{color:#38bdf8;font-family:monospace;font-size:16px;margin-top:8px}
+  .result-banner img.badge{width:300px;height:120px;margin-top:16px;border-radius:8px}
+  .loader{display:inline-block;width:16px;height:16px;border:2px solid #334155;border-top-color:#38bdf8;border-radius:50%;animation:spin .6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .textarea-field{width:100%;min-height:120px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;padding:12px;font-family:monospace;font-size:13px;resize:vertical}
+  .textarea-field:focus{outline:none;border-color:#38bdf8}
+  .hidden{display:none}
+  .step-indicator{display:flex;justify-content:center;gap:32px;margin-bottom:24px;padding:16px;background:#1e293b;border-radius:8px}
+  .step-indicator .step-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#64748b}
+  .step-indicator .step-item.done{color:#22c55e}
+  .step-indicator .step-item.active{color:#38bdf8}
+  .step-indicator .step-item .num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#334155;color:#94a3b8}
+  .step-indicator .step-item.done .num{background:#22c55e;color:#0f172a}
+  .step-indicator .step-item.active .num{background:#38bdf8;color:#0f172a}
+  @media(max-width:768px){.data-grid{grid-template-columns:1fr}.tabs{flex-direction:column}.translation-row{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>🔄 <span>ENOSIS</span> — Universal Data Translation Layer</h1>
+    <div class="sub">Unlocking data so every AI application can work</div>
+  </div>
+  <div style="font-size:13px;color:#94a3b8">PolyU IFC 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- Step Indicator -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step-item active" id="step1"><span class="num">1</span> Select Source</div>
+    <div class="step-item" id="step2"><span class="num">2</span> Analyze Input</div>
+    <div class="step-item" id="step3"><span class="num">3</span> AI Translation</div>
+    <div class="step-item" id="step4"><span class="num">4</span> Standardized Output</div>
+    <div class="step-item" id="step5"><span class="num">5</span> Upload & Certify</div>
+  </div>
+
+  <!-- Source Tabs -->
+  <div class="panel">
+    <h2>📡 1. Select Data Source</h2>
+    <div class="tabs">
+      <div class="tab active" data-source="cms" onclick="selectSource('cms', this)">🏥 Mock Clinic CMS</div>
+      <div class="tab" data-source="lab" onclick="selectSource('lab', this)">📄 Lab Report (OCR)</div>
+      <div class="tab" data-source="custom" onclick="selectSource('custom', this)">✏️ Custom Clinical Text</div>
+    </div>
+    <div id="sourceCms" class="source-panel">
+      <div class="data-grid single">
+        <div class="data-card">
+          <h3>Source</h3>
+          <div class="value">Central Clinic — Mock CMS (http://localhost:8080)</div>
+          <div class="value" style="margin-top:8px;font-size:12px;color:#64748b">Data is scraped via Playwright browser automation, simulating extraction from any clinic system without integration work.</div>
+        </div>
+      </div>
+      <div class="data-grid" id="cmsPatients"></div>
+    </div>
+    <div id="sourceLab" class="source-panel hidden">
+      <div class="data-grid single">
+        <div class="data-card">
+          <h3>Simulated OCR Input</h3>
+          <div class="value" style="margin-bottom:8px">Handwritten clinical notes processed by Tesseract OCR. Demonstrates translation from unstructured, scanned documents.</div>
+          <div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#cbd5e1;line-height:1.6">
+Patient: Sally Wong<br>
+HKID: B7654321<br>
+DOB: 1962-08-20<br>
+Gender: F<br><br>
+Diagnosis: Asthma (J45.9), Osteoarthritis of knee (M17.9)<br>
+Medications: Salbutamol inhaler 100mcg PRN, Paracetamol 500mg QID<br>
+Labs: Peak Flow 320 L/min, CRP 12 mg/L<br>
+Notes: Patient reports wheezing in mornings. Knee pain when climbing stairs. Referred to physiotherapy.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="sourceCustom" class="source-panel hidden">
+      <div class="data-grid single">
+        <div class="data-card">
+          <h3>Custom Clinical Notes</h3>
+          <div class="value" style="margin-bottom:8px">Type or paste any clinical data below. Enosis will parse and translate it — demonstrating universal format support.</div>
+          <textarea class="textarea-field" id="customText" placeholder="Example: Patient: Lee Ka Ho, HKID: A9876543, DOB: 1970-03-22, Male&#10;Diagnosis: Hyperlipidemia (E78.5)&#10;Medication: Atorvastatin 20mg at night&#10;Labs: Total Chol 6.2, LDL 3.8&#10;Notes: Routine health check. Elevated cholesterol. Advised diet and exercise.">Patient: Lee Ka Ho
+HKID: A9876543
+DOB: 1970-03-22
+Gender: M
+
+Diagnosis: Hyperlipidemia (E78.5)
+Medication: Atorvastatin 20mg nocte
+
+Labs: Total Cholesterol 6.2 mmol/L, LDL 3.8 mmol/L
+
+Notes: Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Repeat lipids in 3 months.</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Translation Panel -->
+  <div class="panel">
+    <h2><span class="step">2</span> AI Translation via DeepSeek &nbsp;<span style="color:#64748b;font-size:12px;font-weight:400">v4-flash · temp=0.1 · max_tokens=4096</span></h2>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnTranslate" onclick="runTranslation()">🔄 Translate via DeepSeek</button>
+      <button class="btn btn-success hidden" id="btnUpload" onclick="runUpload()">📤 Upload to eHealth+</button>
+    </div>
+    <div id="translationSpinner" class="hidden" style="margin-top:16px;text-align:center;padding:24px">
+      <div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div>
+      <div style="color:#94a3b8;font-size:14px">Calling DeepSeek API for medical translation...</div>
+    </div>
+  </div>
+
+  <!-- Results Panels -->
+  <div id="resultCodes" class="panel hidden">
+    <h2>📋 Translation Results <span class="badge-success" id="confidenceBadge">96.5% avg</span></h2>
+    <div id="translationResults"></div>
+  </div>
+
+  <div id="resultFhir" class="panel hidden">
+    <h2>📦 FHIR R5 Bundle <span style="color:#64748b;font-size:12px;font-weight:400" id="fhirCount"></span></h2>
+    <div id="fhirTree" class="fhir-tree"></div>
+  </div>
+
+  <div id="resultUpload" class="panel hidden">
+    <h2>📤 Upload Complete <span class="badge-success" id="uploadStatus">submitted</span></h2>
+    <div class="result-banner">
+      <div class="icon">✅</div>
+      <h3>Successfully Uploaded to eHealth+ (Mock)</h3>
+      <p>Reference ID:</p>
+      <div class="ref" id="ehealthRef">MOCK-EH-20260706-XXXXXX</div>
+      <div id="badgeArea" class="hidden" style="margin-top:16px">
+        <p style="margin-bottom:8px">🏆 Smart Clinic Certification</p>
+        <img class="badge" id="certBadge" src="/badges/gold.svg" alt="Gold Badge">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_KEY = 'dev-api-key-123456';
+const CLINIC_ID = 'c1010101-0000-4000-a000-000000000001';
+const BASE = '';
+let currentSource = 'cms';
+let clinicCreated = false;
+
+const DATA_SOURCES = {
+  cms: {
+    patients: [
+      { id: 'P001', name: 'Chan Tai Man', hkid: 'A1234567', dob: '1955-01-01', gender: 'M', phone: '9123-4567',
+        diagnoses: [{code:'E11.9',desc:'Type 2 diabetes mellitus without complications'},{code:'I10',desc:'Essential (primary) hypertension'}],
+        medications: [{name:'Metformin',dosage:'500mg',freq:'Twice daily'},{name:'Lisinopril',dosage:'10mg',freq:'Once daily'}],
+        labs: [{test:'HbA1c',value:'7.2',unit:'%',ref:'< 7.0'},{test:'Fasting Glucose',value:'8.5',unit:'mmol/L',ref:'4.0-6.0'}],
+        notes:'Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months.' },
+      { id: 'P002', name: 'Wong Sau Ying', hkid: 'A7654321', dob: '1960-06-15', gender: 'F', phone: '9876-5432',
+        diagnoses: [{code:'J45.9',desc:'Asthma, unspecified'},{code:'M17.9',desc:'Osteoarthritis of knee'}],
+        medications: [{name:'Salbutamol',dosage:'100mcg',freq:'As needed'},{name:'Paracetamol',dosage:'500mg',freq:'Four times daily'}],
+        labs: [{test:'Peak Flow',value:'320',unit:'L/min',ref:'> 400'},{test:'CRP',value:'12',unit:'mg/L',ref:'< 5'}],
+        notes:'Patient reports wheezing in mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol PRN and Paracetamol QID. Referred to physiotherapy.' },
+      { id: 'P003', name: 'Lee Ka Ho', hkid: 'A9876543', dob: '1970-03-22', gender: 'M', phone: '6543-2198',
+        diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'}],
+        medications: [{name:'Atorvastatin',dosage:'20mg',freq:'Once daily at night'}],
+        labs: [{test:'Total Cholesterol',value:'6.2',unit:'mmol/L',ref:'< 5.2'},{test:'LDL',value:'3.8',unit:'mmol/L',ref:'< 2.6'}],
+        notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.' }
+    ]
+  },
+  lab: {
+    patients: [{
+      id: 'P002',
+      name: 'Sally Wong',
+      hkid: 'B7654321',
+      dob: '1962-08-20',
+      gender: 'F',
+      phone: '9876-5432',
+      diagnoses: [{code:'J45.9',desc:'Asthma, unspecified'},{code:'M17.9',desc:'Osteoarthritis of knee, unspecified'}],
+      medications: [{name:'Salbutamol',dosage:'100mcg',freq:'As needed'},{name:'Paracetamol',dosage:'500mg',freq:'Four times daily'}],
+      labs: [{test:'Peak Flow',value:'320',unit:'L/min',ref:'> 400'},{test:'CRP',value:'12',unit:'mg/L',ref:'< 5'}],
+      notes:'Patient reports wheezing in the mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol inhaler PRN and Paracetamol 500mg QID. Referral to physiotherapy for knee.'
+    }]
+  },
+  custom: {
+    patients: [{
+      id: 'P003',
+      name: 'Lee Ka Ho',
+      hkid: 'A9876543',
+      dob: '1970-03-22',
+      gender: 'M',
+      phone: '6543-2198',
+      diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'}],
+      medications: [{name:'Atorvastatin',dosage:'20mg',freq:'Once daily at night'}],
+      labs: [{test:'Total Cholesterol',value:'6.2',unit:'mmol/L',ref:'< 5.2'},{test:'LDL',value:'3.8',unit:'mmol/L',ref:'< 2.6'}],
+      notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.'
+    }]
+  }
+};
+
+function selectSource(source, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.source-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('source' + source.charAt(0).toUpperCase() + source.slice(1)).classList.remove('hidden');
+  currentSource = source;
+  ['resultCodes','resultFhir','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('btnUpload').classList.add('hidden');
+  document.getElementById('btnTranslate').disabled = false;
+  setStep(1);
+  if (source === 'cms') renderCmsPatients();
+}
+
+function renderCmsPatients() {
+  const container = document.getElementById('cmsPatients');
+  container.innerHTML = '';
+  const src = DATA_SOURCES.cms;
+  src.patients.forEach((p, idx) => {
+    const selected = idx === 0 ? 'selected' : '';
+    container.innerHTML += \`
+      <div class="data-card" style="cursor:pointer;border:2px solid \${idx === 0 ? '#38bdf8' : 'transparent'}" onclick="selectPatient(\${idx}, this)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>\${p.name}</h3>
+          <span style="font-size:12px;color:#64748b">\${p.id}</span>
+        </div>
+        <table style="margin-top:8px">
+          <tr><td style="color:#64748b;padding:2px 0">HKID</td><td style="padding:2px 8px">\${p.hkid}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">DOB</td><td style="padding:2px 8px">\${p.dob}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Gender</td><td style="padding:2px 8px">\${p.gender === 'M' ? 'Male' : 'Female'}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Diagnoses</td><td style="padding:2px 8px">\${p.diagnoses.map(d => d.code).join(', ')}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Meds</td><td style="padding:2px 8px">\${p.medications.map(m => m.name).join(', ')}</td></tr>
+        </table>
+      </div>\`;
+  });
+}
+
+let selectedPatientIdx = 0;
+function selectPatient(idx, el) {
+  selectedPatientIdx = idx;
+  el.parentElement.querySelectorAll('.data-card').forEach(c => c.style.borderColor = 'transparent');
+  el.style.borderColor = '#38bdf8';
+}
+
+async function runTranslation() {
+  const btn = document.getElementById('btnTranslate');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Translating...';
+  document.getElementById('translationSpinner').classList.remove('hidden');
+  ['resultCodes','resultFhir','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('btnUpload').classList.add('hidden');
+  setStep(3);
+
+  try {
+    const src = DATA_SOURCES[currentSource];
+    const patient = src.patients[currentSource === 'cms' ? selectedPatientIdx : 0];
+
+    if (!clinicCreated) {
+      await fetch(BASE + '/api/v1/ingest', {
+        method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
+        body: JSON.stringify({clinic_id: CLINIC_ID, clinic_name:'Central Clinic', cms_type:'demo', cms_url:'http://localhost:8080', patient_ids:[patient.id]})
+      });
+      clinicCreated = true;
+    }
+
+    setStep(4);
+
+    const translateRes = await fetch(BASE + '/api/v1/translate', {
+      method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        clinic_id: CLINIC_ID,
+        patient_id: patient.id,
+        patient_data: {name:{first:patient.name.split(' ')[0],last:patient.name.split(' ').slice(1).join(' ')||patient.name.split(' ')[0]},hkid:patient.hkid,dob:patient.dob,gender:patient.gender},
+        diagnoses: patient.diagnoses.map(d => ({code: d.code, description: d.desc})),
+        medications: patient.medications.map(m => ({name: m.name, dosage: m.dosage, frequency: m.freq})),
+        lab_results: patient.labs.map(l => ({test: l.test, value: l.value, unit: l.unit, reference: l.ref})),
+        clinical_notes: patient.notes
+      })
+    });
+
+    if (!translateRes.ok) {
+      const errText = await translateRes.text();
+      throw new Error('Translation failed: ' + translateRes.status + ' ' + errText);
+    }
+
+    const translateData = await translateRes.json();
+    renderTranslationResults(translateData);
+    renderFhirBundle(translateData.fhir_bundle);
+
+    document.getElementById('resultCodes').classList.remove('hidden');
+    document.getElementById('resultFhir').classList.remove('hidden');
+
+    const avgConf = translateData.translations.length > 0
+      ? (translateData.translations.reduce((s,t) => s + t.confidence, 0) / translateData.translations.length * 100).toFixed(1)
+      : 'N/A';
+    document.getElementById('confidenceBadge').textContent = avgConf + '% avg';
+    document.getElementById('fhirCount').textContent = '· ' + (translateData.fhir_bundle?.entry?.length || 0) + ' resources';
+
+    setStep(5);
+    document.getElementById('btnUpload').classList.remove('hidden');
+
+  } catch(err) {
+    alert('Error: ' + err.message);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔄 Translate via DeepSeek';
+    document.getElementById('translationSpinner').classList.add('hidden');
+  }
+}
+
+function renderTranslationResults(data) {
+  const container = document.getElementById('translationResults');
+  container.innerHTML = '';
+  data.translations.forEach(t => {
+    const pct = (t.confidence * 100).toFixed(0);
+    const cls = pct >= 90 ? 'high' : pct >= 75 ? 'medium' : 'low';
+    container.innerHTML += \`
+      <div class="translation-row">
+        <div class="original">\${escapeHtml(t.original)}</div>
+        <div class="arrow">→</div>
+        <div class="result">\${escapeHtml(t.translated)}</div>
+        <div class="confidence">
+          <div class="confidence-bar"><div class="fill \${cls}" style="width:\${pct}%"></div></div>
+          <div class="confidence-text">\${pct}%</div>
+        </div>
+      </div>\`;
+  });
+}
+
+function renderFhirBundle(bundle) {
+  const container = document.getElementById('fhirTree');
+  container.innerHTML = '';
+  if (!bundle || !bundle.entry) { container.textContent = 'No FHIR bundle data'; return; }
+  container.innerHTML += '<div><span class="key">resourceType</span>: <span class="string">"' + bundle.resourceType + '"</span></div>';
+  container.innerHTML += '<div><span class="key">type</span>: <span class="string">"' + bundle.type + '"</span></div>';
+  container.innerHTML += '<div><span class="key">entry</span>: <span class="number">' + bundle.entry.length + '</span> resources</div>';
+  bundle.entry.forEach((e, i) => {
+    const r = e.resource || {};
+    container.innerHTML += \`
+      <div style="margin:8px 0 4px 16px;padding:8px;background:#1e293b;border-radius:6px">
+        <div class="collapsible open" onclick="toggleFhirEntry(\${i})">\${r.resourceType} #\${i+1}</div>
+        <div id="fhirEntry\${i}" class="fhir-entry">\${renderFhirResource(r)}</div>
+      </div>\`;
+  });
+}
+
+function renderFhirResource(r) {
+  let html = '<div style="padding:4px 0 0 16px">';
+  for (const [key, val] of Object.entries(r)) {
+    if (typeof val === 'string') html += '<div><span class="key">' + key + '</span>: <span class="string">"' + val + '"</span></div>';
+    else if (typeof val === 'number') html += '<div><span class="key">' + key + '</span>: <span class="number">' + val + '</span></div>';
+    else if (Array.isArray(val)) html += '<div><span class="key">' + key + '</span>: [' + val.length + ' items]</div>';
+    else if (typeof val === 'object' && val) html += '<div><span class="key">' + key + '</span>: {...}</div>';
+  }
+  return html + '</div>';
+}
+
+function toggleFhirEntry(idx) {
+  const el = document.getElementById('fhirEntry' + idx);
+  const header = el.previousElementSibling;
+  if (el.style.display === 'none') { el.style.display = 'block'; header.classList.add('open'); }
+  else { el.style.display = 'none'; header.classList.remove('open'); }
+}
+
+async function runUpload() {
+  const btn = document.getElementById('btnUpload');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Uploading...';
+
+  try {
+    const src = DATA_SOURCES[currentSource];
+    const patient = src.patients[currentSource === 'cms' ? selectedPatientIdx : 0];
+
+    const translateRes = await fetch(BASE + '/api/v1/translate', {
+      method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        clinic_id: CLINIC_ID,
+        patient_id: patient.id,
+        patient_data: {name:{first:patient.name.split(' ')[0],last:patient.name.split(' ').slice(1).join(' ')||patient.name.split(' ')[0]},hkid:patient.hkid,dob:patient.dob,gender:patient.gender},
+        diagnoses: patient.diagnoses.map(d => ({code: d.code, description: d.desc})),
+        medications: patient.medications.map(m => ({name: m.name, dosage: m.dosage, frequency: m.freq})),
+        lab_results: patient.labs.map(l => ({test: l.test, value: l.value, unit: l.unit, reference: l.ref})),
+        clinical_notes: patient.notes
+      })
+    });
+    const translateData = await translateRes.json();
+    const fhirBundle = translateData.fhir_bundle;
+
+    const uploadRes = await fetch(BASE + '/api/v1/upload', {
+      method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({clinic_id: CLINIC_ID, patient_id: patient.id, fhir_bundle: fhirBundle, patient_consent: true})
+    });
+    const uploadData = await uploadRes.json();
+    document.getElementById('ehealthRef').textContent = uploadData.ehealth_reference;
+    document.getElementById('resultUpload').classList.remove('hidden');
+
+    const certRes = await fetch(BASE + '/api/v1/certification/' + CLINIC_ID, {headers: {'X-API-Key': API_KEY}});
+    const certData = await certRes.json();
+    document.getElementById('uploadStatus').textContent = certData.current_level.toUpperCase() + ' certified';
+    const badgeUrl = '/badges/' + certData.current_level + '.svg';
+    document.getElementById('certBadge').src = badgeUrl;
+    document.getElementById('badgeArea').classList.remove('hidden');
+
+  } catch(err) {
+    alert('Upload error: ' + err.message);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📤 Upload to eHealth+';
+  }
+}
+
+function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function setStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+}
+
+renderCmsPatients();
+</script>
+</body>
+</html>

@@ -89,6 +89,20 @@ npx skills add Leonxlnx/taste-skill
 | FHIR | fhir.resources 7.0+ (R5) |
 | Container | Docker + Docker Compose |
 
+### v0 Translation Demo Page
+
+A new interactive demo at `/demo/` that visually shows the AI translation pipeline:
+
+| Feature | What it shows |
+|---|---|
+| **3 data sources** | Mock CMS, Lab Report (OCR), Custom Clinical Text |
+| **Source selector tabs** | Switch between sources, all go through same DeepSeek engine |
+| **AI translation panel** | Calls DeepSeek API, displays confidence bars per field |
+| **FHIR R5 viewer** | Collapsible tree view of generated FHIR bundle |
+| **Upload + certification** | Shows eHealth+ reference + Gold badge on success |
+| **Step indicator** | 5-step visual progress (Select → Analyze → Translate → Output → Upload) |
+| **Factory sensor preview** | Placeholder for cross-industry expansion (v4) |
+
 ### v0 What's Built (Complete)
 
 | Directory | Files | Status |
@@ -99,7 +113,7 @@ npx skills add Leonxlnx/taste-skill
 | `src/utils/` | logger | ✅ Done |
 | `src/badges/` | bronze, silver, gold, platinum, diamond | ✅ Done |
 | `mock_cms/` | index, dashboard, patient, patients, data/ | ✅ Done |
-| `tests/` | test_api.py (12 tests) | ✅ Done (12/12 passing) |
+| `tests/` | test_api.py (12) + test_e2e.py (20) | ✅ Done (32/32 passing) |
 | `scripts/` | seed_database, run_demo | ✅ Done |
 | Root | Dockerfile, docker-compose, requirements, .env.example, README | ✅ Done |
 

@@ -516,5 +516,15 @@ def demo():
 
 ---
 
+### v0 Demo Page
+
+The AI translation pipeline is now visible at **`/demo/`** — an interactive single-page app with 3 data sources, confidence bars, FHIR tree viewer, and certification result. Zero new backend code — just static HTML+JS calling the existing API.
+
+### Reference
+
+- [`ehr-content-standards-guidebook.md`](./ehr-content-standards-guidebook.md) — Hong Kong eHealth content standards for realistic test data generation
+
+---
+
 *Team: Enosis*
 *Date: July 2026*

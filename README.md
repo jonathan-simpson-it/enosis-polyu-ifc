@@ -139,6 +139,7 @@ docker-compose exec api python scripts/run_demo.py
 
 | Service | URL |
 |---|---|
+| Translation Demo | http://localhost:8000/demo/ |
 | API Docs (Swagger) | http://localhost:8000/docs |
 | ReDoc | http://localhost:8000/redoc |
 | Health Check | http://localhost:8000/health |
@@ -312,9 +313,28 @@ More patients → More clinics want certification → Industry standard
 ## Running Tests
 
 ```bash
-pip install pytest
+# Unit + integration tests (12)
+pytest tests/test_api.py -v
+
+# Full E2E tests (20) — includes Playwright browser tests
+pytest tests/test_e2e.py -v
+
+# All tests
 pytest tests/ -v
 ```
+
+### Test Coverage (32/32 passing)
+
+| Suite | Tests | What it covers |
+|---|---|---|
+| `test_api.py` | 12 | API auth, health, ingest, translate, upload, certification |
+| `test_e2e.py` | 20 | CMS UI, translation demo page, API endpoints, full pipeline |
+
+---
+
+## Resources
+
+- [`ehr-content-standards-guidebook.md`](./ehr-content-standards-guidebook.md) — Hong Kong eHealth content standards reference (for Synthea-based test data generation)
 
 ---
 

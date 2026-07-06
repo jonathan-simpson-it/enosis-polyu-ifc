@@ -53,8 +53,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Mount static files for badge SVGs
+# Mount static files for badge SVGs and demo page
 app.mount("/badges", StaticFiles(directory="src/badges"), name="badges")
+app.mount("/demo", StaticFiles(directory="src/demo", html=True), name="demo")
 
 # Register routers — health is public, others require API key
 app.include_router(health_router)

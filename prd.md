@@ -2040,6 +2040,31 @@ class GBADataSpaceConnector:
 
 ---
 
+---
+
+## 31. Test Data Strategy — Synthea Integration
+
+For generating realistic Hong Kong patient cohorts, use **Synthea** (open-source synthetic patient generator):
+
+```bash
+pip install synthea
+synthea --population 100 --module hong_kong
+```
+
+Or configure Synthea's module to match HK eHealth content standards from the guidebook:
+
+```properties
+# synthea.properties overrides for HK
+exporter.fhir.use_shr_extensions = false
+exporter.fhir.bulk_data = true
+population.default.city = Hong Kong
+population.default.state = HK
+```
+
+See [`ehr-content-standards-guidebook.md`](./ehr-content-standards-guidebook.md) for the full FHIR profile requirements.
+
+---
+
 **End of Complete PRD — v0 to v5**
 
 ---
