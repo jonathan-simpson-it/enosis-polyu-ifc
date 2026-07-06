@@ -6,7 +6,7 @@
 
 ## Context
 
-Build a universal data translation layer that automatically extracts data from ANY clinic system, translates it to FHIR R5, and uploads it to eHealth+ — with **zero additional work from the clinic**.
+Build a universal data translation layer that automatically extracts data from ANY clinic system — electronic CMS, handwritten notes, scanned documents, lab photos, or direct text input — translates it to FHIR R5, and uploads it to eHealth+ — with **zero additional work from the clinic**.
 
 **Core Principle:** *"The clinic should never know Enosis exists. Zero additional work. Zero friction. Just automatic translation."*
 

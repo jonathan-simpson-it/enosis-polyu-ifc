@@ -167,6 +167,33 @@ class CertificationResponse(BaseModel):
     levels: list[LevelHistory] = Field(default_factory=list)
 
 
+# ── Upload Data (Direct Submission / File Upload) ─────────────────────────────
+
+
+class UploadDataRequest(BaseModel):
+    """Direct clinical data submission from a doctor (JSON body, not file upload)."""
+    clinic_id: Optional[str] = None
+    clinic_name: str = "Direct Upload"
+    source_description: str = "Direct data submission"
+    patient_data: PatientData
+
+
+class UploadDataResponse(BaseModel):
+    job_id: str
+    status: str = "processing"
+    records_extracted: int = 0
+    estimated_time: int = 5
+    source_type: str = "direct_submission"
+
+
+class UploadDataStatusResponse(BaseModel):
+    job_id: str
+    status: str = "pending"
+    records_extracted: int = 0
+    source_type: Optional[str] = None
+    data: list[dict[str, Any]] = Field(default_factory=list)
+
+
 # ── Error ─────────────────────────────────────────────────────────────────────
 
 

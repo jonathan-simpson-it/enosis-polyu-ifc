@@ -8,7 +8,14 @@ from src.utils.logger import logger
 
 
 class CMSScraper:
-    """Scrapes patient data from clinic CMS systems via browser automation."""
+    """Extracts patient data from clinic CMS systems via browser automation.
+
+    Part of Enosis's multi-modal ingestion pipeline:
+    - CMS scraping (Playwright) — digital/electronic systems
+    - OCR (Tesseract) — handwritten notes, printed documents, lab photos
+    - File upload API — image/JSON/CSV uploads
+    - Direct submission API — structured JSON input
+    """
 
     async def scrape_patient(self, cms_url: str, patient_id: str) -> dict[str, Any]:
         """Scrape a single patient's data from the CMS.

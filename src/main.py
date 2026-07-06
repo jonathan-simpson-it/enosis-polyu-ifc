@@ -16,6 +16,7 @@ from src.api.health import router as health_router
 from src.api.ingest import router as ingest_router
 from src.api.translate import router as translate_router
 from src.api.upload import router as upload_router
+from src.api.upload_data import router as upload_data_router
 from src.api.certification import router as certification_router
 
 # API Key security scheme
@@ -71,6 +72,7 @@ app.include_router(health_router)
 app.include_router(ingest_router, dependencies=[Depends(verify_api_key)])
 app.include_router(translate_router, dependencies=[Depends(verify_api_key)])
 app.include_router(upload_router, dependencies=[Depends(verify_api_key)])
+app.include_router(upload_data_router, dependencies=[Depends(verify_api_key)])
 app.include_router(certification_router, dependencies=[Depends(verify_api_key)])
 
 

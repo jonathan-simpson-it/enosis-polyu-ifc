@@ -27,7 +27,7 @@ Win PolyU IFC 2026 by demonstrating:
 |---|---|
 | Week 1 | Project setup, Docker, database, FastAPI skeleton |
 | Week 2 | DeepSeek integration, FHIR conversion |
-| Week 3 | Playwright scraping, Tesseract OCR |
+| Week 3 | Playwright scraping, Tesseract OCR, file upload + direct submission API |
 | Week 4 | Mock eHealth+, certification, demo script |
 
 ### v0 Success Criteria
@@ -35,7 +35,7 @@ Win PolyU IFC 2026 by demonstrating:
 | Criterion | Measurement |
 |---|---|
 | Working demo | End-to-end flow: CMS → translation → FHIR → mock upload |
-| Technical credibility | DeepSeek API + FHIR R5 + screen scraping working |
+| Technical credibility | DeepSeek API + FHIR R5 + screen scraping + OCR + file upload working |
 | User experience | "Zero work" — clinic does nothing different |
 | Judges impressed | Clear problem, elegant solution, big vision |
 
@@ -254,6 +254,65 @@ Response:
             "medications": [...]
         }
     ]
+}
+```
+
+### Upload Data (File / Direct Submission)
+```
+POST /api/v1/upload-data (multipart/form-data)
+
+Form fields:
+- file: image (PNG/JPG) for OCR, or JSON/CSV data file
+- clinic_id: "uuid" (optional)
+- clinic_name: "Direct Upload" (optional)
+
+Response:
+{
+    "job_id": "uuid",
+    "status": "processing",
+    "records_extracted": 1,
+    "estimated_time": 3,
+    "source_type": "file_upload"
+}
+
+POST /api/v1/upload-data/direct
+
+Request:
+{
+    "clinic_id": "uuid",
+    "clinic_name": "Central Clinic",
+    "source_description": "Doctor typed from consultation",
+    "patient_data": {
+        "patient_id": "P001",
+        "name": "Chan Tai Man",
+        "hkid": "A1234567",
+        "dob": "1955-01-01",
+        "gender": "M",
+        "diagnoses": [{"code": "I10", "description": "Essential hypertension"}],
+        "medications": [{"name": "Lisinopril", "dosage": "10mg", "frequency": "Once daily"}],
+        "lab_results": [],
+        "clinical_notes": "Patient reports occasional dizziness"
+    }
+}
+
+Response:
+{
+    "job_id": "uuid",
+    "status": "processing",
+    "records_extracted": 1,
+    "estimated_time": 1,
+    "source_type": "direct_submission"
+}
+
+GET /api/v1/upload-data/{job_id}/status
+
+Response:
+{
+    "job_id": "uuid",
+    "status": "completed",
+    "records_extracted": 1,
+    "source_type": "direct_submission",
+    "data": [{ ... patient record ... }]
 }
 ```
 

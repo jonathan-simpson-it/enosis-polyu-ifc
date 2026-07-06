@@ -34,7 +34,7 @@
 
 ### One AI Agent. One Job.
 
-> *"Ingest data from ANY source, in ANY format → Output in a unified, machine-readable schema."*
+> *"Ingest data from ANY source, in ANY format — electronic CMS, handwritten notes, scanned documents, lab photos, or direct text input → Output in a unified, machine-readable schema."*
 
 | What We Do | What We Don't Do |
 |---|---|
@@ -47,7 +47,62 @@
 
 ---
 
-## 4. PHASE 0: HACKATHON DEMO (v0)
+## 4. COMPETITIVE LANDSCAPE
+
+| Competitor | What They Do | Why We Win |
+|---|---|---|
+| **MedLink (UK)** | Healthcare data integration; integrated with EMIS Web | Healthcare-only, UK-centric, assumes structured data |
+| **Accredited CMS Vendors** | Sell full clinical management systems | We work with **existing** systems — no migration |
+| **UA Edge Translator** | Protocol translation for manufacturing | Manufacturing-only; protocol-level, not semantic |
+| **superglue (YC)** | Generic data transformation | No industry context; no unstructured data handling |
+| **CData / MuleSoft** | Enterprise data connectors | Require pre-built connectors; no AI; too expensive for SMEs |
+| **Mainland AI Health** (Alibaba, Tencent) | AI health platforms | Don't understand HK's regulatory context |
+
+**No one occupies the center:** cross-industry, AI-native, semantic, any data source, continuous learning.
+
+---
+
+## 5. THE MOAT
+
+| Layer | Why It's Defensible |
+|---|---|
+| **Data Moat** | Proprietary translation corpus grows with every customer; cross-industry learning creates exponential value |
+| **Network Effects** | More customers = more translations = better agent = more customers |
+| **Technical Complexity** | Hybrid AI (ontology + knowledge graph + LLM) + edge deployment + multi-industry schema mapping |
+| **Regulatory First-Mover** | First to eHealth+ accreditation; first to build cross-border compliance (PDPO + PIPL) |
+| **Neutral Positioning** | "Switzerland of data" — no hardware, no cloud lock-in, trusted by all |
+
+---
+
+## 6. MARKET OPPORTUNITY
+
+| Segment | Size |
+|---|---|
+| HK Private Clinics | 3,000+ |
+| HK Public Hospitals | 40+ |
+| GBA Hospitals | 1,000+ |
+| GBA Manufacturers | 600,000+ |
+| **Total Addressable Market** | **HK$100B+/year** |
+
+### Revenue Model
+- Per-transaction: HK$5-20 per patient record
+- Subscription: HK$500-2,000/month per clinic (unlimited)
+- Government-funded: HK$500/month subsidy per doctor via eHealth+ Connectivity Support Scheme
+
+### Projections
+
+| Year | Customers | Revenue |
+|---|---|---|
+| Year 1 | 100 clinics | HK$2.4M |
+| Year 2 | 500 clinics | HK$15M |
+| Year 3 | 1,500 clinics | HK$54M |
+| Year 4+ | 3,000+ (cross-industry) | HK$180M+ |
+
+**Unit Economics:** LTV:CAC = 12:1 (CAC ~HK$5,000, LTV ~HK$60,000)
+
+---
+
+## 7. PHASE 0: HACKATHON DEMO (v0)
 
 ### Goal
 Win PolyU IFC 2026 by demonstrating:
@@ -84,7 +139,7 @@ Win PolyU IFC 2026 by demonstrating:
 
 ---
 
-## 5. CORE USE CASE
+## 8. CORE USE CASE
 
 ### The Zero-Work Pipeline
 
@@ -95,7 +150,7 @@ Win PolyU IFC 2026 by demonstrating:
    - Runs on clinic server
    - Scheduled scraping (every 15 min)
    - Detects new/changed patient records
-   - Extracts data (screen scraping / API)
+   - Extracts data (screen scraping / API / OCR)
    - Stores locally (offline-first)
    - Queues for cloud sync
                                     ↓
@@ -114,7 +169,7 @@ Win PolyU IFC 2026 by demonstrating:
 
 ---
 
-## 6. DATABASE SCHEMA (v0 — SQLite)
+## 9. DATABASE SCHEMA (v0 — SQLite)
 
 ```python
 class Clinic(Base):
@@ -163,7 +218,7 @@ class CertificationTracking(Base):
 
 ---
 
-## 7. API ENDPOINTS (v0)
+## 10. API ENDPOINTS (v0)
 
 ```
 GET /health
@@ -174,6 +229,17 @@ Response: { job_id, status, patients_scraped }
 
 GET /api/v1/ingest/{job_id}/status
 Response: { job_id, status, patients_found, data: [...] }
+
+POST /api/v1/upload-data
+Request: multipart/form-data — file (image/JSON/CSV) + clinic_id + clinic_name
+Response: { job_id, status, records_extracted, source_type }
+
+POST /api/v1/upload-data/direct
+Request: { clinic_id, clinic_name, patient_data: { ... } }
+Response: { job_id, status, records_extracted, source_type }
+
+GET /api/v1/upload-data/{job_id}/status
+Response: { job_id, status, records_extracted, data: [...] }
 
 POST /api/v1/translate
 Request: { clinic_id, patient_id, patient_data, diagnoses, medications }
@@ -194,7 +260,7 @@ GET /badges/{level}.svg
 
 ---
 
-## 8. DEEPSEEK PROMPT
+## 11. DEEPSEEK PROMPT
 
 ```
 System: You are a medical data translator. Map clinical data to standard
@@ -215,7 +281,7 @@ Expected Output:
 
 ---
 
-## 9. SMART CLINIC CERTIFICATION
+## 12. SMART CLINIC CERTIFICATION
 
 ### The "Gold Play Button" for Healthcare
 
@@ -255,7 +321,7 @@ More patients → More clinics want certification → Industry standard
 
 ---
 
-## 10. FOLDER STRUCTURE (v0)
+## 13. FOLDER STRUCTURE (v0)
 
 ```
 enosis-v0/
@@ -268,12 +334,13 @@ enosis-v0/
 │   ├── api/
 │   │   ├── health.py
 │   │   ├── ingest.py
+│   │   ├── upload_data.py       # File upload + direct submission
 │   │   ├── translate.py
 │   │   ├── upload.py
 │   │   └── certification.py
 │   ├── services/
-│   │   ├── scrape.py            # Playwright
-│   │   ├── ocr.py               # Tesseract
+│   │   ├── scrape.py            # Playwright (CMS scraping)
+│   │   ├── ocr.py               # Tesseract (handwritten + printed docs)
 │   │   ├── translate.py         # DeepSeek
 │   │   ├── fhir.py              # FHIR R5
 │   │   └── ehealth.py           # Mock
@@ -304,7 +371,7 @@ enosis-v0/
 
 ---
 
-## 11. ENVIRONMENT VARIABLES
+## 14. ENVIRONMENT VARIABLES
 
 ```env
 API_KEY="dev-api-key-123456"
@@ -322,7 +389,7 @@ MOCK_EHEALTH_URL="http://localhost:8000/mock/ehealth"
 
 ---
 
-## 12. DEVELOPMENT ROADMAP
+## 15. DEVELOPMENT ROADMAP
 
 ### v0: Hackathon Demo (Weeks 1-4)
 
@@ -386,7 +453,7 @@ MOCK_EHEALTH_URL="http://localhost:8000/mock/ehealth"
 
 ---
 
-## 13. ZVEC INTEGRATION (Phase 2)
+## 16. ZVEC INTEGRATION (Phase 2)
 
 ### What is ZVec?
 
@@ -438,7 +505,7 @@ results = collection.search(
 
 ---
 
-## 14. DEMO SCRIPT
+## 17. DEMO SCRIPT
 
 ```python
 # scripts/run_demo.py
@@ -481,7 +548,7 @@ def demo():
 
 ---
 
-## 15. THE PITCH
+## 18. THE PITCH
 
 > *"Judges, the Smart Economy cannot be built on broken data.*
 >
@@ -503,7 +570,32 @@ def demo():
 
 ---
 
-## 16. SUMMARY
+## 19. RISK MITIGATION
+
+| Risk | Mitigation |
+|---|---|
+| **Slow adoption by clinics** | Leverage government subsidy (HK$6,000/doctor); offer zero-setup service |
+| **Hospital bureaucracy** | Start with small private clinics (fastest decision-makers); build case studies |
+| **Competition** | Build data moat quickly; achieve accreditation first; create switching costs |
+| **Clinical accuracy** | Human-in-the-loop validation; confidence scoring; PolyU clinical partnership |
+| **Cross-border compliance** | Register under GBA Standard Contract; partner with mainland entity |
+| **Scaling across industries** | Same core engine; add industry-specific translation modules |
+
+---
+
+## 20. THE ASK
+
+| Need | Details |
+|---|---|
+| **Seed Funding** | HK$5-10M |
+| **Team Expansion** | 2-3 additional engineers |
+| **Pilot Program** | 10-20 PolyU allied health clinics |
+| **Accreditation** | eHealth+ Bronze (Month 3), Silver (Month 6) |
+| **First Revenue** | 100+ clinics (Year 1) |
+
+---
+
+## 21. SUMMARY
 
 | Phase | Goal | Timeline | Key Deliverable |
 |---|---|---|---|

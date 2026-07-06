@@ -10,7 +10,7 @@ PolyU IFC 2026 Hackathon Demo.
 
 ### One AI Agent. One Job.
 
-> *"Ingest data from ANY source, in ANY format → Output in a unified, machine-readable schema."*
+> *"Ingest data from ANY source, in ANY format — electronic CMS, handwritten notes, scanned documents, lab photos, or direct input → Output in a unified, machine-readable schema."*
 
 | What We Do | What We Don't Do |
 |---|---|
@@ -39,10 +39,72 @@ PolyU IFC 2026 Hackathon Demo.
 
 | Step | Action | Technology |
 |---|---|---|
-| **Ingest** | Scrape patient data from clinic CMS | Playwright |
+| **Ingest** | Extract patient data from any source — CMS (Playwright), handwritten notes (OCR), scanned documents (OCR), file uploads, or direct text input | Playwright + Tesseract OCR + file API |
 | **Translate** | Map diagnoses → ICD-10, medications → SNOMED-CT, generate FHIR R5 | DeepSeek API |
 | **Upload** | Send FHIR bundle to eHealth+ | Mock API |
 | **Certify** | Award Smart Clinic Certified badge | In-app logic |
+
+---
+
+## The Problem
+
+> *"Every industry has data, but it speaks different dialects."*
+
+| Industry | The Data Mess | Impact |
+|---|---|---|
+| **Healthcare** | Private clinics (<1% upload to eHealth+), legacy CMS, handwritten notes, fragmented coding systems | Incomplete medical records; no population health AI |
+| **Manufacturing** | PLC protocols, MES schemas, ERP exports, sensor streams, Excel, paper logs | 600K+ GBA SMEs can't use AI |
+| **Finance** | Mainland credit data ≠ HK bank risk models; different accounting standards | Mainland SMEs can't access HK capital |
+| **Logistics** | Shipping lines, terminals, trucking, customs — each with incompatible tracking | No end-to-end visibility |
+| **Government** | 5,200+ datasets, 700+ spatial datasets — departments can't share data | No cross-department analytics |
+
+**The 15th Five-Year Plan targets 70% AI sector penetration by 2027. This is impossible without solving data fragmentation.**
+
+### Why Existing Solutions Fail
+
+| Approach | Limitation |
+|---|---|
+| **Vertical integration players** (MedLink, Graphnet) | Healthcare-only, assume structured data, UK-centric |
+| **Protocol translators** (UA Edge, Kepware) | Manufacturing-only, protocol-level, no semantic understanding |
+| **Generic ETL tools** (superglue, CData, MuleSoft) | No industry context, can't handle unstructured data, require pre-built connectors |
+| **Platform vendors** (Epic, SAP, Alibaba Cloud) | Too expensive for SMEs, require full system migration, vendor lock-in |
+
+**No one is building a cross-industry, AI-native, semantic data translation layer that handles any data source and learns continuously.**
+
+---
+
+## The Moat
+
+| Layer | Why It's Defensible |
+|---|---|
+| **1. Data Moat** | Proprietary translation corpus grows with every customer. Cross-industry learning creates exponential value. |
+| **2. Network Effects** | More customers = more translations = better agent = more customers. Winner-take-all dynamics. |
+| **3. Technical Complexity** | Hybrid AI (ontology + knowledge graph + LLM) + edge deployment + FHIR/OPC-UA/ISO 20022 mapping = non-trivial to replicate. |
+| **4. Regulatory First-Mover** | First to achieve eHealth+ accreditation. First to build cross-border compliance layer (PDPO + PIPL). Switching costs are enormous. |
+| **5. Neutral Positioning** | "Switzerland of data" — no hardware to sell, no cloud to fill, no ecosystem to lock you into. Trusted by all. |
+
+---
+
+## Market Opportunity
+
+| Segment | Size | Revenue Model |
+|---|---|---|
+| HK Private Clinics | 3,000+ | HK$5-20/record or HK$500-2,000/month subscription |
+| HK Public Hospitals | 40+ | Enterprise contracts |
+| GBA Hospitals | 1,000+ | Cross-border expansion |
+| GBA Manufacturers | 600,000+ | Phase 2 industrial translation |
+| **Total Addressable Market** | **HK$100B+/year** | Cross-industry platform |
+
+### Revenue Projection
+
+| Year | Customers | Avg Revenue/Customer | Total Revenue |
+|---|---|---|---|
+| Year 1 | 100 clinics | HK$2,000/month | HK$2.4M |
+| Year 2 | 500 clinics | HK$2,500/month | HK$15M |
+| Year 3 | 1,500 clinics | HK$3,000/month | HK$54M |
+| Year 4+ | 3,000+ (cross-industry) | HK$5,000/month | HK$180M+ |
+
+**Unit Economics:** CAC ~HK$5,000 (via government subsidy program), LTV ~HK$60,000 (3-year avg), LTV:CAC = 12:1.
 
 ---
 
@@ -118,7 +180,7 @@ docker-compose exec api python scripts/run_demo.py
    - Runs on clinic server
    - Scheduled scraping (every 15 min)
    - Detects new/changed patient records
-   - Extracts data (screen scraping / API)
+   - Extracts data (screen scraping / API / OCR)
    - Stores locally (offline-first)
    - Queues for cloud sync
                                     ↓
@@ -179,6 +241,7 @@ enosis/
 │   ├── api/
 │   │   ├── health.py            # GET /health
 │   │   ├── ingest.py            # POST /ingest, GET /ingest/{job}/status
+│   │   ├── upload_data.py       # POST /upload-data, POST /upload-data/direct, GET /upload-data/{job}/status
 │   │   ├── translate.py         # POST /translate
 │   │   ├── upload.py            # POST /upload, GET /upload/{id}/status
 │   │   └── certification.py     # GET /certification/{clinic_id}
@@ -230,10 +293,13 @@ X-API-Key: dev-api-key-123456
 ```
 
 | Method | Path | Description |
-|---|---|---|
+|---|---|---|---|
 | `GET` | `/health` | Health check (public) |
-| `POST` | `/api/v1/ingest` | Scrape patient data from CMS |
+| `POST` | `/api/v1/ingest` | Scrape patient data from clinic CMS (Playwright) |
 | `GET` | `/api/v1/ingest/{job_id}/status` | Poll ingest job |
+| `POST` | `/api/v1/upload-data` | Upload file (image/JSON/CSV) for data extraction |
+| `POST` | `/api/v1/upload-data/direct` | Direct JSON submission of patient data (no file) |
+| `GET` | `/api/v1/upload-data/{job_id}/status` | Poll upload-data job |
 | `POST` | `/api/v1/translate` | Translate to FHIR R5 via DeepSeek |
 | `POST` | `/api/v1/upload` | Upload FHIR bundle to eHealth+ |
 | `GET` | `/api/v1/upload/{upload_id}/status` | Poll upload status |
@@ -323,11 +389,11 @@ pytest tests/test_e2e.py -v
 pytest tests/ -v
 ```
 
-### Test Coverage (32/32 passing)
+### Test Coverage (41/41 passing)
 
 | Suite | Tests | What it covers |
 |---|---|---|
-| `test_api.py` | 12 | API auth, health, ingest, translate, upload, certification |
+| `test_api.py` | 21 | API auth, health, ingest, translate, upload, certification, file upload, direct submission, OCR |
 | `test_e2e.py` | 20 | CMS UI, translation demo page, API endpoints, full pipeline |
 
 ---
@@ -361,9 +427,42 @@ pytest tests/ -v
 
 ---
 
+## Risk Mitigation
+
+| Risk | Mitigation |
+|---|---|
+| **Slow adoption by clinics** | Leverage government subsidy (clinics get HK$6,000); offer zero-setup service |
+| **Hospital bureaucracy** | Start with small private clinics (fastest decision-makers); build case studies |
+| **Competition** | Build data moat quickly; achieve accreditation first; create switching costs |
+| **Clinical accuracy** | Human-in-the-loop validation; confidence scoring; PolyU clinical partnership |
+| **Cross-border compliance** | Register under GBA Standard Contract; partner with mainland entity |
+| **Scaling across industries** | Same core engine; add industry-specific translation modules |
+
+---
+
+## The Ask
+
+For **PolyU IFC 2026**: Working demo + business plan + technical architecture + go-to-market strategy + team capability.
+
+| Need | Details |
+|---|---|
+| **Seed Funding** | HK$5-10M |
+| **Team Expansion** | 2-3 additional engineers |
+| **Pilot Program** | 10-20 PolyU allied health clinics |
+| **Accreditation** | eHealth+ Bronze (Month 3), Silver (Month 6) |
+| **First Revenue** | 100+ clinics (Year 1) |
+
+---
+
 ## Team
 
 Built for **PolyU IFC 2026** by Team Enosis.
+
+| Role | Background | Advantage |
+|---|---|---|
+| **AI/Software Engineers** | NLP, multimodal AI, edge deployment, full-stack | Build the core translation engine |
+| **Medical Network** | Partner's parents are practicing doctors | Clinical validation pipeline; healthcare SaaS connections |
+| **PolyU Partnership** | Faculty of Health + Department of Computing + MTRI network | Pilot customers, clinical validation, GBA expansion |
 
 **Enosis** (Greek: ἕνωσις) — "union, unity." Bringing together disparate data sources into one unified, readable format.
 
