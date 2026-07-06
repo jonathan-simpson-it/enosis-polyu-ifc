@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: enosis-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./mock_cms:/app/mock_cms
+    env_file:
+      - .env
+    environment:
+      - TESSERACT_CMD=/usr/bin/tesseract
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-cms:
+    image: nginx:alpine
+    container_name: enosis-mock-cms
+    ports:
+      - "8080:80"
+    volumes:
+      - ./mock_cms:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
