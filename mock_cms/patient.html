@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Clinic CMS — Patient Details</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f1f5f9; }
+        .header { background: #1e40af; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; }
+        .container { max-width: 900px; margin: 24px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { color: #1e40af; margin-bottom: 16px; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 10px 12px; text-align: left; font-size: 13px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-item { }
+        .info-item label { display: block; font-size: 12px; color: #64748b; margin-bottom: 2px; text-transform: uppercase; }
+        .info-item span { font-size: 16px; color: #1e293b; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 Central Clinic — Patient Details</h1>
+        <a href="/patients.html" style="color:white;text-decoration:none;">← Back to Patients</a>
+    </div>
+    <div class="container">
+        <div class="card" id="patient-data">
+            <h2>Demographics</h2>
+            <div class="info-grid">
+                <div class="info-item"><label>Patient ID</label><span id="pid">P001</span></div>
+                <div class="info-item"><label>Name</label><span id="pname">Chan Tai Man</span></div>
+                <div class="info-item"><label>HKID</label><span id="phkid">A1234567</span></div>
+                <div class="info-item"><label>DOB</label><span id="pdob">1955-01-01</span></div>
+                <div class="info-item"><label>Gender</label><span id="pgender">M</span></div>
+                <div class="info-item"><label>Phone</label><span id="pphone">9123-4567</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Diagnoses</h2>
+            <table id="diagnoses-table">
+                <tr><th>Code</th><th>Description</th><th>Date</th></tr>
+                <tr><td>E11.9</td><td>Type 2 diabetes mellitus without complications</td><td>2024-01-15</td></tr>
+                <tr><td>I10</td><td>Essential (primary) hypertension</td><td>2024-01-15</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Medications</h2>
+            <table id="medications-table">
+                <tr><th>Name</th><th>Dosage</th><th>Frequency</th></tr>
+                <tr><td>Metformin</td><td>500mg</td><td>Twice daily</td></tr>
+                <tr><td>Lisinopril</td><td>10mg</td><td>Once daily</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Lab Results</h2>
+            <table id="labs-table">
+                <tr><th>Test</th><th>Value</th><th>Unit</th><th>Reference</th></tr>
+                <tr><td>HbA1c</td><td>7.2</td><td>%</td><td>&lt; 7.0</td></tr>
+                <tr><td>Fasting Glucose</td><td>8.5</td><td>mmol/L</td><td>4.0-6.0</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Clinical Notes</h2>
+            <p>Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months.</p>
+        </div>
+    </div>
+
+    <script>
+        // Dynamically load patient data based on URL param
+        const urlParams = new URLSearchParams(window.location.search);
+        const patientId = urlParams.get('id') || 'P001';
+
+        const patients = {
+            'P001': {
+                id: 'P001', name: 'Chan Tai Man', hkid: 'A1234567', dob: '1955-01-01', gender: 'M', phone: '9123-4567',
+                diagnoses: [
+                    { code: 'E11.9', description: 'Type 2 diabetes mellitus without complications', date: '2024-01-15' },
+                    { code: 'I10', description: 'Essential (primary) hypertension', date: '2024-01-15' }
+                ],
+                medications: [
+                    { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily' },
+                    { name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily' }
+                ],
+                labs: [
+                    { test: 'HbA1c', value: '7.2', unit: '%', reference: '< 7.0' },
+                    { test: 'Fasting Glucose', value: '8.5', unit: 'mmol/L', reference: '4.0-6.0' }
+                ],
+                notes: 'Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months.'
+            },
+            'P002': {
+                id: 'P002', name: 'Wong Sau Ying', hkid: 'A7654321', dob: '1960-06-15', gender: 'F', phone: '9876-5432',
+                diagnoses: [
+                    { code: 'J45.9', description: 'Asthma, unspecified', date: '2024-03-10' },
+                    { code: 'M17.9', description: 'Osteoarthritis of knee, unspecified', date: '2024-03-10' }
+                ],
+                medications: [
+                    { name: 'Salbutamol', dosage: '100mcg', frequency: 'As needed' },
+                    { name: 'Paracetamol', dosage: '500mg', frequency: 'Four times daily' }
+                ],
+                labs: [
+                    { test: 'Peak Flow', value: '320', unit: 'L/min', reference: '> 400' },
+                    { test: 'CRP', value: '12', unit: 'mg/L', reference: '< 5' }
+                ],
+                notes: 'Patient reports wheezing in the mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol inhaler PRN and Paracetamol 500mg QID. Referral to physiotherapy for knee.'
+            },
+            'P003': {
+                id: 'P003', name: 'Lee Ka Ho', hkid: 'A9876543', dob: '1970-03-22', gender: 'M', phone: '6543-2198',
+                diagnoses: [
+                    { code: 'E78.5', description: 'Hyperlipidemia, unspecified', date: '2024-05-20' }
+                ],
+                medications: [
+                    { name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily at night' }
+                ],
+                labs: [
+                    { test: 'Total Cholesterol', value: '6.2', unit: 'mmol/L', reference: '< 5.2' },
+                    { test: 'LDL', value: '3.8', unit: 'mmol/L', reference: '< 2.6' }
+                ],
+                notes: 'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.'
+            }
+        };
+
+        const patient = patients[patientId] || patients['P001'];
+
+        document.getElementById('pid').textContent = patient.id;
+        document.getElementById('pname').textContent = patient.name;
+        document.getElementById('phkid').textContent = patient.hkid;
+        document.getElementById('pdob').textContent = patient.dob;
+        document.getElementById('pgender').textContent = patient.gender;
+        document.getElementById('pphone').textContent = patient.phone;
+
+        // Render diagnoses
+        const diagTable = document.getElementById('diagnoses-table');
+        diagTable.innerHTML = '<tr><th>Code</th><th>Description</th><th>Date</th></tr>' +
+            patient.diagnoses.map(d => `<tr><td>${d.code}</td><td>${d.description}</td><td>${d.date}</td></tr>`).join('');
+
+        // Render medications
+        const medTable = document.getElementById('medications-table');
+        medTable.innerHTML = '<tr><th>Name</th><th>Dosage</th><th>Frequency</th></tr>' +
+            patient.medications.map(m => `<tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td></tr>`).join('');
+
+        // Render labs
+        const labTable = document.getElementById('labs-table');
+        labTable.innerHTML = '<tr><th>Test</th><th>Value</th><th>Unit</th><th>Reference</th></tr>' +
+            patient.labs.map(l => `<tr><td>${l.test}</td><td>${l.value}</td><td>${l.unit}</td><td>${l.reference}</td></tr>`).join('');
+    </script>
+</body>
+</html>
