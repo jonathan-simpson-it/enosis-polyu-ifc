@@ -73,82 +73,40 @@
     </div>
 
     <script>
-        // Dynamically load patient data based on URL param
+        // Load patient data from Synthea-generated JSON
         const urlParams = new URLSearchParams(window.location.search);
         const patientId = urlParams.get('id') || 'P001';
 
-        const patients = {
-            'P001': {
-                id: 'P001', name: 'Chan Tai Man', hkid: 'A1234567', dob: '1955-01-01', gender: 'M', phone: '9123-4567',
-                diagnoses: [
-                    { code: 'E11.9', description: 'Type 2 diabetes mellitus without complications', date: '2024-01-15' },
-                    { code: 'I10', description: 'Essential (primary) hypertension', date: '2024-01-15' }
-                ],
-                medications: [
-                    { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily' },
-                    { name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily' }
-                ],
-                labs: [
-                    { test: 'HbA1c', value: '7.2', unit: '%', reference: '< 7.0' },
-                    { test: 'Fasting Glucose', value: '8.5', unit: 'mmol/L', reference: '4.0-6.0' }
-                ],
-                notes: 'Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months.'
-            },
-            'P002': {
-                id: 'P002', name: 'Wong Sau Ying', hkid: 'A7654321', dob: '1960-06-15', gender: 'F', phone: '9876-5432',
-                diagnoses: [
-                    { code: 'J45.9', description: 'Asthma, unspecified', date: '2024-03-10' },
-                    { code: 'M17.9', description: 'Osteoarthritis of knee, unspecified', date: '2024-03-10' }
-                ],
-                medications: [
-                    { name: 'Salbutamol', dosage: '100mcg', frequency: 'As needed' },
-                    { name: 'Paracetamol', dosage: '500mg', frequency: 'Four times daily' }
-                ],
-                labs: [
-                    { test: 'Peak Flow', value: '320', unit: 'L/min', reference: '> 400' },
-                    { test: 'CRP', value: '12', unit: 'mg/L', reference: '< 5' }
-                ],
-                notes: 'Patient reports wheezing in the mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol inhaler PRN and Paracetamol 500mg QID. Referral to physiotherapy for knee.'
-            },
-            'P003': {
-                id: 'P003', name: 'Lee Ka Ho', hkid: 'A9876543', dob: '1970-03-22', gender: 'M', phone: '6543-2198',
-                diagnoses: [
-                    { code: 'E78.5', description: 'Hyperlipidemia, unspecified', date: '2024-05-20' }
-                ],
-                medications: [
-                    { name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily at night' }
-                ],
-                labs: [
-                    { test: 'Total Cholesterol', value: '6.2', unit: 'mmol/L', reference: '< 5.2' },
-                    { test: 'LDL', value: '3.8', unit: 'mmol/L', reference: '< 2.6' }
-                ],
-                notes: 'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.'
-            }
-        };
+        fetch('data/patients.json')
+            .then(r => r.json())
+            .then(allPatients => {
+                const patient = allPatients.find(p => p.id === patientId);
+                if (!patient) return;
 
-        const patient = patients[patientId] || patients['P001'];
+                document.getElementById('pid').textContent = patient.id;
+                document.getElementById('pname').textContent = patient.name;
+                document.getElementById('phkid').textContent = patient.hkid;
+                document.getElementById('pdob').textContent = patient.dob;
+                document.getElementById('pgender').textContent = patient.gender;
+                document.getElementById('pphone').textContent = patient.phone;
 
-        document.getElementById('pid').textContent = patient.id;
-        document.getElementById('pname').textContent = patient.name;
-        document.getElementById('phkid').textContent = patient.hkid;
-        document.getElementById('pdob').textContent = patient.dob;
-        document.getElementById('pgender').textContent = patient.gender;
-        document.getElementById('pphone').textContent = patient.phone;
+                const diagTable = document.getElementById('diagnoses-table');
+                diagTable.innerHTML = '<tr><th>Code</th><th>Description</th></tr>' +
+                    patient.diagnoses.map(d => `<tr><td>${d.code}</td><td>${d.description}</td></tr>`).join('');
 
-        // Render diagnoses
-        const diagTable = document.getElementById('diagnoses-table');
-        diagTable.innerHTML = '<tr><th>Code</th><th>Description</th><th>Date</th></tr>' +
-            patient.diagnoses.map(d => `<tr><td>${d.code}</td><td>${d.description}</td><td>${d.date}</td></tr>`).join('');
+                const medTable = document.getElementById('medications-table');
+                medTable.innerHTML = '<tr><th>Name</th><th>Dosage</th><th>Frequency</th></tr>' +
+                    patient.medications.map(m => `<tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td></tr>`).join('');
 
-        // Render medications
-        const medTable = document.getElementById('medications-table');
-        medTable.innerHTML = '<tr><th>Name</th><th>Dosage</th><th>Frequency</th></tr>' +
-            patient.medications.map(m => `<tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td></tr>`).join('');
+                const labTable = document.getElementById('labs-table');
+                labTable.innerHTML = '<tr><th>Test</th><th>Value</th><th>Unit</th><th>Reference</th></tr>' +
+                    patient.lab_results.map(l => `<tr><td>${l.test}</td><td>${l.value}</td><td>${l.unit}</td><td>${l.reference}</td></tr>`).join('');
 
-        // Render labs
-        const labTable = document.getElementById('labs-table');
-        labTable.innerHTML = '<tr><th>Test</th><th>Value</th><th>Unit</th><th>Reference</th></tr>' +
-            patient.labs.map(l => `<tr><td>${l.test}</td><td>${l.value}</td><td>${l.unit}</td><td>${l.reference}</td></tr>`).join('');
+                if (patient.clinical_notes) {
+                    const notesCard = document.querySelector('.card:last-child p');
+                    if (notesCard) notesCard.textContent = patient.clinical_notes;
+                }
+            });
     </script>
 </body>
 </html>

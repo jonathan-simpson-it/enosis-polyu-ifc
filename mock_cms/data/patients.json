@@ -1,65 +1,876 @@
-{
-  "patients": [
-    {
-      "patient_id": "P001",
-      "name": "Chan Tai Man",
-      "hkid": "A1234567",
-      "dob": "1955-01-01",
-      "gender": "M",
-      "phone": "9123-4567",
-      "diagnoses": [
-        {"code": "E11.9", "description": "Type 2 diabetes mellitus without complications", "date": "2024-01-15"},
-        {"code": "I10", "description": "Essential (primary) hypertension", "date": "2024-01-15"}
-      ],
-      "medications": [
-        {"name": "Metformin", "dosage": "500mg", "frequency": "Twice daily"},
-        {"name": "Lisinopril", "dosage": "10mg", "frequency": "Once daily"}
-      ],
-      "lab_results": [
-        {"test": "HbA1c", "value": "7.2", "unit": "%", "reference": "< 7.0"},
-        {"test": "Fasting Glucose", "value": "8.5", "unit": "mmol/L", "reference": "4.0-6.0"}
-      ],
-      "clinical_notes": "Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months."
-    },
-    {
-      "patient_id": "P002",
-      "name": "Wong Sau Ying",
-      "hkid": "A7654321",
-      "dob": "1960-06-15",
-      "gender": "F",
-      "phone": "9876-5432",
-      "diagnoses": [
-        {"code": "J45.9", "description": "Asthma, unspecified", "date": "2024-03-10"},
-        {"code": "M17.9", "description": "Osteoarthritis of knee, unspecified", "date": "2024-03-10"}
-      ],
-      "medications": [
-        {"name": "Salbutamol", "dosage": "100mcg", "frequency": "As needed"},
-        {"name": "Paracetamol", "dosage": "500mg", "frequency": "Four times daily"}
-      ],
-      "lab_results": [
-        {"test": "Peak Flow", "value": "320", "unit": "L/min", "reference": "> 400"},
-        {"test": "CRP", "value": "12", "unit": "mg/L", "reference": "< 5"}
-      ],
-      "clinical_notes": "Patient reports wheezing in the mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol inhaler PRN and Paracetamol 500mg QID. Referral to physiotherapy for knee."
-    },
-    {
-      "patient_id": "P003",
-      "name": "Lee Ka Ho",
-      "hkid": "A9876543",
-      "dob": "1970-03-22",
-      "gender": "M",
-      "phone": "6543-2198",
-      "diagnoses": [
-        {"code": "E78.5", "description": "Hyperlipidemia, unspecified", "date": "2024-05-20"}
-      ],
-      "medications": [
-        {"name": "Atorvastatin", "dosage": "20mg", "frequency": "Once daily at night"}
-      ],
-      "lab_results": [
-        {"test": "Total Cholesterol", "value": "6.2", "unit": "mmol/L", "reference": "< 5.2"},
-        {"test": "LDL", "value": "3.8", "unit": "mmol/L", "reference": "< 2.6"}
-      ],
-      "clinical_notes": "Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months."
-    }
-  ]
-}
+[
+  {
+    "id": "P001",
+    "name": "Leung Hin Wa",
+    "hkid": "U2167390",
+    "ehr_id": "EHR-733052-GWW",
+    "dob": "1977-03-26",
+    "gender": "M",
+    "phone": "515831819",
+    "age": 49,
+    "address": "Flat 30A, 49 Nathan Rd, New Territories",
+    "diagnoses": [
+      {
+        "code": "I10",
+        "description": "Essential (primary) hypertension"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Sertraline",
+        "dosage": "50mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Fasting Glucose",
+        "value": "8.3",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      },
+      {
+        "test": "HbA1c",
+        "value": "8.6",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "Total Cholesterol",
+        "value": "6.5",
+        "unit": "mmol/L",
+        "reference": "< 5.2"
+      },
+      {
+        "test": "Creatinine",
+        "value": "107.1",
+        "unit": "umol/L",
+        "reference": "60-110"
+      },
+      {
+        "test": "eGFR",
+        "value": "62.2",
+        "unit": "mL/min/1.73m2",
+        "reference": "> 60"
+      },
+      {
+        "test": "ALT",
+        "value": "35.0",
+        "unit": "U/L",
+        "reference": "< 40"
+      },
+      {
+        "test": "AST",
+        "value": "70.9",
+        "unit": "U/L",
+        "reference": "< 37"
+      },
+      {
+        "test": "Hb",
+        "value": "15.6",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      }
+    ],
+    "clinical_notes": "Patient presents with numbness in feet. Fasting glucose elevated at 8.5 mmol/L.. Referred to specialist for further evaluation."
+  },
+  {
+    "id": "P002",
+    "name": "Fong Chun Kit",
+    "hkid": "B3999814",
+    "ehr_id": "EHR-647621-SRE",
+    "dob": "1949-01-17",
+    "gender": "M",
+    "phone": "988433761",
+    "age": 77,
+    "address": "Flat 4A, 80 Argyle St, New Territories",
+    "diagnoses": [
+      {
+        "code": "D64.9",
+        "description": "Anemia, unspecified"
+      },
+      {
+        "code": "I10",
+        "description": "Essential (primary) hypertension"
+      },
+      {
+        "code": "J44.9",
+        "description": "Chronic obstructive pulmonary disease, unspecified"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Sertraline",
+        "dosage": "50mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily"
+      },
+      {
+        "name": "Omeprazole",
+        "dosage": "20mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Atorvastatin",
+        "dosage": "20mg",
+        "frequency": "Once daily at night"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "White Cell Count",
+        "value": "3.0",
+        "unit": "x10^9/L",
+        "reference": "4.0-11.0"
+      },
+      {
+        "test": "TSH",
+        "value": "1.3",
+        "unit": "mIU/L",
+        "reference": "0.4-4.0"
+      },
+      {
+        "test": "Blood Pressure Diastolic",
+        "value": "67.7",
+        "unit": "mmHg",
+        "reference": "< 80"
+      },
+      {
+        "test": "Blood Pressure Systolic",
+        "value": "112.8",
+        "unit": "mmHg",
+        "reference": "< 130"
+      },
+      {
+        "test": "Triglycerides",
+        "value": "3.4",
+        "unit": "mmol/L",
+        "reference": "< 1.7"
+      },
+      {
+        "test": "HbA1c",
+        "value": "5.6",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "Hb",
+        "value": "11.9",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      }
+    ],
+    "clinical_notes": "Routine health check. Gait normal. No focal neurological deficits.. Advised to maintain a food diary and reduce sodium intake."
+  },
+  {
+    "id": "P003",
+    "name": "Wan Sze Man",
+    "hkid": "N6452810",
+    "ehr_id": "EHR-504623-SCW",
+    "dob": "1994-04-15",
+    "gender": "F",
+    "phone": "974059567",
+    "age": 32,
+    "address": "Flat 31B, 25 Hennessy Rd, Hong Kong Island",
+    "diagnoses": [
+      {
+        "code": "E78.5",
+        "description": "Hyperlipidemia, unspecified"
+      },
+      {
+        "code": "E11.9",
+        "description": "Type 2 diabetes mellitus without complications"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Lisinopril",
+        "dosage": "10mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Triglycerides",
+        "value": "3.2",
+        "unit": "mmol/L",
+        "reference": "< 1.7"
+      },
+      {
+        "test": "BMI",
+        "value": "32.1",
+        "unit": "kg/m2",
+        "reference": "18.5-24.9"
+      },
+      {
+        "test": "AST",
+        "value": "35.1",
+        "unit": "U/L",
+        "reference": "< 37"
+      },
+      {
+        "test": "Blood Pressure Systolic",
+        "value": "127.1",
+        "unit": "mmHg",
+        "reference": "< 130"
+      },
+      {
+        "test": "Hb",
+        "value": "10.8",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      }
+    ],
+    "clinical_notes": "Patient presents with shortness of breath on exertion. Thyroid diffuse enlargement without nodules.. Prescribed Lisinopril. Advised diet and exercise. Follow-up in 3 months."
+  },
+  {
+    "id": "P004",
+    "name": "Ching Ka Ho",
+    "hkid": "C5194249",
+    "ehr_id": "EHR-582754-WEV",
+    "dob": "1978-08-28",
+    "gender": "M",
+    "phone": "234661780",
+    "age": 47,
+    "address": "Flat 25C, 46 Hennessy Rd, Kowloon",
+    "diagnoses": [
+      {
+        "code": "F32.9",
+        "description": "Major depressive disorder, single episode, unspecified"
+      },
+      {
+        "code": "E03.9",
+        "description": "Hypothyroidism, unspecified"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily"
+      },
+      {
+        "name": "Lisinopril",
+        "dosage": "10mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Fasting Glucose",
+        "value": "4.3",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      },
+      {
+        "test": "HbA1c",
+        "value": "9.9",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "HDL",
+        "value": "1.5",
+        "unit": "mmol/L",
+        "reference": "> 1.0"
+      },
+      {
+        "test": "AST",
+        "value": "20.9",
+        "unit": "U/L",
+        "reference": "< 37"
+      },
+      {
+        "test": "CRP",
+        "value": "23.8",
+        "unit": "mg/L",
+        "reference": "< 5"
+      },
+      {
+        "test": "Peak Flow",
+        "value": "229.7",
+        "unit": "L/min",
+        "reference": "> 400"
+      },
+      {
+        "test": "Blood Pressure Systolic",
+        "value": "159.9",
+        "unit": "mmHg",
+        "reference": "< 130"
+      }
+    ],
+    "clinical_notes": "Routine health check. BP 138/85. Trace pitting edema in lower extremities.. Advised to monitor blood pressure daily and keep a log."
+  },
+  {
+    "id": "P005",
+    "name": "Man Bik Yu",
+    "hkid": "L1655625",
+    "ehr_id": "EHR-329170-GOV",
+    "dob": "1949-10-06",
+    "gender": "F",
+    "phone": "224783505",
+    "age": 76,
+    "address": "Flat 27C, 87 Des Voeux Rd Central, Kowloon",
+    "diagnoses": [
+      {
+        "code": "E03.9",
+        "description": "Hypothyroidism, unspecified"
+      },
+      {
+        "code": "N18.3",
+        "description": "Chronic kidney disease, Stage 3"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Sertraline",
+        "dosage": "50mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily"
+      },
+      {
+        "name": "Omeprazole",
+        "dosage": "20mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "HbA1c",
+        "value": "7.1",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "LDL",
+        "value": "2.0",
+        "unit": "mmol/L",
+        "reference": "< 2.6"
+      },
+      {
+        "test": "White Cell Count",
+        "value": "9.0",
+        "unit": "x10^9/L",
+        "reference": "4.0-11.0"
+      },
+      {
+        "test": "ALT",
+        "value": "49.8",
+        "unit": "U/L",
+        "reference": "< 40"
+      },
+      {
+        "test": "SpO2",
+        "value": "88.6",
+        "unit": "%",
+        "reference": "> 95"
+      },
+      {
+        "test": "Peak Flow",
+        "value": "424.4",
+        "unit": "L/min",
+        "reference": "> 400"
+      },
+      {
+        "test": "BMI",
+        "value": "33.2",
+        "unit": "kg/m2",
+        "reference": "18.5-24.9"
+      },
+      {
+        "test": "TSH",
+        "value": "3.6",
+        "unit": "mIU/L",
+        "reference": "0.4-4.0"
+      },
+      {
+        "test": "Triglycerides",
+        "value": "1.7",
+        "unit": "mmol/L",
+        "reference": "< 1.7"
+      },
+      {
+        "test": "AST",
+        "value": "50.3",
+        "unit": "U/L",
+        "reference": "< 37"
+      }
+    ],
+    "clinical_notes": "Patient presents with persistent cough with sputum. Blood pressure 145/92. Heart sounds normal. Lungs clear.. Continue current medications. Repeat labs in 6 weeks."
+  },
+  {
+    "id": "P006",
+    "name": "Ng Sze Man",
+    "hkid": "R4307773",
+    "ehr_id": "EHR-202279-RBX",
+    "dob": "1969-11-04",
+    "gender": "F",
+    "phone": "586853131",
+    "age": 56,
+    "address": "Flat 19D, 90 Nathan Rd, Kowloon",
+    "diagnoses": [
+      {
+        "code": "D64.9",
+        "description": "Anemia, unspecified"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Salbutamol",
+        "dosage": "100mcg",
+        "frequency": "As needed"
+      },
+      {
+        "name": "Sertraline",
+        "dosage": "50mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "LDL",
+        "value": "1.3",
+        "unit": "mmol/L",
+        "reference": "< 2.6"
+      },
+      {
+        "test": "SpO2",
+        "value": "92.5",
+        "unit": "%",
+        "reference": "> 95"
+      },
+      {
+        "test": "eGFR",
+        "value": "32.1",
+        "unit": "mL/min/1.73m2",
+        "reference": "> 60"
+      },
+      {
+        "test": "Creatinine",
+        "value": "60.6",
+        "unit": "umol/L",
+        "reference": "60-110"
+      },
+      {
+        "test": "HDL",
+        "value": "1.9",
+        "unit": "mmol/L",
+        "reference": "> 1.0"
+      },
+      {
+        "test": "TSH",
+        "value": "3.0",
+        "unit": "mIU/L",
+        "reference": "0.4-4.0"
+      },
+      {
+        "test": "White Cell Count",
+        "value": "6.0",
+        "unit": "x10^9/L",
+        "reference": "4.0-11.0"
+      },
+      {
+        "test": "HbA1c",
+        "value": "6.7",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "Fasting Glucose",
+        "value": "10.7",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      },
+      {
+        "test": "BMI",
+        "value": "22.5",
+        "unit": "kg/m2",
+        "reference": "18.5-24.9"
+      }
+    ],
+    "clinical_notes": "Routine health check. Gait normal. No focal neurological deficits.. Advised to attend diabetes education program."
+  },
+  {
+    "id": "P007",
+    "name": "Chung Ho Yin",
+    "hkid": "C4610567",
+    "ehr_id": "EHR-333001-UI5",
+    "dob": "1994-01-30",
+    "gender": "M",
+    "phone": "544249375",
+    "age": 32,
+    "address": "Flat 38D, 79 Argyle St, New Territories",
+    "diagnoses": [
+      {
+        "code": "E03.9",
+        "description": "Hypothyroidism, unspecified"
+      },
+      {
+        "code": "D64.9",
+        "description": "Anemia, unspecified"
+      },
+      {
+        "code": "E11.9",
+        "description": "Type 2 diabetes mellitus without complications"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Atorvastatin",
+        "dosage": "20mg",
+        "frequency": "Once daily at night"
+      },
+      {
+        "name": "Salbutamol",
+        "dosage": "100mcg",
+        "frequency": "As needed"
+      },
+      {
+        "name": "Warfarin",
+        "dosage": "3mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Fasting Glucose",
+        "value": "9.7",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      },
+      {
+        "test": "TSH",
+        "value": "1.0",
+        "unit": "mIU/L",
+        "reference": "0.4-4.0"
+      },
+      {
+        "test": "BMI",
+        "value": "33.5",
+        "unit": "kg/m2",
+        "reference": "18.5-24.9"
+      },
+      {
+        "test": "eGFR",
+        "value": "49.3",
+        "unit": "mL/min/1.73m2",
+        "reference": "> 60"
+      },
+      {
+        "test": "AST",
+        "value": "35.1",
+        "unit": "U/L",
+        "reference": "< 37"
+      },
+      {
+        "test": "SpO2",
+        "value": "94.8",
+        "unit": "%",
+        "reference": "> 95"
+      },
+      {
+        "test": "Triglycerides",
+        "value": "3.9",
+        "unit": "mmol/L",
+        "reference": "< 1.7"
+      },
+      {
+        "test": "Creatinine",
+        "value": "138.4",
+        "unit": "umol/L",
+        "reference": "60-110"
+      },
+      {
+        "test": "HbA1c",
+        "value": "5.3",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "LDL",
+        "value": "2.7",
+        "unit": "mmol/L",
+        "reference": "< 2.6"
+      }
+    ],
+    "clinical_notes": "Routine health check. Gait normal. No focal neurological deficits.. Advised to attend diabetes education program."
+  },
+  {
+    "id": "P008",
+    "name": "Siu Lai Kuen",
+    "hkid": "P997261A",
+    "ehr_id": "EHR-310839-R1G",
+    "dob": "1976-07-29",
+    "gender": "F",
+    "phone": "246384524",
+    "age": 49,
+    "address": "Flat 38D, 17 Des Voeux Rd Central, New Territories",
+    "diagnoses": [
+      {
+        "code": "I25.1",
+        "description": "Atherosclerotic heart disease"
+      },
+      {
+        "code": "I10",
+        "description": "Essential (primary) hypertension"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Paracetamol",
+        "dosage": "500mg",
+        "frequency": "Four times daily"
+      },
+      {
+        "name": "Levothyroxine",
+        "dosage": "50mcg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Lisinopril",
+        "dosage": "10mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Peak Flow",
+        "value": "227.5",
+        "unit": "L/min",
+        "reference": "> 400"
+      },
+      {
+        "test": "LDL",
+        "value": "4.5",
+        "unit": "mmol/L",
+        "reference": "< 2.6"
+      },
+      {
+        "test": "White Cell Count",
+        "value": "15.0",
+        "unit": "x10^9/L",
+        "reference": "4.0-11.0"
+      },
+      {
+        "test": "CRP",
+        "value": "44.8",
+        "unit": "mg/L",
+        "reference": "< 5"
+      },
+      {
+        "test": "eGFR",
+        "value": "60.0",
+        "unit": "mL/min/1.73m2",
+        "reference": "> 60"
+      },
+      {
+        "test": "Hb",
+        "value": "8.9",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      }
+    ],
+    "clinical_notes": "Patient presents with numbness in feet. Gait normal. No focal neurological deficits.. Dosage reduced due to improved symptoms. Review in 2 months."
+  },
+  {
+    "id": "P009",
+    "name": "Tong Long Yin",
+    "hkid": "H9792208",
+    "ehr_id": "EHR-586724-GL9",
+    "dob": "1988-03-12",
+    "gender": "M",
+    "phone": "968312073",
+    "age": 38,
+    "address": "Flat 27B, 48 Nathan Rd, Hong Kong Island",
+    "diagnoses": [
+      {
+        "code": "M17.9",
+        "description": "Osteoarthritis of knee, unspecified"
+      },
+      {
+        "code": "K21.9",
+        "description": "Gastro-esophageal reflux disease without esophagitis"
+      },
+      {
+        "code": "E03.9",
+        "description": "Hypothyroidism, unspecified"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Omeprazole",
+        "dosage": "20mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Levothyroxine",
+        "dosage": "50mcg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Warfarin",
+        "dosage": "3mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Amlodipine",
+        "dosage": "5mg",
+        "frequency": "Once daily"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "TSH",
+        "value": "0.4",
+        "unit": "mIU/L",
+        "reference": "0.4-4.0"
+      },
+      {
+        "test": "BMI",
+        "value": "22.2",
+        "unit": "kg/m2",
+        "reference": "18.5-24.9"
+      },
+      {
+        "test": "CRP",
+        "value": "24.4",
+        "unit": "mg/L",
+        "reference": "< 5"
+      },
+      {
+        "test": "Peak Flow",
+        "value": "525.8",
+        "unit": "L/min",
+        "reference": "> 400"
+      },
+      {
+        "test": "Blood Pressure Systolic",
+        "value": "114.2",
+        "unit": "mmHg",
+        "reference": "< 130"
+      },
+      {
+        "test": "HDL",
+        "value": "1.7",
+        "unit": "mmol/L",
+        "reference": "> 1.0"
+      },
+      {
+        "test": "Creatinine",
+        "value": "98.8",
+        "unit": "umol/L",
+        "reference": "60-110"
+      },
+      {
+        "test": "Hb",
+        "value": "15.9",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      },
+      {
+        "test": "HbA1c",
+        "value": "9.6",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "Fasting Glucose",
+        "value": "10.0",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      }
+    ],
+    "clinical_notes": "Patient presents with urinary frequency and urgency. Blood pressure 145/92. Heart sounds normal. Lungs clear.. Medication dose adjusted. Monitor blood glucose daily for 1 week."
+  },
+  {
+    "id": "P010",
+    "name": "Wong Ka Wai",
+    "hkid": "I1571711",
+    "ehr_id": "EHR-837734-Z77",
+    "dob": "1947-01-18",
+    "gender": "F",
+    "phone": "647582675",
+    "age": 79,
+    "address": "Flat 6C, 24 Argyle St, New Territories",
+    "diagnoses": [
+      {
+        "code": "H25.9",
+        "description": "Age-related cataract, unspecified"
+      },
+      {
+        "code": "J45.9",
+        "description": "Asthma, unspecified"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Omeprazole",
+        "dosage": "20mg",
+        "frequency": "Once daily"
+      },
+      {
+        "name": "Salbutamol",
+        "dosage": "100mcg",
+        "frequency": "As needed"
+      }
+    ],
+    "lab_results": [
+      {
+        "test": "Heart Rate",
+        "value": "54.9",
+        "unit": "bpm",
+        "reference": "60-100"
+      },
+      {
+        "test": "HbA1c",
+        "value": "5.9",
+        "unit": "%",
+        "reference": "< 7.0"
+      },
+      {
+        "test": "Fasting Glucose",
+        "value": "5.5",
+        "unit": "mmol/L",
+        "reference": "4.0-6.0"
+      },
+      {
+        "test": "Blood Pressure Systolic",
+        "value": "121.9",
+        "unit": "mmHg",
+        "reference": "< 130"
+      },
+      {
+        "test": "White Cell Count",
+        "value": "12.0",
+        "unit": "x10^9/L",
+        "reference": "4.0-11.0"
+      },
+      {
+        "test": "Hb",
+        "value": "12.2",
+        "unit": "g/dL",
+        "reference": "13-17 (M), 12-15 (F)"
+      },
+      {
+        "test": "LDL",
+        "value": "4.4",
+        "unit": "mmol/L",
+        "reference": "< 2.6"
+      }
+    ],
+    "clinical_notes": "Routine health check. Fasting glucose elevated at 8.5 mmol/L.. Advised regular follow-up with ophthalmologist."
+  }
+]

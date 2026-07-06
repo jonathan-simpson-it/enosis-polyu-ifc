@@ -28,24 +28,35 @@
     <div class="container">
         <div class="card">
             <h2>📋 All Patients</h2>
-            <table>
+            <table id="patient-table">
                 <tr>
-                    <th>Patient ID</th><th>Name</th><th>HKID</th><th>DOB</th><th>Gender</th><th>Actions</th>
-                </tr>
-                <tr>
-                    <td>P001</td><td>Chan Tai Man</td><td>A1234567</td><td>1955-01-01</td><td>M</td>
-                    <td><a class="btn" href="/patient.html?id=P001">View</a></td>
-                </tr>
-                <tr>
-                    <td>P002</td><td>Wong Sau Ying</td><td>A7654321</td><td>1960-06-15</td><td>F</td>
-                    <td><a class="btn" href="/patient.html?id=P002">View</a></td>
-                </tr>
-                <tr>
-                    <td>P003</td><td>Lee Ka Ho</td><td>A9876543</td><td>1970-03-22</td><td>M</td>
-                    <td><a class="btn" href="/patient.html?id=P003">View</a></td>
+                    <th>ID</th><th>Name</th><th>HKID</th><th>DOB</th><th>Gender</th><th>Age</th><th>Diagnoses</th><th>Actions</th>
                 </tr>
             </table>
+            <p id="patient-count" style="margin-top:12px;color:#64748b;font-size:13px"></p>
         </div>
     </div>
+    <script>
+        fetch('data/patients.json')
+            .then(r => r.json())
+            .then(patients => {
+                const table = document.getElementById('patient-table');
+                document.getElementById('patient-count').textContent = `Total: ${patients.length} patients (Synthea-generated, HK eHealth standards)`;
+                patients.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.hkid}</td>
+                        <td>${p.dob}</td>
+                        <td>${p.gender}</td>
+                        <td>${p.age || ''}</td>
+                        <td>${p.diagnoses.slice(0,2).map(d => d.code).join(', ')}${p.diagnoses.length > 2 ? '...' : ''}</td>
+                        <td><a class="btn" href="/patient.html?id=${p.id}">View</a></td>
+                    `;
+                    table.appendChild(tr);
+                });
+            });
+    </script>
 </body>
 </html>

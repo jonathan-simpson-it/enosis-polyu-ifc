@@ -40,32 +40,39 @@
         </div>
         <div class="card">
             <h2>📊 Today's Summary</h2>
-            <table>
+            <table id="summary-table">
                 <tr><th>Metric</th><th>Value</th></tr>
-                <tr><td>Total Patients</td><td>3</td></tr>
-                <tr><td>Appointments Today</td><td>2</td></tr>
-                <tr><td>Pending Lab Results</td><td>1</td></tr>
+                <tr><td>Total Patients</td><td id="total-patients">—</td></tr>
                 <tr><td>System Status</td><td><span class="badge badge-active">Active</span></td></tr>
             </table>
         </div>
         <div class="card">
             <h2>📋 Recent Patients</h2>
-            <table>
-                <tr><th>Patient ID</th><th>Name</th><th>HKID</th><th>DOB</th><th>Gender</th><th>Actions</th></tr>
-                <tr>
-                    <td>P001</td><td>Chan Tai Man</td><td>A1234567</td><td>1955-01-01</td><td>M</td>
-                    <td><a class="btn" href="/patient.html?id=P001">View</a></td>
-                </tr>
-                <tr>
-                    <td>P002</td><td>Wong Sau Ying</td><td>A7654321</td><td>1960-06-15</td><td>F</td>
-                    <td><a class="btn" href="/patient.html?id=P002">View</a></td>
-                </tr>
-                <tr>
-                    <td>P003</td><td>Lee Ka Ho</td><td>A9876543</td><td>1970-03-22</td><td>M</td>
-                    <td><a class="btn" href="/patient.html?id=P003">View</a></td>
-                </tr>
+            <table id="recent-patients-table">
+                <tr><th>ID</th><th>Name</th><th>HKID</th><th>DOB</th><th>Gender</th><th>Actions</th></tr>
             </table>
         </div>
     </div>
+    <script>
+        fetch('data/patients.json')
+            .then(r => r.json())
+            .then(patients => {
+                document.getElementById('total-patients').textContent = patients.length;
+
+                const table = document.getElementById('recent-patients-table');
+                patients.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.hkid}</td>
+                        <td>${p.dob}</td>
+                        <td>${p.gender}</td>
+                        <td><a class="btn" href="/patient.html?id=${p.id}">View</a></td>
+                    `;
+                    table.appendChild(tr);
+                });
+            });
+    </script>
 </body>
 </html>

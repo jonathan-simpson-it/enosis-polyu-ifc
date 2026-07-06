@@ -1,0 +1,353 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "https://www.ehealth.gov.hk",
+            "value": "P997261A",
+            "type": {
+              "text": "HKID"
+            }
+          },
+          {
+            "system": "https://www.ehealth.gov.hk/ehr-id",
+            "value": "EHR-310839-R1G",
+            "type": {
+              "text": "eHealth ID"
+            }
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Siu",
+            "given": [
+              "Lai Kuen"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1976-07-29",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "246384524"
+          }
+        ],
+        "address": [
+          {
+            "text": "Flat 38D, 17 Des Voeux Rd Central, New Territories"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "I25.1",
+              "display": "Atherosclerotic heart disease"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "53741008"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "59621000"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "387517004",
+              "display": "Paracetamol"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "N02BE01"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {
+            "text": "500mg Four times daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "372548007",
+              "display": "Levothyroxine"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "H03AA01"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {
+            "text": "50mcg Once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "386873005",
+              "display": "Lisinopril"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {
+            "text": "10mg Once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Peak Flow"
+        },
+        "valueQuantity": {
+          "value": 227.5,
+          "unit": "L/min"
+        },
+        "referenceRange": [
+          {
+            "text": "> 400"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "LDL"
+        },
+        "valueQuantity": {
+          "value": 4.5,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "text": "< 2.6"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "White Cell Count"
+        },
+        "valueQuantity": {
+          "value": 15.0,
+          "unit": "x10^9/L"
+        },
+        "referenceRange": [
+          {
+            "text": "4.0-11.0"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "CRP"
+        },
+        "valueQuantity": {
+          "value": 44.8,
+          "unit": "mg/L"
+        },
+        "referenceRange": [
+          {
+            "text": "< 5"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "eGFR"
+        },
+        "valueQuantity": {
+          "value": 60.0,
+          "unit": "mL/min/1.73m2"
+        },
+        "referenceRange": [
+          {
+            "text": "> 60"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Hb"
+        },
+        "valueQuantity": {
+          "value": 8.9,
+          "unit": "g/dL"
+        },
+        "referenceRange": [
+          {
+            "text": "13-17 (M), 12-15 (F)"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    }
+  ]
+}

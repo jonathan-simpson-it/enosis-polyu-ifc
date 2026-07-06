@@ -1,0 +1,295 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "https://www.ehealth.gov.hk",
+            "value": "U2167390",
+            "type": {
+              "text": "HKID"
+            }
+          },
+          {
+            "system": "https://www.ehealth.gov.hk/ehr-id",
+            "value": "EHR-733052-GWW",
+            "type": {
+              "text": "eHealth ID"
+            }
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Leung",
+            "given": [
+              "Hin Wa"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1977-03-26",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "515831819"
+          }
+        ],
+        "address": [
+          {
+            "text": "Flat 30A, 49 Nathan Rd, New Territories"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "59621000"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "372957000",
+              "display": "Sertraline"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "N06AB06"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {
+            "text": "50mg Once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Fasting Glucose"
+        },
+        "valueQuantity": {
+          "value": 8.3,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "text": "4.0-6.0"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "HbA1c"
+        },
+        "valueQuantity": {
+          "value": 8.6,
+          "unit": "%"
+        },
+        "referenceRange": [
+          {
+            "text": "< 7.0"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Total Cholesterol"
+        },
+        "valueQuantity": {
+          "value": 6.5,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "text": "< 5.2"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Creatinine"
+        },
+        "valueQuantity": {
+          "value": 107.1,
+          "unit": "umol/L"
+        },
+        "referenceRange": [
+          {
+            "text": "60-110"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "eGFR"
+        },
+        "valueQuantity": {
+          "value": 62.2,
+          "unit": "mL/min/1.73m2"
+        },
+        "referenceRange": [
+          {
+            "text": "> 60"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "ALT"
+        },
+        "valueQuantity": {
+          "value": 35.0,
+          "unit": "U/L"
+        },
+        "referenceRange": [
+          {
+            "text": "< 40"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "AST"
+        },
+        "valueQuantity": {
+          "value": 70.9,
+          "unit": "U/L"
+        },
+        "referenceRange": [
+          {
+            "text": "< 37"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "text": "Hb"
+        },
+        "valueQuantity": {
+          "value": 15.6,
+          "unit": "g/dL"
+        },
+        "referenceRange": [
+          {
+            "text": "13-17 (M), 12-15 (F)"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    }
+  ]
+}

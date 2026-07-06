@@ -206,49 +206,49 @@ let clinicCreated = false;
 const DATA_SOURCES = {
   cms: {
     patients: [
-      { id: 'P001', name: 'Chan Tai Man', hkid: 'A1234567', dob: '1955-01-01', gender: 'M', phone: '9123-4567',
-        diagnoses: [{code:'E11.9',desc:'Type 2 diabetes mellitus without complications'},{code:'I10',desc:'Essential (primary) hypertension'}],
-        medications: [{name:'Metformin',dosage:'500mg',freq:'Twice daily'},{name:'Lisinopril',dosage:'10mg',freq:'Once daily'}],
-        labs: [{test:'HbA1c',value:'7.2',unit:'%',ref:'< 7.0'},{test:'Fasting Glucose',value:'8.5',unit:'mmol/L',ref:'4.0-6.0'}],
-        notes:'Patient presents with fatigue and increased thirst. Blood pressure 140/90. Advised on diet and exercise. Prescribed Metformin 500mg BD and Lisinopril 10mg OD. Follow-up in 3 months.' },
-      { id: 'P002', name: 'Wong Sau Ying', hkid: 'A7654321', dob: '1960-06-15', gender: 'F', phone: '9876-5432',
-        diagnoses: [{code:'J45.9',desc:'Asthma, unspecified'},{code:'M17.9',desc:'Osteoarthritis of knee'}],
-        medications: [{name:'Salbutamol',dosage:'100mcg',freq:'As needed'},{name:'Paracetamol',dosage:'500mg',freq:'Four times daily'}],
-        labs: [{test:'Peak Flow',value:'320',unit:'L/min',ref:'> 400'},{test:'CRP',value:'12',unit:'mg/L',ref:'< 5'}],
-        notes:'Patient reports wheezing in mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol PRN and Paracetamol QID. Referred to physiotherapy.' },
-      { id: 'P003', name: 'Lee Ka Ho', hkid: 'A9876543', dob: '1970-03-22', gender: 'M', phone: '6543-2198',
-        diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'}],
-        medications: [{name:'Atorvastatin',dosage:'20mg',freq:'Once daily at night'}],
-        labs: [{test:'Total Cholesterol',value:'6.2',unit:'mmol/L',ref:'< 5.2'},{test:'LDL',value:'3.8',unit:'mmol/L',ref:'< 2.6'}],
-        notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.' }
+      { id: 'P001', name: 'Leung Hin Wa', hkid: 'U2167390', dob: '1977-03-26', gender: 'M', phone: '515831819',
+        diagnoses: [{code:'I10',desc:'Essential (primary) hypertension'}],
+        medications: [{name:'Sertraline',dosage:'50mg',freq:'Once daily'}],
+        labs: [{test:"Fasting Glucose",value:'8.3',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'8.6',unit:"%",ref:"< 7.0"},{test:"Total Cholesterol",value:'6.5',unit:"mmol/L",ref:"< 5.2"},{test:"Creatinine",value:'107.1',unit:"umol/L",ref:"60-110"}],
+        notes:"Patient presents with numbness in feet. Referred to specialist for further evaluation." },
+      { id: 'P002', name: 'Fong Chun Kit', hkid: 'B3999814', dob: '1949-01-17', gender: 'M', phone: '988433761',
+        diagnoses: [{code:'D64.9',desc:'Anemia, unspecified'},{code:'I10',desc:'Essential (primary) hypertension'},{code:'J44.9',desc:'COPD, unspecified'}],
+        medications: [{name:'Sertraline',dosage:'50mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'},{name:'Omeprazole',dosage:'20mg',freq:'Once daily'}],
+        labs: [{test:"White Cell Count",value:'3.0',unit:"x10^9/L",ref:"4.0-11.0"},{test:"TSH",value:'1.3',unit:"mIU/L",ref:"0.4-4.0"},{test:"Triglycerides",value:'3.4',unit:"mmol/L",ref:"< 1.7"},{test:"Hb",value:'11.9',unit:"g/dL",ref:"13-17"}],
+        notes:"Routine health check. Gait normal. Advised to maintain a food diary and reduce sodium intake." },
+      { id: 'P003', name: 'Wan Sze Man', hkid: 'N6452810', dob: '1994-04-15', gender: 'F', phone: '974059567',
+        diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'},{code:'E11.9',desc:'Type 2 diabetes mellitus'}],
+        medications: [{name:'Lisinopril',dosage:'10mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'}],
+        labs: [{test:"Triglycerides",value:'3.2',unit:"mmol/L",ref:"< 1.7"},{test:"BMI",value:'32.1',unit:"kg/m2",ref:"18.5-24.9"},{test:"AST",value:'35.1',unit:"U/L",ref:"< 37"},{test:"Blood Pressure Systolic",value:'127.1',unit:"mmHg",ref:"< 130"}],
+        notes:"Patient presents with shortness of breath on exertion. Prescribed Lisinopril. Advised diet and exercise. Follow-up in 3 months." }
     ]
   },
   lab: {
     patients: [{
       id: 'P002',
-      name: 'Sally Wong',
-      hkid: 'B7654321',
-      dob: '1962-08-20',
-      gender: 'F',
-      phone: '9876-5432',
-      diagnoses: [{code:'J45.9',desc:'Asthma, unspecified'},{code:'M17.9',desc:'Osteoarthritis of knee, unspecified'}],
-      medications: [{name:'Salbutamol',dosage:'100mcg',freq:'As needed'},{name:'Paracetamol',dosage:'500mg',freq:'Four times daily'}],
-      labs: [{test:'Peak Flow',value:'320',unit:'L/min',ref:'> 400'},{test:'CRP',value:'12',unit:'mg/L',ref:'< 5'}],
-      notes:'Patient reports wheezing in the mornings. Knee pain worse when climbing stairs. Prescribed Salbutamol inhaler PRN and Paracetamol 500mg QID. Referral to physiotherapy for knee.'
+      name: 'Tam Ho Yin',
+      hkid: 'R9241808',
+      dob: '1954-07-09',
+      gender: 'M',
+      phone: '241719087',
+      diagnoses: [{code:'G47.9',desc:'Sleep disorder, unspecified'},{code:'I25.1',desc:'Atherosclerotic heart disease'}],
+      medications: [{name:'Warfarin',dosage:'3mg',freq:'Once daily'},{name:'Sertraline',dosage:'50mg',freq:'Once daily'}],
+      labs: [{test:"CRP",value:'18.0',unit:"mg/L",ref:"< 5"},{test:"Heart Rate",value:'55.6',unit:"bpm",ref:"60-100"},{test:"Fasting Glucose",value:'5.2',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'7.3',unit:"%",ref:"< 7.0"}],
+      notes:'Patient reports difficulty sleeping and feeling anxious. ECG shows sinus rhythm with LVH. Medication dose adjusted. Follow-up in 2 months.'
     }]
   },
   custom: {
     patients: [{
       id: 'P003',
-      name: 'Lee Ka Ho',
-      hkid: 'A9876543',
-      dob: '1970-03-22',
-      gender: 'M',
-      phone: '6543-2198',
-      diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'}],
-      medications: [{name:'Atorvastatin',dosage:'20mg',freq:'Once daily at night'}],
-      labs: [{test:'Total Cholesterol',value:'6.2',unit:'mmol/L',ref:'< 5.2'},{test:'LDL',value:'3.8',unit:'mmol/L',ref:'< 2.6'}],
-      notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Prescribed Atorvastatin 20mg nocte. Repeat lipids in 3 months.'
+      name: 'Wan Sze Man',
+      hkid: 'N6452810',
+      dob: '1994-04-15',
+      gender: 'F',
+      phone: '974059567',
+      diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'},{code:'E11.9',desc:'Type 2 diabetes mellitus without complications'}],
+      medications: [{name:'Lisinopril',dosage:'10mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'}],
+      labs: [{test:"Triglycerides",value:'3.2',unit:"mmol/L",ref:"< 1.7"},{test:"BMI",value:'32.1',unit:"kg/m2",ref:"18.5-24.9"},{test:"Fasting Glucose",value:'7.8',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'7.2',unit:"%",ref:"< 7.0"}],
+      notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Repeat labs in 3 months.'
     }]
   }
 };

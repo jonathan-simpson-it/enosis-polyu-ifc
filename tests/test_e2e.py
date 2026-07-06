@@ -57,40 +57,39 @@ class TestMockCMS:
         page.wait_for_load_state("networkidle")
         assert page.get_by_text("Today's Summary").is_visible()
         assert page.get_by_text("Total Patients").is_visible()
-        assert page.get_by_role("cell", name="3", exact=True).first.is_visible()
 
     def test_cms_patient_list(self, page):
         page.goto(CMS_URL + "/patients.html")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Chan Tai Man").is_visible()
-        assert page.get_by_text("Wong Sau Ying").is_visible()
-        assert page.get_by_text("Lee Ka Ho").is_visible()
+        assert page.get_by_text("Leung Hin Wa").is_visible()
+        assert page.get_by_text("Fong Chun Kit").is_visible()
+        assert page.get_by_text("Wan Sze Man").is_visible()
+        assert page.get_by_text("Synthea-generated").is_visible()
 
     def test_cms_patient_detail_p001(self, page):
         page.goto(CMS_URL + "/patient.html?id=P001")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Chan Tai Man").is_visible()
-        assert page.get_by_text("A1234567").is_visible()
-        assert page.get_by_text("1955-01-01").is_visible()
-        assert page.get_by_text("E11.9", exact=True).is_visible()
-        assert page.get_by_role("cell", name="Metformin", exact=True).is_visible()
-        assert page.get_by_text("HbA1c", exact=True).is_visible()
+        assert page.get_by_text("Leung Hin Wa").is_visible()
+        assert page.get_by_text("U2167390").is_visible()
+        assert page.get_by_text("1977-03-26").is_visible()
+        assert page.get_by_text("I10", exact=True).is_visible()
+        assert page.get_by_text("HbA1c").is_visible()
 
     def test_cms_patient_p002(self, page):
         page.goto(CMS_URL + "/patient.html?id=P002")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Wong Sau Ying").is_visible()
-        assert page.get_by_text("A7654321").is_visible()
-        assert page.get_by_text("J45.9", exact=True).is_visible()
-        assert page.get_by_role("cell", name="Salbutamol", exact=True).is_visible()
+        assert page.get_by_text("Fong Chun Kit").is_visible()
+        assert page.get_by_text("B3999814").is_visible()
+        assert page.get_by_text("D64.9", exact=True).is_visible()
+        assert page.get_by_text("Omeprazole").is_visible()
 
     def test_cms_patient_p003(self, page):
         page.goto(CMS_URL + "/patient.html?id=P003")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Lee Ka Ho").is_visible()
-        assert page.get_by_text("A9876543").is_visible()
+        assert page.get_by_text("Wan Sze Man").is_visible()
+        assert page.get_by_text("N6452810").is_visible()
         assert page.get_by_text("E78.5", exact=True).is_visible()
-        assert page.get_by_role("cell", name="Atorvastatin", exact=True).is_visible()
+        assert page.get_by_role("cell", name="Lisinopril", exact=True).is_visible()
 
     def test_cms_nav_links(self, page):
         page.goto(CMS_URL + "/reports.html")
