@@ -58,11 +58,21 @@ PolyU IFC 2026 Hackathon Demo.
 
 ```bash
 # Local (creates venv, installs deps, starts all services, runs demo)
+make dev
+
+# Or directly:
 ./scripts/run.sh
 
 # Docker (builds containers, starts services, runs demo)
 ./scripts/run-docker.sh
 ```
+
+| Command | What it does |
+|---|---|
+| `make dev` | Start everything + run demo |
+| `make demo` | Run demo (servers already running) |
+| `make seed` | Seed database |
+| `make stop` | Kill servers |
 
 ### Manual Setup
 
