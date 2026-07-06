@@ -52,35 +52,40 @@ class CMSScraper:
                 };
 
                 const patientDiv = document.getElementById('patient-data');
-                const paragraphs = patientDiv ? patientDiv.querySelectorAll('p') : [];
+                const infoItems = patientDiv ? patientDiv.querySelectorAll('.info-item') : [];
 
                 let name = '', hkid = '', dob = '', gender = '';
-                paragraphs.forEach(p => {
-                    const text = p.textContent.trim();
-                    if (text.includes('Name:')) name = text.replace('Name:', '').trim();
-                    if (text.includes('HKID:')) hkid = text.replace('HKID:', '').trim();
-                    if (text.includes('DOB:')) dob = text.replace('DOB:', '').trim();
-                    if (text.includes('Gender:')) gender = text.replace('Gender:', '').trim();
-                });
-
-                // Get clinical notes
-                const h2s = document.querySelectorAll('h2');
-                let notes = '';
-                h2s.forEach(h2 => {
-                    if (h2.textContent.includes('Clinical Notes')) {
-                        const nextP = h2.nextElementSibling;
-                        if (nextP) notes = nextP.textContent.trim();
+                infoItems.forEach(item => {
+                    const label = item.querySelector('label');
+                    const span = item.querySelector('span');
+                    if (label && span) {
+                        const text = label.textContent.trim();
+                        const val = span.textContent.trim();
+                        if (text === 'Name') name = val;
+                        if (text === 'HKID') hkid = val;
+                        if (text === 'DOB') dob = val;
+                        if (text === 'Gender') gender = val;
                     }
                 });
 
-                // Map tables by their preceding h2
-                const tables = document.querySelectorAll('table');
+                // Get clinical notes
+                const cards = document.querySelectorAll('.card');
+                let notes = '';
+                cards.forEach(card => {
+                    const h2 = card.querySelector('h2');
+                    if (h2 && h2.textContent.includes('Clinical Notes')) {
+                        const p = card.querySelector('p');
+                        if (p) notes = p.textContent.trim();
+                    }
+                });
+
+                // Map tables by preceding h2 inside cards
                 const tableMap = {};
-                const allH2s = document.querySelectorAll('h2');
-                allH2s.forEach((h2, idx) => {
-                    const nextTable = h2.nextElementSibling;
-                    if (nextTable && nextTable.tagName === 'TABLE') {
-                        const rows = nextTable.querySelectorAll('tr');
+                cards.forEach(card => {
+                    const h2 = card.querySelector('h2');
+                    const table = card.querySelector('table');
+                    if (h2 && table) {
+                        const rows = table.querySelectorAll('tr');
                         const data = [];
                         for (let i = 1; i < rows.length; i++) {
                             const cells = rows[i].querySelectorAll('td');
