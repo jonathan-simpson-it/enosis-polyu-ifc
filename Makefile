@@ -1,7 +1,7 @@
-.PHONY: dev demo seed stop
+.PHONY: dev demo seed stop frontend-dev frontend-build
 
-dev: ## Start API + CMS, seed DB, run demo
-	./scripts/run.sh
+dev: ## Start all services (API + frontend + CMS)
+	npm run dev
 
 demo: ## Run demo (servers must already be running)
 	.venv/bin/python scripts/run_demo.py
@@ -9,9 +9,16 @@ demo: ## Run demo (servers must already be running)
 seed: ## Seed database
 	.venv/bin/python scripts/seed_database.py
 
-stop: ## Kill API + CMS servers
+frontend-dev: ## Start Next.js frontend only
+	npm run dev:frontend
+
+frontend-build: ## Build Next.js frontend
+	npm run build
+
+stop: ## Kill API + CMS + frontend servers
 	-kill $$(lsof -ti :8000) 2>/dev/null
 	-kill $$(lsof -ti :8080) 2>/dev/null
+	-kill $$(lsof -ti :3000) 2>/dev/null
 	@echo "Stopped"
 
 .PHONY: help

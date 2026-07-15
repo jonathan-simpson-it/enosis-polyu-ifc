@@ -41,3 +41,12 @@ Thumbs.db
 tmp/
 .agents/
 .playwright-mcp/
+
+# Node / JavaScript
+node_modules/
+*.tsbuildinfo
+
+# Frontend
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts

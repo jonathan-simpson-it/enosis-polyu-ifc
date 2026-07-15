@@ -1,0 +1,17 @@
+{
+  "name": "enosis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Enosis — Universal Data Translation Layer",
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run seed && uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "seed": "python3 scripts/seed_database.py",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
