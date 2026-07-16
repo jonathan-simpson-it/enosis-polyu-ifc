@@ -8,7 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app/src
-      - ./mock_cms:/app/mock_cms
+      - ./mock_trade:/app/mock_trade
     env_file:
       - .env
     environment:
@@ -20,13 +20,13 @@ services:
       timeout: 10s
       retries: 3
 
-  mock-cms:
+  mock-trade:
     image: nginx:alpine
-    container_name: enosis-mock-cms
+    container_name: enosis-mock-trade
     ports:
       - "8080:80"
     volumes:
-      - ./mock_cms:/usr/share/nginx/html
+      - ./mock_trade:/usr/share/nginx/html
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
       interval: 30s

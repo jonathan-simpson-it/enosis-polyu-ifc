@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     # Tesseract OCR
     tesseract_cmd: str = "/usr/bin/tesseract"
 
-    # Mock eHealth+
-    mock_ehealth_url: str = "http://localhost:8000/mock/ehealth"
+    # Mock HK TSW Phase 3
+    mock_tsw_url: str = "http://localhost:8000/mock/tsw"
 
     # App
     app_version: str = "v0-hackathon"

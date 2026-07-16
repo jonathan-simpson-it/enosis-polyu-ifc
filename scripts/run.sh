@@ -33,9 +33,9 @@ if [ ! -f .venv/.installed ]; then
   touch .venv/.installed
 fi
 
-# ── Start mock CMS ──
-echo "→ Starting mock CMS on :8080..."
-python3 -m http.server 8080 --directory mock_cms > /tmp/enosis-cms.log 2>&1 &
+# ── Start mock Trade System ──
+echo "→ Starting mock Trade System on :8080..."
+python3 -m http.server 8080 --directory mock_trade > /tmp/enosis-trade.log 2>&1 &
 CMS_PID=$!
 echo "  PID: $CMS_PID"
 
@@ -55,7 +55,7 @@ fi
 
 echo "→ API: http://localhost:8000"
 echo "→ Docs: http://localhost:8000/docs"
-echo "→ CMS:  http://localhost:8080"
+echo "→ Trade System: http://localhost:8080"
 
 # ── Seed database ──
 python scripts/seed_database.py

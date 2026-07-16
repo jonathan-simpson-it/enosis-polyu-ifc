@@ -1,7 +1,7 @@
 .PHONY: dev demo seed stop frontend-dev frontend-build
 
 dev: ## Start all services (API + frontend + CMS)
-	npm run dev
+	./scripts/run.sh
 
 demo: ## Run demo (servers must already be running)
 	.venv/bin/python scripts/run_demo.py

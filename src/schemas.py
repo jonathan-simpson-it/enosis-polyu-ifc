@@ -1,4 +1,4 @@
-"""Pydantic request/response schemas for Enosis v0 API."""
+"""Pydantic request/response schemas for Enosis — Trading Domain."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ class ServiceStatus(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str = "healthy"
-    version: str = "v0-hackathon"
+    version: str = "v0-hackathon-trade"
     services: ServiceStatus = ServiceStatus()
 
 
@@ -27,69 +27,85 @@ class HealthResponse(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    clinic_id: Optional[str] = None
-    clinic_name: str = "Central Clinic"
-    cms_type: str = "mock"
-    cms_url: str = "http://localhost:8080"
-    patient_ids: Optional[list[str]] = None
+    trader_id: Optional[str] = None
+    trader_name: str = "GBA Trading Ltd"
+    source_system: str = "mock_trade"
+    source_url: str = "http://localhost:8080"
+    declaration_ids: Optional[list[str]] = None
 
 
 class IngestResponse(BaseModel):
     job_id: str
     status: str = "processing"
-    patients_scraped: int = 0
+    declarations_scraped: int = 0
     estimated_time: int = 10
 
 
-class PatientData(BaseModel):
-    patient_id: str
-    name: str = ""
-    hkid: str = ""
-    dob: str = ""
-    gender: str = ""
-    diagnoses: list[dict[str, str]] = Field(default_factory=list)
-    medications: list[dict[str, str]] = Field(default_factory=list)
-    lab_results: list[dict[str, str]] = Field(default_factory=list)
-    clinical_notes: str = ""
+class DeclarationData(BaseModel):
+    declaration_id: str = ""
+    declaration_number: str = ""
+    consignor_name: str = ""
+    consignor_address: str = ""
+    consignee_name: str = ""
+    consignee_address: str = ""
+    port_of_loading: str = ""
+    port_of_discharge: str = ""
+    incoterms: str = ""
+    total_declared_value: float = 0.0
+    gross_weight: float = 0.0
+    net_weight: float = 0.0
+    number_of_packages: int = 1
+    container_number: str = ""
+    country_of_origin: str = ""
+    country_of_destination: str = ""
+    transport_mode: str = ""
+    declaration_date: str = ""
+    commodities: list[dict[str, Any]] = Field(default_factory=list)
+    goods_items: list[dict[str, Any]] = Field(default_factory=list)
+    measures: list[dict[str, Any]] = Field(default_factory=list)
+    commercial_notes: str = ""
 
 
 class IngestStatusResponse(BaseModel):
     job_id: str
     status: str = "pending"
-    patients_found: int = 0
-    patients_extracted: int = 0
+    declarations_found: int = 0
+    declarations_extracted: int = 0
     data: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Translate ─────────────────────────────────────────────────────────────────
 
 
-class DiagnosisInput(BaseModel):
-    code: Optional[str] = ""
+class CommodityInput(BaseModel):
     description: str = ""
+    hs_code_hint: Optional[str] = ""
 
 
-class MedicationInput(BaseModel):
-    name: str
-    dosage: Optional[str] = ""
-    frequency: Optional[str] = ""
-
-
-class LabResultInput(BaseModel):
-    test: str
-    value: str
+class GoodsItemInput(BaseModel):
+    description: str
+    quantity: Optional[float] = 0.0
     unit: Optional[str] = ""
-    reference: Optional[str] = ""
+    declared_value: Optional[float] = 0.0
+    weight: Optional[float] = 0.0
+    country_of_origin: Optional[str] = ""
+
+
+class MeasureInput(BaseModel):
+    measure_type: str
+    value: float = 0.0
+    unit: Optional[str] = ""
+    qualifier: Optional[str] = ""
 
 
 class TranslateRequest(BaseModel):
-    clinic_id: str
-    patient_id: str
-    patient_data: dict[str, Any]
-    diagnoses: list[DiagnosisInput] = Field(default_factory=list)
-    medications: list[MedicationInput] = Field(default_factory=list)
-    lab_results: list[LabResultInput] = Field(default_factory=list)
-    clinical_notes: Optional[str] = ""
+    trader_id: str
+    declaration_id: str
+    declaration_data: dict[str, Any]
+    commodities: list[CommodityInput] = Field(default_factory=list)
+    goods_items: list[GoodsItemInput] = Field(default_factory=list)
+    measures: list[MeasureInput] = Field(default_factory=list)
+    commercial_notes: Optional[str] = ""
 
 
 class TranslationEntry(BaseModel):
@@ -108,7 +124,7 @@ class TokenUsage(BaseModel):
 class TranslateResponse(BaseModel):
     job_id: str
     status: str = "completed"
-    fhir_bundle: dict[str, Any] = Field(default_factory=dict)
+    wco_declaration: dict[str, Any] = Field(default_factory=dict)
     translations: list[TranslationEntry] = Field(default_factory=list)
     token_usage: Optional[TokenUsage] = None
 
@@ -117,24 +133,24 @@ class TranslateResponse(BaseModel):
 
 
 class UploadRequest(BaseModel):
-    clinic_id: str
-    patient_id: str
-    fhir_bundle: dict[str, Any]
-    patient_consent: bool = True
+    trader_id: str
+    declaration_id: str
+    wco_declaration: dict[str, Any]
+    trader_consent: bool = True
 
 
 class UploadResponse(BaseModel):
     upload_id: str
     status: str = "submitted"
-    ehealth_reference: str
-    message: str = "Successfully uploaded to eHealth+ (mock)"
+    tsw_reference: str
+    message: str = "Successfully submitted to HK TSW Phase 3 (mock)"
 
 
 class UploadStatusResponse(BaseModel):
     upload_id: str
     status: str
-    ehealth_reference: Optional[str] = None
-    uploaded_at: Optional[str] = None
+    tsw_reference: Optional[str] = None
+    submitted_at: Optional[str] = None
 
 
 # ── Certification ─────────────────────────────────────────────────────────────
@@ -155,11 +171,11 @@ class LevelHistory(BaseModel):
 
 
 class CertificationResponse(BaseModel):
-    clinic_id: str
-    clinic_name: str
+    trader_id: str
+    trader_name: str
     current_level: str = "none"
     level_name: Optional[str] = None
-    records_uploaded: int = 0
+    declarations_submitted: int = 0
     accuracy_rate: float = 0.0
     badge_url: Optional[str] = None
     next_level: Optional[NextLevel] = None
@@ -171,11 +187,10 @@ class CertificationResponse(BaseModel):
 
 
 class UploadDataRequest(BaseModel):
-    """Direct clinical data submission from a doctor (JSON body, not file upload)."""
-    clinic_id: Optional[str] = None
-    clinic_name: str = "Direct Upload"
-    source_description: str = "Direct data submission"
-    patient_data: PatientData
+    trader_id: Optional[str] = None
+    trader_name: str = "Direct Upload"
+    source_description: str = "Direct trade data submission"
+    declaration_data: DeclarationData
 
 
 class UploadDataResponse(BaseModel):

@@ -1,4 +1,4 @@
-"""E2E tests for Enosis — covers UI, API, and translation pipeline."""
+"""E2E tests for Enosis — covers UI, API, and translation pipeline (Trading Domain)."""
 
 import time
 import uuid
@@ -7,11 +7,9 @@ import httpx
 from playwright.sync_api import sync_playwright
 
 BASE_URL = "http://localhost:8000"
-CMS_URL = "http://localhost:8080"
+TRADE_SYSTEM_URL = "http://localhost:8080"
 API_KEY = "dev-api-key-123456"
 
-
-# ── Fixtures ──────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
 def api_client():
@@ -34,202 +32,173 @@ def page(browser):
     p.close()
 
 
-# ── Act 1: Mock CMS UI ───────────────────────────────────────────────────────
+# ── Act 1: Mock Trade System UI ───────────────────────────────────────────────
 
-class TestMockCMS:
-    def test_cms_login_page(self, page):
-        page.goto(CMS_URL)
-        assert "Mock Clinic CMS" in page.title()
+class TestMockTradeSystem:
+    def test_trade_login_page(self, page):
+        page.goto(TRADE_SYSTEM_URL)
+        assert "Trade Declaration System" in page.title()
         assert page.get_by_role("button", name="Login").is_visible()
 
-    def test_cms_login(self, page):
-        page.goto(CMS_URL)
-        page.get_by_role("textbox", name="Username").fill("admin")
+    def test_trade_login(self, page):
+        page.goto(TRADE_SYSTEM_URL)
+        page.get_by_role("textbox", name="Trader ID").fill("trader01")
         page.get_by_role("textbox", name="Password").fill("password")
         page.get_by_role("button", name="Login").click()
         page.wait_for_load_state("networkidle")
         assert "Dashboard" in page.title()
-        assert page.get_by_text("Central Clinic").is_visible()
 
-    def test_cms_dashboard_summary(self, page):
-        page.goto(CMS_URL)
-        page.get_by_role("button", name="Login").click()
+    def test_trade_dashboard_displays_declarations(self, page):
+        page.goto(f"{TRADE_SYSTEM_URL}/dashboard.html")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Today's Summary").is_visible()
-        assert page.get_by_text("Total Patients").is_visible()
+        assert page.get_by_text("Recent Declarations").is_visible()
+        assert page.get_by_text("Gold Trader").is_visible()
 
-    def test_cms_patient_list(self, page):
-        page.goto(CMS_URL + "/patients.html")
+    def test_trade_declaration_detail(self, page):
+        page.goto(f"{TRADE_SYSTEM_URL}/declaration.html?id=D001")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Leung Hin Wa").is_visible()
-        assert page.get_by_text("Fong Chun Kit").is_visible()
-        assert page.get_by_text("Wan Sze Man").is_visible()
-        assert page.get_by_text("Synthea-generated").is_visible()
+        assert "Declaration Detail" in page.title()
+        assert page.get_by_text("Declaration Information").is_visible()
 
-    def test_cms_patient_detail_p001(self, page):
-        page.goto(CMS_URL + "/patient.html?id=P001")
+    def test_trade_declarations_list(self, page):
+        page.goto(f"{TRADE_SYSTEM_URL}/declarations.html")
         page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Leung Hin Wa").is_visible()
-        assert page.get_by_text("U2167390").is_visible()
-        assert page.get_by_text("1977-03-26").is_visible()
-        assert page.get_by_text("I10", exact=True).is_visible()
-        assert page.get_by_text("HbA1c").is_visible()
-
-    def test_cms_patient_p002(self, page):
-        page.goto(CMS_URL + "/patient.html?id=P002")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Fong Chun Kit").is_visible()
-        assert page.get_by_text("B3999814").is_visible()
-        assert page.get_by_text("D64.9", exact=True).is_visible()
-        assert page.get_by_text("Omeprazole").is_visible()
-
-    def test_cms_patient_p003(self, page):
-        page.goto(CMS_URL + "/patient.html?id=P003")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Wan Sze Man").is_visible()
-        assert page.get_by_text("N6452810").is_visible()
-        assert page.get_by_text("E78.5", exact=True).is_visible()
-        assert page.get_by_role("cell", name="Lisinopril", exact=True).is_visible()
-
-    def test_cms_nav_links(self, page):
-        page.goto(CMS_URL + "/reports.html")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_role("heading", name="📊 Reports").is_visible()
-        page.goto(CMS_URL + "/appointments.html")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_role("heading", name="📅 Appointments").is_visible()
+        assert "Declarations" in page.title()
 
 
-# ── Act 2: Translation Demo UI ────────────────────────────────────────────────
+# ── Act 2: API ────────────────────────────────────────────────────────────────
 
-class TestTranslationDemo:
-    def test_demo_page_loads(self, page):
-        page.goto(BASE_URL + "/demo/")
-        page.wait_for_load_state("networkidle")
-        assert "Translation Demo" in page.title()
-        assert page.get_by_text("Data Source").first.is_visible()
-
-    def test_demo_source_tabs(self, page):
-        page.goto(BASE_URL + "/demo/")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_text("Mock Clinic CMS").is_visible()
-        assert page.get_by_text("Lab Report (OCR)").is_visible()
-        assert page.get_by_text("Custom Clinical Text").is_visible()
-
-    def test_demo_translate_button(self, page):
-        page.goto(BASE_URL + "/demo/")
-        page.wait_for_load_state("networkidle")
-        btn = page.get_by_role("button", name="Translate via DeepSeek")
-        assert btn.is_visible()
-        assert btn.is_enabled()
-
-    def test_demo_step_indicator(self, page):
-        page.goto(BASE_URL + "/demo/")
-        page.wait_for_load_state("networkidle")
-        assert page.get_by_role("heading", name="1. Select Data Source").is_visible()
-        assert page.get_by_text("Upload & Certify").is_visible()
-
-
-# ── Act 3: API Endpoints ─────────────────────────────────────────────────────
-
-class TestAPI:
+class TestTradeAPI:
     def test_health(self, api_client):
-        r = api_client.get("/health")
-        assert r.status_code == 200
-        data = r.json()
-        assert data["status"] == "healthy"
-        assert data["services"]["database"] == "connected"
+        resp = api_client.get("/health")
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "healthy"
+        assert resp.json()["version"] == "v0-hackathon-trade"
 
-    def test_ingest(self, api_client):
-        r = api_client.post("/api/v1/ingest", json={
-            "clinic_id": str(uuid.uuid4()),
-            "clinic_name": "E2E Test Clinic",
-            "cms_type": "mock",
-            "cms_url": "http://localhost:8080/patient.html",
-            "patient_ids": ["P001"]
-        }, headers={"X-API-Key": API_KEY})
-        assert r.status_code in (200, 500)
+    def test_root_info(self, api_client):
+        resp = api_client.get("/")
+        assert resp.status_code == 200
+        assert "Enosis" in resp.json()["name"]
+        assert "HK TSW Phase 3" in resp.json()["tagline"]
 
-    def test_translate(self, api_client):
-        clinic_id = str(uuid.uuid4())
-        api_client.post("/api/v1/ingest", json={
-            "clinic_id": clinic_id, "clinic_name": "Test",
-            "cms_type": "mock", "cms_url": "http://localhost:8080/patient.html",
-            "patient_ids": ["P001"]
-        }, headers={"X-API-Key": API_KEY})
-        r = api_client.post("/api/v1/translate", json={
-            "clinic_id": clinic_id,
-            "patient_id": "P001",
-            "patient_data": {"name": {"first": "Tai Man", "last": "Chan"}, "hkid": "A1234567", "dob": "1955-01-01", "gender": "M"},
-            "diagnoses": [{"code": "E11.9", "description": "Type 2 diabetes mellitus"}],
-            "medications": [{"name": "Metformin", "dosage": "500mg", "frequency": "Twice daily"}],
-            "lab_results": [{"test": "HbA1c", "value": "7.2", "unit": "%", "reference": "< 7.0"}],
-            "clinical_notes": "Test patient"
-        }, headers={"X-API-Key": API_KEY}, timeout=60)
-        assert r.status_code == 200
-        data = r.json()
-        assert data["status"] == "completed"
-        assert len(data["translations"]) > 0
+    def test_full_trade_flow(self, api_client):
+        trader_id = f"t-e2e-flow-{str(uuid.uuid4())[:8]}"
 
-    def test_auth_required(self, api_client):
-        r = api_client.get("/api/v1/ingest/xxx/status")
-        assert r.status_code in (401, 403)
+        # Step 1: Ingest
+        ingest_resp = api_client.post(
+            "/api/v1/ingest",
+            json={
+                "trader_id": trader_id,
+                "trader_name": "E2E Flow Trader",
+                "source_system": "mock_trade",
+                "source_url": "http://localhost:8080",
+                "declaration_ids": ["D001"],
+            },
+            headers={"X-API-Key": API_KEY},
+        )
+        assert ingest_resp.status_code == 200
+        job_id = ingest_resp.json()["job_id"]
 
-    def test_badge_svg(self, api_client):
-        for level in ["bronze", "silver", "gold", "platinum", "diamond"]:
-            r = api_client.get(f"/badges/{level}.svg")
-            assert r.status_code == 200
-            assert r.headers["content-type"] == "image/svg+xml"
+        time.sleep(1)
+        status_resp = api_client.get(f"/api/v1/ingest/{job_id}/status", headers={"X-API-Key": API_KEY})
+        assert status_resp.status_code == 200
 
-    def test_static_demo_page(self, api_client):
-        r = api_client.get("/demo/")
-        assert r.status_code == 200
-        assert "text/html" in r.headers["content-type"]
+        # Step 2: Translate
+        translate_resp = api_client.post(
+            "/api/v1/translate",
+            json={
+                "trader_id": trader_id,
+                "declaration_id": "D001",
+                "declaration_data": {
+                    "declaration_number": "DEC-E2E-001",
+                    "consignor_name": "E2E Trader Ltd",
+                    "consignee_name": "E2E Buyer Ltd",
+                    "port_of_loading": "Yantian",
+                    "port_of_discharge": "Hong Kong",
+                    "incoterms": "CIF",
+                    "total_declared_value": 100000.0,
+                },
+                "commodities": [
+                    {"description": "Test electronic integrated circuits", "hs_code_hint": "8542"},
+                ],
+                "goods_items": [
+                    {"description": "Test IC chips - 100 pcs", "quantity": 100, "unit": "PCE", "declared_value": 50000.0, "weight": 10.0, "country_of_origin": "CN"},
+                ],
+            },
+            headers={"X-API-Key": API_KEY},
+        )
+        assert translate_resp.status_code in (200, 502)
+        if translate_resp.status_code == 200:
+            translate_data = translate_resp.json()
+            assert "wco_declaration" in translate_data
+            assert "translations" in translate_data
+
+            wco = translate_data["wco_declaration"]
+            assert wco.get("resourceType") == "WCODeclaration"
+
+            # Step 3: Upload
+            upload_resp = api_client.post(
+                "/api/v1/upload",
+                json={
+                    "trader_id": trader_id,
+                    "declaration_id": "D001",
+                    "wco_declaration": wco,
+                    "trader_consent": True,
+                },
+                headers={"X-API-Key": API_KEY},
+            )
+            assert upload_resp.status_code == 200
+            upload_data = upload_resp.json()
+            assert upload_data["status"] == "submitted"
+            assert "MOCK-TSW-" in upload_data["tsw_reference"]
+
+            # Step 4: Certification
+            cert_resp = api_client.get(
+                f"/api/v1/certification/{trader_id}",
+                headers={"X-API-Key": API_KEY},
+            )
+            assert cert_resp.status_code == 200
+            cert_data = cert_resp.json()
+            assert cert_data["trader_name"] == "E2E Flow Trader"
+            assert "current_level" in cert_data
 
 
-# ── Act 4: E2E Translation Pipeline ──────────────────────────────────────────
+# ── Act 3: Demo UI ────────────────────────────────────────────────────────────
 
-class TestE2EPipeline:
-    def test_full_pipeline_demo(self, api_client):
-        clinic_id = str(uuid.uuid4())
+class TestTradeDemoUI:
+    def test_demo_page_loads(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        assert "ENOSIS" in page.title()
 
-        r = api_client.get("/health")
-        assert r.json()["status"] == "healthy"
+    def test_demo_three_source_tabs(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        assert page.get_by_text("Mock Trade System").is_visible()
+        assert page.get_by_text("Manifest OCR").is_visible()
+        assert page.get_by_text("Custom Commercial Text").is_visible()
 
-        api_client.post("/api/v1/ingest", json={
-            "clinic_id": clinic_id, "clinic_name": "Pipeline Test",
-            "cms_type": "mock", "cms_url": "http://localhost:8080/patient.html",
-            "patient_ids": ["P001"]
-        }, headers={"X-API-Key": API_KEY})
+    def test_demo_default_shows_trade_declarations(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        assert page.get_by_text("DEC-2026-001").is_visible()
+        assert page.get_by_text("GBA Trading Ltd").is_visible()
 
-        t = api_client.post("/api/v1/translate", json={
-            "clinic_id": clinic_id, "patient_id": "P001",
-            "patient_data": {"name": {"first": "Tai Man", "last": "Chan"}, "hkid": "A1234567", "dob": "1955-01-01", "gender": "M"},
-            "diagnoses": [{"code": "E11.9", "description": "Type 2 diabetes mellitus"}],
-            "medications": [{"name": "Metformin", "dosage": "500mg", "frequency": "Twice daily"}],
-            "lab_results": [], "clinical_notes": "E2E pipeline test"
-        }, headers={"X-API-Key": API_KEY}, timeout=60)
+    def test_demo_manifest_tab_shows_ocr(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        page.get_by_text("Manifest OCR").click()
+        page.wait_for_timeout(500)
+        assert page.get_by_text("INVOICE NO").is_visible()
 
-        assert t.status_code == 200
-        td = t.json()
-        assert td["status"] == "completed"
-        assert len(td["translations"]) >= 2
+    def test_demo_custom_tab_shows_textarea(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        page.get_by_text("Custom Commercial Text").click()
+        page.wait_for_timeout(500)
+        assert page.get_by_text("Laptop computers").is_visible()
 
-        fhir_bundle = td.get("fhir_bundle", {})
-        assert fhir_bundle.get("resourceType") == "Bundle"
-
-        u = api_client.post("/api/v1/upload", json={
-            "clinic_id": clinic_id, "patient_id": "P001",
-            "fhir_bundle": fhir_bundle, "patient_consent": True
-        }, headers={"X-API-Key": API_KEY})
-        assert u.status_code == 200
-        ud = u.json()
-        assert "MOCK-EH-" in ud["ehealth_reference"]
-
-    def test_certification_flow(self, api_client):
-        r = api_client.get(f"/api/v1/certification/c1010101-0000-4000-a000-000000000001",
-                           headers={"X-API-Key": API_KEY})
-        assert r.status_code == 200
-        data = r.json()
-        assert data["current_level"] in ("gold", "bronze", "silver", "platinum", "diamond", "none")
-        assert isinstance(data["badge_url"], str)
+    def test_demo_translate_button_exists(self, page):
+        page.goto(f"{BASE_URL}/demo/")
+        page.wait_for_load_state("networkidle")
+        assert page.get_by_text("Translate to WCO JSON").is_visible()

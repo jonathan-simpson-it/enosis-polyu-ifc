@@ -1,4 +1,4 @@
-"""Translation endpoints — convert clinical data to FHIR R5 via DeepSeek."""
+"""Translation endpoints — convert trade data to HS Codes and WCO JSON via DeepSeek."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.database import get_db
-from src.models import Clinic, Translation, FHIRBundle
+from src.models import Trader, Translation, WCODeclaration
 from src.schemas import TranslateRequest, TranslateResponse, TranslationEntry, TokenUsage
 from src.services.translate import DeepSeekTranslator
 from src.services.certification import calculate_level
@@ -20,28 +20,26 @@ router = APIRouter(prefix="/api/v1", tags=["Translate"])
 
 @router.post("/translate", response_model=TranslateResponse)
 async def translate_data(request: TranslateRequest, db: Session = Depends(get_db)):
-    """Translate clinical data to standard codes and FHIR R5.
+    """Translate trade declaration data to HS Codes and WCO JSON.
 
-    Uses the DeepSeek API for semantic mapping of diagnoses (ICD-10),
-    medications (SNOMED-CT/WHO-ATC), and FHIR R5 resource generation.
+    Uses the DeepSeek API for semantic mapping of commodities (HS Codes)
+    and WCO Data Model JSON declaration generation.
     """
-    # Validate clinic
-    clinic = db.query(Clinic).filter(Clinic.id == request.clinic_id).first()
-    if not clinic:
-        raise HTTPException(status_code=404, detail="Clinic not found")
+    trader = db.query(Trader).filter(Trader.id == request.trader_id).first()
+    if not trader:
+        raise HTTPException(status_code=404, detail="Trader not found")
 
     job_id = str(uuid.uuid4())
 
     try:
         translator = DeepSeekTranslator()
 
-        # Build patient data payload
         payload: dict[str, Any] = {
-            "patient_data": request.patient_data,
-            "diagnoses": [d.model_dump() for d in request.diagnoses],
-            "medications": [m.model_dump() for m in request.medications],
-            "lab_results": [l.model_dump() for l in request.lab_results],
-            "clinical_notes": request.clinical_notes or "",
+            "declaration_data": request.declaration_data,
+            "commodities": [c.model_dump() for c in request.commodities],
+            "goods_items": [g.model_dump() for g in request.goods_items],
+            "measures": [m.model_dump() for m in request.measures],
+            "commercial_notes": request.commercial_notes or "",
         }
 
         result = await translator.translate(payload)
@@ -49,48 +47,45 @@ async def translate_data(request: TranslateRequest, db: Session = Depends(get_db
         logger.error(f"Translation failed: {exc}")
         raise HTTPException(status_code=502, detail=f"DeepSeek API error: {str(exc)}")
 
-    fhir_bundle = result.get("fhir_bundle", {})
+    wco_declaration = result.get("wco_declaration", {})
 
-    # Build translation entries
     translations: list[TranslationEntry] = []
-    for diag in result.get("diagnoses", []):
+    for com in result.get("commodities", []):
         translations.append(TranslationEntry(
-            original=f"{diag.get('original_code', '')} - {diag.get('original_description', '')}",
-            translated=f"ICD-10: {diag.get('icd10_code', '')}",
-            mapped_code=diag.get("icd10_code", ""),
-            mapping_standard="ICD-10",
-            confidence=diag.get("confidence", 0.0),
+            original=f"{com.get('original_description', '')}",
+            translated=f"HS Code: {com.get('hs_code', '')}",
+            mapped_code=com.get("hs_code", ""),
+            mapping_standard="HS Code",
+            confidence=com.get("confidence", 0.0),
         ))
-    for med in result.get("medications", []):
+    for item in result.get("goods_items", []):
         translations.append(TranslationEntry(
-            original=f"{med.get('original_name', '')} {med.get('dosage', '')} {med.get('frequency', '')}".strip(),
-            translated=f"SNOMED-CT: {med.get('snomed_code', '')} ({med.get('snomed_name', '')})",
-            mapped_code=med.get("snomed_code", ""),
-            mapping_standard="SNOMED-CT",
-            confidence=med.get("confidence", 0.0),
+            original=f"{item.get('original_description', '')} x{item.get('quantity', 0)}",
+            translated=f"HS Code: {item.get('hs_code', '')} ({item.get('country_of_origin', '')})",
+            mapped_code=item.get("hs_code", ""),
+            mapping_standard="HS Code",
+            confidence=item.get("confidence", 0.0),
         ))
 
-    # Save translations to DB
     for t in translations:
         db.add(Translation(
-            clinic_id=request.clinic_id,
-            patient_id=request.patient_id,
-            source_type="diagnosis" if t.mapping_standard == "ICD-10" else "medication",
+            trader_id=request.trader_id,
+            declaration_id=request.declaration_id,
+            source_type="commodity" if "x" not in t.original else "goods_item",
             original_text=t.original,
             translated_text=t.translated,
             confidence=t.confidence,
             mapped_code=t.mapped_code,
             mapping_standard=t.mapping_standard,
-            fhir_resource=None,
-            ehealth_status="pending",
+            wco_declaration_item=None,
+            tsw_status="pending",
         ))
 
-    # Save FHIR bundle
-    db.add(FHIRBundle(
-        clinic_id=request.clinic_id,
-        patient_id=request.patient_id,
-        bundle=fhir_bundle,
-        upload_status="pending",
+    db.add(WCODeclaration(
+        trader_id=request.trader_id,
+        declaration_id=request.declaration_id,
+        declaration=wco_declaration,
+        submission_status="pending",
     ))
     db.commit()
 
@@ -99,7 +94,7 @@ async def translate_data(request: TranslateRequest, db: Session = Depends(get_db
     return TranslateResponse(
         job_id=job_id,
         status="completed",
-        fhir_bundle=fhir_bundle,
+        wco_declaration=wco_declaration,
         translations=translations,
         token_usage=TokenUsage(input_tokens=850, output_tokens=420),
     )

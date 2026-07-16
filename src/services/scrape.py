@@ -1,4 +1,4 @@
-"""Playwright-based CMS screen scraping service."""
+"""Playwright-based Trade Declaration System scraping service."""
 
 from typing import Any
 
@@ -7,36 +7,27 @@ from playwright.async_api import async_playwright
 from src.utils.logger import logger
 
 
-class CMSScraper:
-    """Extracts patient data from clinic CMS systems via browser automation.
+class TradeSystemScraper:
+    """Extracts declaration data from Trade Declaration System via browser automation.
 
     Part of Enosis's multi-modal ingestion pipeline:
-    - CMS scraping (Playwright) — digital/electronic systems
-    - OCR (Tesseract) — handwritten notes, printed documents, lab photos
-    - File upload API — image/JSON/CSV uploads
+    - Trade system scraping (Playwright) — digital trade portals
+    - OCR (Tesseract) — scanned manifest documents, commercial invoices
+    - File upload API — JSON/CSV data file uploads
     - Direct submission API — structured JSON input
     """
 
-    async def scrape_patient(self, cms_url: str, patient_id: str) -> dict[str, Any]:
-        """Scrape a single patient's data from the CMS.
-
-        Args:
-            cms_url: Base URL of the CMS patient detail page.
-            patient_id: Patient identifier to look up.
-
-        Returns:
-            Dict with extracted patient data.
-        """
-        logger.info(f"Scraping patient {patient_id} from {cms_url}")
+    async def scrape_declaration(self, system_url: str, declaration_id: str) -> dict[str, Any]:
+        logger.info(f"Scraping declaration {declaration_id} from {system_url}")
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
-            full_url = f"{cms_url}?id={patient_id}" if "?" not in cms_url else cms_url
+            full_url = f"{system_url}?id={declaration_id}" if "?" not in system_url else system_url
             await page.goto(full_url, wait_until="networkidle")
 
-            patient_data = await page.evaluate(
+            declaration_data = await page.evaluate(
                 """() => {
                 const getText = (selector) => {
                     const el = document.querySelector(selector);
@@ -48,7 +39,6 @@ class CMSScraper:
                     if (tableIndex >= tables.length) return [];
                     const rows = tables[tableIndex].querySelectorAll('tr');
                     const data = [];
-                    // Skip header row
                     for (let i = 1; i < rows.length; i++) {
                         const cells = rows[i].querySelectorAll('td');
                         if (cells.length > 0) {
@@ -58,35 +48,34 @@ class CMSScraper:
                     return data;
                 };
 
-                const patientDiv = document.getElementById('patient-data');
-                const infoItems = patientDiv ? patientDiv.querySelectorAll('.info-item') : [];
+                const declDiv = document.getElementById('declaration-data');
+                const infoItems = declDiv ? declDiv.querySelectorAll('.info-item') : [];
 
-                let name = '', hkid = '', dob = '', gender = '';
+                let declarationNumber = '', consignorName = '', consigneeName = '', portOfLoading = '', portOfDischarge = '';
                 infoItems.forEach(item => {
                     const label = item.querySelector('label');
                     const span = item.querySelector('span');
                     if (label && span) {
                         const text = label.textContent.trim();
                         const val = span.textContent.trim();
-                        if (text === 'Name') name = val;
-                        if (text === 'HKID') hkid = val;
-                        if (text === 'DOB') dob = val;
-                        if (text === 'Gender') gender = val;
+                        if (text === 'Declaration No') declarationNumber = val;
+                        if (text === 'Consignor') consignorName = val;
+                        if (text === 'Consignee') consigneeName = val;
+                        if (text === 'Port of Loading') portOfLoading = val;
+                        if (text === 'Port of Discharge') portOfDischarge = val;
                     }
                 });
 
-                // Get clinical notes
                 const cards = document.querySelectorAll('.card');
                 let notes = '';
                 cards.forEach(card => {
                     const h2 = card.querySelector('h2');
-                    if (h2 && h2.textContent.includes('Clinical Notes')) {
+                    if (h2 && h2.textContent.includes('Commercial Notes')) {
                         const p = card.querySelector('p');
                         if (p) notes = p.textContent.trim();
                     }
                 });
 
-                // Map tables by preceding h2 inside cards
                 const tableMap = {};
                 cards.forEach(card => {
                     const h2 = card.querySelector('h2');
@@ -105,41 +94,33 @@ class CMSScraper:
                 });
 
                 return {
-                    name: name,
-                    hkid: hkid,
-                    dob: dob,
-                    gender: gender,
-                    diagnoses: tableMap['Diagnoses'] || [],
-                    medications: tableMap['Medications'] || [],
-                    lab_results: tableMap['Lab Results'] || [],
-                    clinical_notes: notes
+                    declaration_number: declarationNumber,
+                    consignor_name: consignorName,
+                    consignee_name: consigneeName,
+                    port_of_loading: portOfLoading,
+                    port_of_discharge: portOfDischarge,
+                    commodities: tableMap['Commodities'] || [],
+                    goods_items: tableMap['Goods Items'] || [],
+                    measures: tableMap['Measures'] || [],
+                    commercial_notes: notes
                 };
             }"""
             )
 
             await browser.close()
 
-        patient_data["patient_id"] = patient_id
-        logger.info(f"Scraped patient {patient_id}: {patient_data.get('name', 'Unknown')}")
-        return patient_data
+        declaration_data["declaration_id"] = declaration_id
+        logger.info(f"Scraped declaration {declaration_id}: {declaration_data.get('declaration_number', 'Unknown')}")
+        return declaration_data
 
-    async def scrape_patients(
-        self, cms_url: str, patient_ids: list[str]
+    async def scrape_declarations(
+        self, system_url: str, declaration_ids: list[str]
     ) -> list[dict[str, Any]]:
-        """Scrape multiple patients sequentially.
-
-        Args:
-            cms_url: Base URL of the CMS.
-            patient_ids: List of patient identifiers.
-
-        Returns:
-            List of patient data dicts.
-        """
         results: list[dict[str, Any]] = []
-        for pid in patient_ids:
+        for did in declaration_ids:
             try:
-                data = await self.scrape_patient(cms_url, pid)
+                data = await self.scrape_declaration(system_url, did)
                 results.append(data)
             except Exception as exc:
-                logger.error(f"Failed to scrape patient {pid}: {exc}")
+                logger.error(f"Failed to scrape declaration {did}: {exc}")
         return results

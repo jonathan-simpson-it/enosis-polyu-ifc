@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enosis — Translation Demo</title>
+<title>Enosis — Trade Declaration Demo</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.5}
   .top-bar{background:#1e293b;border-bottom:1px solid #334155;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
   .top-bar h1{font-size:20px;color:#f8fafc}
-  .top-bar h1 span{color:#38bdf8}
+  .top-bar h1 span{color:#22c55e}
   .top-bar .sub{font-size:13px;color:#94a3b8}
   .container{max-width:1100px;margin:0 auto;padding:24px}
   .tabs{display:flex;gap:8px;margin-bottom:24px}
   .tab{padding:12px 24px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#94a3b8;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s}
-  .tab:hover{border-color:#38bdf8;color:#e2e8f0}
-  .tab.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+  .tab:hover{border-color:#22c55e;color:#e2e8f0}
+  .tab.active{background:#22c55e;color:#0f172a;border-color:#22c55e}
   .panel{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;margin-bottom:24px}
-  .panel h2{font-size:16px;color:#38bdf8;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-  .panel h2 .step{background:#38bdf8;color:#0f172a;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .panel h2{font-size:16px;color:#22c55e;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .panel h2 .step{background:#22c55e;color:#0f172a;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
   .panel h2 .badge-success{background:#22c55e;color:#0f172a;font-size:11px;padding:2px 10px;border-radius:12px;margin-left:auto}
   .panel h2 .badge-pending{background:#f59e0b;color:#0f172a;font-size:11px;padding:2px 10px;border-radius:12px;margin-left:auto}
   .data-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
@@ -31,8 +31,8 @@
   .data-card th{text-align:left;color:#64748b;padding:6px 4px;border-bottom:1px solid #1e293b;font-weight:500}
   .data-card td{padding:6px 4px;border-bottom:1px solid #1e293b;color:#cbd5e1}
   .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
-  .btn-primary{background:#38bdf8;color:#0f172a}
-  .btn-primary:hover{background:#7dd3fc;transform:translateY(-1px)}
+  .btn-primary{background:#22c55e;color:#0f172a}
+  .btn-primary:hover{background:#4ade80;transform:translateY(-1px)}
   .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
   .btn-success{background:#22c55e;color:#0f172a}
   .btn-success:disabled{opacity:.4;cursor:not-allowed}
@@ -40,7 +40,7 @@
   .translation-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1e293b}
   .translation-row:last-child{border-bottom:none}
   .translation-row .original{flex:0 0 180px;font-size:13px;color:#94a3b8}
-  .translation-row .arrow{flex:0 0 20px;color:#38bdf8;font-size:16px}
+  .translation-row .arrow{flex:0 0 20px;color:#22c55e;font-size:16px}
   .translation-row .result{flex:1;font-size:14px;color:#f1f5f9}
   .translation-row .confidence{flex:0 0 160px}
   .confidence-bar{height:8px;border-radius:4px;background:#334155;overflow:hidden;margin-bottom:2px}
@@ -49,32 +49,32 @@
   .confidence-bar .fill.medium{background:#f59e0b}
   .confidence-bar .fill.low{background:#ef4444}
   .confidence-text{font-size:11px;color:#64748b;text-align:right}
-  .fhir-tree{font-family:'SF Mono',Monaco,monospace;font-size:13px;background:#0f172a;border-radius:8px;padding:16px;max-height:300px;overflow-y:auto;line-height:1.8}
-  .fhir-tree .key{color:#38bdf8}
-  .fhir-tree .string{color:#a78bfa}
-  .fhir-tree .number{color:#f59e0b}
-  .fhir-tree .collapsible{cursor:pointer;user-select:none}
-  .fhir-tree .collapsible::before{content:'▶ ';color:#64748b;font-size:10px}
-  .fhir-tree .collapsible.open::before{content:'▼ '}
-  .fhir-tree .hidden{display:none}
+  .wco-tree{font-family:'SF Mono',Monaco,monospace;font-size:13px;background:#0f172a;border-radius:8px;padding:16px;max-height:300px;overflow-y:auto;line-height:1.8}
+  .wco-tree .key{color:#22c55e}
+  .wco-tree .string{color:#a78bfa}
+  .wco-tree .number{color:#f59e0b}
+  .wco-tree .collapsible{cursor:pointer;user-select:none}
+  .wco-tree .collapsible::before{content:'▶ ';color:#64748b;font-size:10px}
+  .wco-tree .collapsible.open::before{content:'▼ '}
+  .wco-tree .hidden{display:none}
   .result-banner{text-align:center;padding:32px;border-radius:12px;background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #22c55e}
   .result-banner .icon{font-size:48px;margin-bottom:8px}
   .result-banner h3{color:#22c55e;font-size:20px;margin-bottom:4px}
   .result-banner p{color:#94a3b8;font-size:14px}
-  .result-banner .ref{color:#38bdf8;font-family:monospace;font-size:16px;margin-top:8px}
+  .result-banner .ref{color:#22c55e;font-family:monospace;font-size:16px;margin-top:8px}
   .result-banner img.badge{width:300px;height:120px;margin-top:16px;border-radius:8px}
-  .loader{display:inline-block;width:16px;height:16px;border:2px solid #334155;border-top-color:#38bdf8;border-radius:50%;animation:spin .6s linear infinite}
+  .loader{display:inline-block;width:16px;height:16px;border:2px solid #334155;border-top-color:#22c55e;border-radius:50%;animation:spin .6s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .textarea-field{width:100%;min-height:120px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;padding:12px;font-family:monospace;font-size:13px;resize:vertical}
-  .textarea-field:focus{outline:none;border-color:#38bdf8}
+  .textarea-field:focus{outline:none;border-color:#22c55e}
   .hidden{display:none}
   .step-indicator{display:flex;justify-content:center;gap:32px;margin-bottom:24px;padding:16px;background:#1e293b;border-radius:8px}
   .step-indicator .step-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#64748b}
   .step-indicator .step-item.done{color:#22c55e}
-  .step-indicator .step-item.active{color:#38bdf8}
+  .step-indicator .step-item.active{color:#22c55e}
   .step-indicator .step-item .num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#334155;color:#94a3b8}
   .step-indicator .step-item.done .num{background:#22c55e;color:#0f172a}
-  .step-indicator .step-item.active .num{background:#38bdf8;color:#0f172a}
+  .step-indicator .step-item.active .num{background:#22c55e;color:#0f172a}
   @media(max-width:768px){.data-grid{grid-template-columns:1fr}.tabs{flex-direction:column}.translation-row{flex-wrap:wrap}}
 </style>
 </head>
@@ -82,55 +82,60 @@
 
 <div class="top-bar">
   <div>
-    <h1>🔄 <span>ENOSIS</span> — Universal Data Translation Layer</h1>
-    <div class="sub">Unlocking data so every AI application can work</div>
+    <h1>🔄 <span>ENOSIS</span> — Trade Data Translation Layer</h1>
+    <div class="sub">Unlocking trade data for HK TSW Phase 3 submission</div>
   </div>
   <div style="font-size:13px;color:#94a3b8">PolyU IFC 2026</div>
 </div>
 
 <div class="container">
 
-  <!-- Step Indicator -->
   <div class="step-indicator" id="stepIndicator">
     <div class="step-item active" id="step1"><span class="num">1</span> Select Source</div>
-    <div class="step-item" id="step2"><span class="num">2</span> Analyze Input</div>
+    <div class="step-item" id="step2"><span class="num">2</span> Analyze Declaration</div>
     <div class="step-item" id="step3"><span class="num">3</span> AI Translation</div>
-    <div class="step-item" id="step4"><span class="num">4</span> Standardized Output</div>
-    <div class="step-item" id="step5"><span class="num">5</span> Upload & Certify</div>
+    <div class="step-item" id="step4"><span class="num">4</span> WCO Standardized Output</div>
+    <div class="step-item" id="step5"><span class="num">5</span> Submit & Certify</div>
   </div>
 
-  <!-- Source Tabs -->
   <div class="panel">
-    <h2>📡 1. Select Data Source</h2>
+    <h2>📡 1. Select Trade Data Source</h2>
     <div class="tabs">
-      <div class="tab active" data-source="cms" onclick="selectSource('cms', this)">🏥 Mock Clinic CMS</div>
-      <div class="tab" data-source="lab" onclick="selectSource('lab', this)">📄 Lab Report (OCR)</div>
-      <div class="tab" data-source="custom" onclick="selectSource('custom', this)">✏️ Custom Clinical Text</div>
+      <div class="tab active" data-source="trade" onclick="selectSource('trade', this)">🚢 Mock Trade System</div>
+      <div class="tab" data-source="manifest" onclick="selectSource('manifest', this)">📄 Manifest OCR</div>
+      <div class="tab" data-source="custom" onclick="selectSource('custom', this)">✏️ Custom Commercial Text</div>
     </div>
-    <div id="sourceCms" class="source-panel">
+    <div id="sourceTrade" class="source-panel">
       <div class="data-grid single">
         <div class="data-card">
           <h3>Source</h3>
-          <div class="value">Central Clinic — Mock CMS (http://localhost:8080)</div>
-          <div class="value" style="margin-top:8px;font-size:12px;color:#64748b">Data is scraped via Playwright browser automation, simulating extraction from any clinic system without integration work.</div>
+          <div class="value">GBA Trading Ltd — Mock Trade Declaration System (http://localhost:8080)</div>
+          <div class="value" style="margin-top:8px;font-size:12px;color:#64748b">Declaration data is scraped via Playwright browser automation, simulating extraction from any trade portal without integration work.</div>
         </div>
       </div>
-      <div class="data-grid" id="cmsPatients"></div>
+      <div class="data-grid" id="tradeDeclarations"></div>
     </div>
-    <div id="sourceLab" class="source-panel hidden">
+    <div id="sourceManifest" class="source-panel hidden">
       <div class="data-grid single">
         <div class="data-card">
           <h3>Simulated OCR Input</h3>
-          <div class="value" style="margin-bottom:8px">Handwritten clinical notes processed by Tesseract OCR. Demonstrates translation from unstructured, scanned documents.</div>
+          <div class="value" style="margin-bottom:8px">Scanned commercial manifest processed by Tesseract OCR. Demonstrates translation from unstructured shipping documents.</div>
           <div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#cbd5e1;line-height:1.6">
-Patient: Sally Wong<br>
-HKID: B7654321<br>
-DOB: 1962-08-20<br>
-Gender: F<br><br>
-Diagnosis: Asthma (J45.9), Osteoarthritis of knee (M17.9)<br>
-Medications: Salbutamol inhaler 100mcg PRN, Paracetamol 500mg QID<br>
-Labs: Peak Flow 320 L/min, CRP 12 mg/L<br>
-Notes: Patient reports wheezing in mornings. Knee pain when climbing stairs. Referred to physiotherapy.
+INVOICE NO: INV-2026-0789<br>
+Container: MSCU4820347<br>
+Consignor: GBA Trading Ltd<br>
+Consignee: HK Electronics Ltd<br>
+Port of Loading: Yantian, Shenzhen<br>
+Port of Discharge: Hong Kong<br><br>
+Item 1: Integrated circuits 7400 series — 5000 pcs<br>
+HS Code: 8542.31.00 — Value: HKD 450,000<br>
+Weight: 120 KG — Origin: CN<br><br>
+Item 2: Printed circuit boards — 200 pcs<br>
+HS Code: 8534.00.00 — Value: HKD 180,000<br>
+Weight: 85 KG — Origin: CN<br><br>
+Gross Weight: 910 KGS<br>
+Net Weight: 850 KGS<br>
+Total Value: HKD 630,000
           </div>
         </div>
       </div>
@@ -138,57 +143,78 @@ Notes: Patient reports wheezing in mornings. Knee pain when climbing stairs. Ref
     <div id="sourceCustom" class="source-panel hidden">
       <div class="data-grid single">
         <div class="data-card">
-          <h3>Custom Clinical Notes</h3>
-          <div class="value" style="margin-bottom:8px">Type or paste any clinical data below. Enosis will parse and translate it — demonstrating universal format support.</div>
-          <textarea class="textarea-field" id="customText" placeholder="Example: Patient: Lee Ka Ho, HKID: A9876543, DOB: 1970-03-22, Male&#10;Diagnosis: Hyperlipidemia (E78.5)&#10;Medication: Atorvastatin 20mg at night&#10;Labs: Total Chol 6.2, LDL 3.8&#10;Notes: Routine health check. Elevated cholesterol. Advised diet and exercise.">Patient: Lee Ka Ho
-HKID: A9876543
-DOB: 1970-03-22
-Gender: M
+          <h3>Custom Commercial Notes</h3>
+          <div class="value" style="margin-bottom:8px">Type or paste any trade/commercial data below. Enosis will parse and translate it to WCO JSON — demonstrating universal format support.</div>
+          <textarea class="textarea-field" id="customText" placeholder="Example: Declaration: DEC-2026-005
+Consignor: Shenzhen Auto Parts Co
+Consignee: HK Motors Ltd
+Port of Loading: Yantian
+Port of Discharge: Hong Kong
+Incoterms: EXW
 
-Diagnosis: Hyperlipidemia (E78.5)
-Medication: Atorvastatin 20mg nocte
+Item 1: Brake pads ceramic — 2000 sets
+HS Code: 8708.30.00 — Value: HKD 1,500,000
+Weight: 5000 KG — Origin: CN
 
-Labs: Total Cholesterol 6.2 mmol/L, LDL 3.8 mmol/L
+Item 2: Dashboard plastic trim — 500 sets
+HS Code: 3926.90.00 — Value: HKD 650,000
+Weight: 3200 KG — Origin: CN
 
-Notes: Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Repeat lipids in 3 months.</textarea>
+Gross Weight: 8900 KGS
+Container: MSCU9012345">Declaration: DEC-2026-009
+Consignor: TechSource HK Ltd
+Consignee: HK Education Dept
+Port of Loading: Hong Kong
+Port of Discharge: Hong Kong
+Incoterms: EXW
+
+Item 1: Laptop computers — 500 pcs
+HS Code: 8471.30.00 — Value: HKD 3,500,000
+Weight: 2500 KG — Origin: CN
+
+Item 2: SSD drives 1TB — 1000 pcs
+HS Code: 8523.51.00 — Value: HKD 700,000
+Weight: 200 KG — Origin: CN
+
+Gross Weight: 5600 KGS
+Net Weight: 5100 KGS
+Total Value: HKD 4,200,000</textarea>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Translation Panel -->
   <div class="panel">
-    <h2><span class="step">2</span> AI Translation via DeepSeek &nbsp;<span style="color:#64748b;font-size:12px;font-weight:400">v4-flash · temp=0.1 · max_tokens=4096</span></h2>
+    <h2><span class="step">2</span> AI Translation via DeepSeek &nbsp;<span style="color:#64748b;font-size:12px;font-weight:400">v4-flash · HS Code mapping · WCO JSON</span></h2>
     <div class="btn-group">
-      <button class="btn btn-primary" id="btnTranslate" onclick="runTranslation()">🔄 Translate via DeepSeek</button>
-      <button class="btn btn-success hidden" id="btnUpload" onclick="runUpload()">📤 Upload to eHealth+</button>
+      <button class="btn btn-primary" id="btnTranslate" onclick="runTranslation()">🔄 Translate to WCO JSON</button>
+      <button class="btn btn-success hidden" id="btnUpload" onclick="runUpload()">📤 Submit to TSW</button>
     </div>
     <div id="translationSpinner" class="hidden" style="margin-top:16px;text-align:center;padding:24px">
       <div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div>
-      <div style="color:#94a3b8;font-size:14px">Calling DeepSeek API for medical translation...</div>
+      <div style="color:#94a3b8;font-size:14px">Calling DeepSeek API for trade translation...</div>
     </div>
   </div>
 
-  <!-- Results Panels -->
   <div id="resultCodes" class="panel hidden">
-    <h2>📋 Translation Results <span class="badge-success" id="confidenceBadge">96.5% avg</span></h2>
+    <h2>📋 HS Code Mapping Results <span class="badge-success" id="confidenceBadge">96.5% avg</span></h2>
     <div id="translationResults"></div>
   </div>
 
-  <div id="resultFhir" class="panel hidden">
-    <h2>📦 FHIR R5 Bundle <span style="color:#64748b;font-size:12px;font-weight:400" id="fhirCount"></span></h2>
-    <div id="fhirTree" class="fhir-tree"></div>
+  <div id="resultWco" class="panel hidden">
+    <h2>📦 WCO Data Model v3.11 Declaration <span style="color:#64748b;font-size:12px;font-weight:400" id="wcoCount"></span></h2>
+    <div id="wcoTree" class="wco-tree"></div>
   </div>
 
   <div id="resultUpload" class="panel hidden">
-    <h2>📤 Upload Complete <span class="badge-success" id="uploadStatus">submitted</span></h2>
+    <h2>📤 Submission Complete <span class="badge-success" id="uploadStatus">submitted</span></h2>
     <div class="result-banner">
       <div class="icon">✅</div>
-      <h3>Successfully Uploaded to eHealth+ (Mock)</h3>
-      <p>Reference ID:</p>
-      <div class="ref" id="ehealthRef">MOCK-EH-20260706-XXXXXX</div>
+      <h3>Successfully Submitted to HK TSW Phase 3 (Mock)</h3>
+      <p>TSW Reference ID:</p>
+      <div class="ref" id="tswRef">MOCK-TSW-20260716-XXXXXX</div>
       <div id="badgeArea" class="hidden" style="margin-top:16px">
-        <p style="margin-bottom:8px">🏆 Smart Clinic Certification</p>
+        <p style="margin-bottom:8px">🏆 Smart Trader Certification</p>
         <img class="badge" id="certBadge" src="/badges/gold.svg" alt="Gold Badge">
       </div>
     </div>
@@ -198,57 +224,52 @@ Notes: Routine health check. Elevated cholesterol. Advised dietary changes and e
 
 <script>
 const API_KEY = 'dev-api-key-123456';
-const CLINIC_ID = 'c1010101-0000-4000-a000-000000000001';
+const TRADER_ID = 't1010101-0000-4000-a000-000000000001';
 const BASE = '';
-let currentSource = 'cms';
-let clinicCreated = false;
+let currentSource = 'trade';
+let traderCreated = false;
 
 const DATA_SOURCES = {
-  cms: {
-    patients: [
-      { id: 'P001', name: 'Leung Hin Wa', hkid: 'U2167390', dob: '1977-03-26', gender: 'M', phone: '515831819',
-        diagnoses: [{code:'I10',desc:'Essential (primary) hypertension'}],
-        medications: [{name:'Sertraline',dosage:'50mg',freq:'Once daily'}],
-        labs: [{test:"Fasting Glucose",value:'8.3',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'8.6',unit:"%",ref:"< 7.0"},{test:"Total Cholesterol",value:'6.5',unit:"mmol/L",ref:"< 5.2"},{test:"Creatinine",value:'107.1',unit:"umol/L",ref:"60-110"}],
-        notes:"Patient presents with numbness in feet. Referred to specialist for further evaluation." },
-      { id: 'P002', name: 'Fong Chun Kit', hkid: 'B3999814', dob: '1949-01-17', gender: 'M', phone: '988433761',
-        diagnoses: [{code:'D64.9',desc:'Anemia, unspecified'},{code:'I10',desc:'Essential (primary) hypertension'},{code:'J44.9',desc:'COPD, unspecified'}],
-        medications: [{name:'Sertraline',dosage:'50mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'},{name:'Omeprazole',dosage:'20mg',freq:'Once daily'}],
-        labs: [{test:"White Cell Count",value:'3.0',unit:"x10^9/L",ref:"4.0-11.0"},{test:"TSH",value:'1.3',unit:"mIU/L",ref:"0.4-4.0"},{test:"Triglycerides",value:'3.4',unit:"mmol/L",ref:"< 1.7"},{test:"Hb",value:'11.9',unit:"g/dL",ref:"13-17"}],
-        notes:"Routine health check. Gait normal. Advised to maintain a food diary and reduce sodium intake." },
-      { id: 'P003', name: 'Wan Sze Man', hkid: 'N6452810', dob: '1994-04-15', gender: 'F', phone: '974059567',
-        diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'},{code:'E11.9',desc:'Type 2 diabetes mellitus'}],
-        medications: [{name:'Lisinopril',dosage:'10mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'}],
-        labs: [{test:"Triglycerides",value:'3.2',unit:"mmol/L",ref:"< 1.7"},{test:"BMI",value:'32.1',unit:"kg/m2",ref:"18.5-24.9"},{test:"AST",value:'35.1',unit:"U/L",ref:"< 37"},{test:"Blood Pressure Systolic",value:'127.1',unit:"mmHg",ref:"< 130"}],
-        notes:"Patient presents with shortness of breath on exertion. Prescribed Lisinopril. Advised diet and exercise. Follow-up in 3 months." }
+  trade: {
+    declarations: [
+      { id: 'D001', declNo: 'DEC-2026-001', consignor: 'GBA Trading Ltd', consignee: 'HK Electronics Ltd',
+        pol: 'Yantian, Shenzhen', pod: 'Hong Kong', incoterms: 'CIF', container: 'MSCU4820347',
+        grossWeight: 910, netWeight: 850, packages: 12, totalValue: 630000, currency: 'HKD',
+        commodities: [{desc:'Integrated circuits, electronic',hs_hint:'8542'},{desc:'Printed circuit boards',hs_hint:'8534'}],
+        goodsItems: [{desc:'IC chips 7400 series - 5000 pcs',qty:5000,unit:'PCE',val:450000,wgt:120,origin:'CN'},{desc:'PCB assemblies - 200 pcs',qty:200,unit:'PCE',val:180000,wgt:85,origin:'CN'}],
+        notes:'Importer: HK Electronics Ltd. Goods manufactured in Shenzhen. CIF Hong Kong via Yantian port.' },
+      { id: 'D002', declNo: 'DEC-2026-002', consignor: 'GBA Trading Ltd', consignee: 'Global Pharma HK',
+        pol: 'Shekou, Shenzhen', pod: 'Hong Kong', incoterms: 'FOB', container: 'CMAU3198756',
+        grossWeight: 2400, netWeight: 2200, packages: 48, totalValue: 1200000, currency: 'HKD',
+        commodities: [{desc:'Pharmaceutical preparations',hs_hint:'3004'},{desc:'Diagnostic reagents',hs_hint:'3822'}],
+        goodsItems: [{desc:'Paracetamol 500mg - 10000 boxes',qty:10000,unit:'BOX',val:800000,wgt:800,origin:'CN'},{desc:'Rapid COVID test kits - 20000 pcs',qty:20000,unit:'PCE',val:400000,wgt:400,origin:'CN'}],
+        notes:'Temperature-controlled shipment. Reefer container set at 15C.' },
+      { id: 'D003', declNo: 'DEC-2026-003', consignor: 'Asia Steel Corp', consignee: 'HK Construction Co',
+        pol: 'Shanghai', pod: 'Kwai Tsing, HK', incoterms: 'CFR', container: 'OOLU8726451',
+        grossWeight: 52000, netWeight: 50000, packages: 200, totalValue: 3500000, currency: 'HKD',
+        commodities: [{desc:'Hot-rolled steel plates >10mm',hs_hint:'7208'},{desc:'Aluminium extruded profiles',hs_hint:'7604'}],
+        goodsItems: [{desc:'Steel plates 12mm - 50 MT',qty:50000,unit:'KGM',val:2500000,wgt:50000,origin:'CN'},{desc:'Aluminium profiles 6m - 200 pcs',qty:200,unit:'PCE',val:1000000,wgt:2000,origin:'CN'}],
+        notes:'Construction materials for HK infrastructure project. CFR Kwai Tsing.' }
     ]
   },
-  lab: {
-    patients: [{
-      id: 'P002',
-      name: 'Tam Ho Yin',
-      hkid: 'R9241808',
-      dob: '1954-07-09',
-      gender: 'M',
-      phone: '241719087',
-      diagnoses: [{code:'G47.9',desc:'Sleep disorder, unspecified'},{code:'I25.1',desc:'Atherosclerotic heart disease'}],
-      medications: [{name:'Warfarin',dosage:'3mg',freq:'Once daily'},{name:'Sertraline',dosage:'50mg',freq:'Once daily'}],
-      labs: [{test:"CRP",value:'18.0',unit:"mg/L",ref:"< 5"},{test:"Heart Rate",value:'55.6',unit:"bpm",ref:"60-100"},{test:"Fasting Glucose",value:'5.2',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'7.3',unit:"%",ref:"< 7.0"}],
-      notes:'Patient reports difficulty sleeping and feeling anxious. ECG shows sinus rhythm with LVH. Medication dose adjusted. Follow-up in 2 months.'
+  manifest: {
+    declarations: [{
+      id: 'D004', declNo: 'DEC-2026-004', consignor: 'Guangdong Foods Ltd', consignee: 'ParknShop HK',
+      pol: 'Nansha, Guangzhou', pod: 'Hong Kong', incoterms: 'CIF', container: 'CCLU5678901',
+      grossWeight: 18500, netWeight: 18000, packages: 600, totalValue: 480000, currency: 'HKD',
+      commodities: [{desc:'Frozen orange juice concentrate',hs_hint:'2009'},{desc:'Food preparations, noodles',hs_hint:'2106'}],
+      goodsItems: [{desc:'Frozen OJ concentrate 1L - 5000 ctns',qty:5000,unit:'CTN',val:300000,wgt:12000,origin:'CN'},{desc:'Instant noodles - 10000 ctns',qty:10000,unit:'CTN',val:180000,wgt:6000,origin:'CN'}],
+      notes:'Food products for HK retail. All items have valid health certificates.'
     }]
   },
   custom: {
-    patients: [{
-      id: 'P003',
-      name: 'Wan Sze Man',
-      hkid: 'N6452810',
-      dob: '1994-04-15',
-      gender: 'F',
-      phone: '974059567',
-      diagnoses: [{code:'E78.5',desc:'Hyperlipidemia, unspecified'},{code:'E11.9',desc:'Type 2 diabetes mellitus without complications'}],
-      medications: [{name:'Lisinopril',dosage:'10mg',freq:'Once daily'},{name:'Metformin',dosage:'500mg',freq:'Twice daily'}],
-      labs: [{test:"Triglycerides",value:'3.2',unit:"mmol/L",ref:"< 1.7"},{test:"BMI",value:'32.1',unit:"kg/m2",ref:"18.5-24.9"},{test:"Fasting Glucose",value:'7.8',unit:"mmol/L",ref:"4.0-6.0"},{test:"HbA1c",value:'7.2',unit:"%",ref:"< 7.0"}],
-      notes:'Routine health check. Elevated cholesterol. Advised dietary changes and exercise. Repeat labs in 3 months.'
+    declarations: [{
+      id: 'D005', declNo: 'DEC-2026-005', consignor: 'Shenzhen Auto Parts Co', consignee: 'HK Motors Ltd',
+      pol: 'Yantian, Shenzhen', pod: 'Hong Kong', incoterms: 'EXW', container: 'MSCU9012345',
+      grossWeight: 8900, netWeight: 8200, packages: 85, totalValue: 2150000, currency: 'HKD',
+      commodities: [{desc:'Brake pads ceramic',hs_hint:'8708'},{desc:'Dashboard plastic trim',hs_hint:'3926'}],
+      goodsItems: [{desc:'Brake pads ceramic - 2000 sets',qty:2000,unit:'SET',val:1500000,wgt:5000,origin:'CN'},{desc:'Dashboard trim kits - 500 sets',qty:500,unit:'SET',val:650000,wgt:3200,origin:'CN'}],
+      notes:'Auto parts for HK aftermarket. EXW Shenzhen. Buyer arranges transport.'
     }]
   }
 };
@@ -259,41 +280,40 @@ function selectSource(source, el) {
   document.querySelectorAll('.source-panel').forEach(p => p.classList.add('hidden'));
   document.getElementById('source' + source.charAt(0).toUpperCase() + source.slice(1)).classList.remove('hidden');
   currentSource = source;
-  ['resultCodes','resultFhir','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  ['resultCodes','resultWco','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById('btnUpload').classList.add('hidden');
   document.getElementById('btnTranslate').disabled = false;
   setStep(1);
-  if (source === 'cms') renderCmsPatients();
+  if (source === 'trade') renderTradeDeclarations();
 }
 
-function renderCmsPatients() {
-  const container = document.getElementById('cmsPatients');
+function renderTradeDeclarations() {
+  const container = document.getElementById('tradeDeclarations');
   container.innerHTML = '';
-  const src = DATA_SOURCES.cms;
-  src.patients.forEach((p, idx) => {
-    const selected = idx === 0 ? 'selected' : '';
+  const src = DATA_SOURCES.trade;
+  src.declarations.forEach((d, idx) => {
     container.innerHTML += \`
-      <div class="data-card" style="cursor:pointer;border:2px solid \${idx === 0 ? '#38bdf8' : 'transparent'}" onclick="selectPatient(\${idx}, this)">
+      <div class="data-card" style="cursor:pointer;border:2px solid \${idx === 0 ? '#22c55e' : 'transparent'}" onclick="selectDeclaration(\${idx}, this)">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <h3>\${p.name}</h3>
-          <span style="font-size:12px;color:#64748b">\${p.id}</span>
+          <h3>\${d.declNo}</h3>
+          <span style="font-size:12px;color:#64748b">\${d.id}</span>
         </div>
         <table style="margin-top:8px">
-          <tr><td style="color:#64748b;padding:2px 0">HKID</td><td style="padding:2px 8px">\${p.hkid}</td></tr>
-          <tr><td style="color:#64748b;padding:2px 0">DOB</td><td style="padding:2px 8px">\${p.dob}</td></tr>
-          <tr><td style="color:#64748b;padding:2px 0">Gender</td><td style="padding:2px 8px">\${p.gender === 'M' ? 'Male' : 'Female'}</td></tr>
-          <tr><td style="color:#64748b;padding:2px 0">Diagnoses</td><td style="padding:2px 8px">\${p.diagnoses.map(d => d.code).join(', ')}</td></tr>
-          <tr><td style="color:#64748b;padding:2px 0">Meds</td><td style="padding:2px 8px">\${p.medications.map(m => m.name).join(', ')}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Consignor</td><td style="padding:2px 8px">\${d.consignor}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Consignee</td><td style="padding:2px 8px">\${d.consignee}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Port of Loading</td><td style="padding:2px 8px">\${d.pol}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Commodities</td><td style="padding:2px 8px">\${d.commodities.map(c => c.desc).join(', ')}</td></tr>
+          <tr><td style="color:#64748b;padding:2px 0">Total Value</td><td style="padding:2px 8px">\${d.currency} \${d.totalValue.toLocaleString()}</td></tr>
         </table>
       </div>\`;
   });
 }
 
-let selectedPatientIdx = 0;
-function selectPatient(idx, el) {
-  selectedPatientIdx = idx;
+let selectedDeclIdx = 0;
+function selectDeclaration(idx, el) {
+  selectedDeclIdx = idx;
   el.parentElement.querySelectorAll('.data-card').forEach(c => c.style.borderColor = 'transparent');
-  el.style.borderColor = '#38bdf8';
+  el.style.borderColor = '#22c55e';
 }
 
 async function runTranslation() {
@@ -301,20 +321,20 @@ async function runTranslation() {
   btn.disabled = true;
   btn.innerHTML = '<span class="loader"></span> Translating...';
   document.getElementById('translationSpinner').classList.remove('hidden');
-  ['resultCodes','resultFhir','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  ['resultCodes','resultWco','resultUpload'].forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById('btnUpload').classList.add('hidden');
   setStep(3);
 
   try {
     const src = DATA_SOURCES[currentSource];
-    const patient = src.patients[currentSource === 'cms' ? selectedPatientIdx : 0];
+    const decl = src.declarations[currentSource === 'trade' ? selectedDeclIdx : 0];
 
-    if (!clinicCreated) {
+    if (!traderCreated) {
       await fetch(BASE + '/api/v1/ingest', {
         method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
-        body: JSON.stringify({clinic_id: CLINIC_ID, clinic_name:'Central Clinic', cms_type:'demo', cms_url:'http://localhost:8080', patient_ids:[patient.id]})
+        body: JSON.stringify({trader_id: TRADER_ID, trader_name:'GBA Trading Ltd', source_system:'demo', source_url:'http://localhost:8080', declaration_ids:[decl.id]})
       });
-      clinicCreated = true;
+      traderCreated = true;
     }
 
     setStep(4);
@@ -322,13 +342,25 @@ async function runTranslation() {
     const translateRes = await fetch(BASE + '/api/v1/translate', {
       method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
       body: JSON.stringify({
-        clinic_id: CLINIC_ID,
-        patient_id: patient.id,
-        patient_data: {name:{first:patient.name.split(' ')[0],last:patient.name.split(' ').slice(1).join(' ')||patient.name.split(' ')[0]},hkid:patient.hkid,dob:patient.dob,gender:patient.gender},
-        diagnoses: patient.diagnoses.map(d => ({code: d.code, description: d.desc})),
-        medications: patient.medications.map(m => ({name: m.name, dosage: m.dosage, frequency: m.freq})),
-        lab_results: patient.labs.map(l => ({test: l.test, value: l.value, unit: l.unit, reference: l.ref})),
-        clinical_notes: patient.notes
+        trader_id: TRADER_ID,
+        declaration_id: decl.id,
+        declaration_data: {
+          declaration_number: decl.declNo,
+          consignor_name: decl.consignor,
+          consignee_name: decl.consignee,
+          port_of_loading: decl.pol,
+          port_of_discharge: decl.pod,
+          incoterms: decl.incoterms,
+          container_number: decl.container,
+          gross_weight: decl.grossWeight,
+          net_weight: decl.netWeight,
+          number_of_packages: decl.packages,
+          total_declared_value: decl.totalValue,
+          declared_currency: decl.currency
+        },
+        commodities: decl.commodities.map(c => ({description: c.desc, hs_code_hint: c.hs_hint})),
+        goods_items: decl.goodsItems.map(g => ({description: g.desc, quantity: g.qty, unit: g.unit, declared_value: g.val, weight: g.wgt, country_of_origin: g.origin})),
+        commercial_notes: decl.notes
       })
     });
 
@@ -339,16 +371,16 @@ async function runTranslation() {
 
     const translateData = await translateRes.json();
     renderTranslationResults(translateData);
-    renderFhirBundle(translateData.fhir_bundle);
+    renderWcoDeclaration(translateData.wco_declaration);
 
     document.getElementById('resultCodes').classList.remove('hidden');
-    document.getElementById('resultFhir').classList.remove('hidden');
+    document.getElementById('resultWco').classList.remove('hidden');
 
     const avgConf = translateData.translations.length > 0
       ? (translateData.translations.reduce((s,t) => s + t.confidence, 0) / translateData.translations.length * 100).toFixed(1)
       : 'N/A';
     document.getElementById('confidenceBadge').textContent = avgConf + '% avg';
-    document.getElementById('fhirCount').textContent = '· ' + (translateData.fhir_bundle?.entry?.length || 0) + ' resources';
+    document.getElementById('wcoCount').textContent = '· ' + (translateData.wco_declaration?.declaration?.GoodsShipment?.GovernmentAgencyGoodsItem?.length || 0) + ' goods items';
 
     setStep(5);
     document.getElementById('btnUpload').classList.remove('hidden');
@@ -358,7 +390,7 @@ async function runTranslation() {
     console.error(err);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🔄 Translate via DeepSeek';
+    btn.innerHTML = '🔄 Translate to WCO JSON';
     document.getElementById('translationSpinner').classList.add('hidden');
   }
 }
@@ -382,36 +414,38 @@ function renderTranslationResults(data) {
   });
 }
 
-function renderFhirBundle(bundle) {
-  const container = document.getElementById('fhirTree');
+function renderWcoDeclaration(wco) {
+  const container = document.getElementById('wcoTree');
   container.innerHTML = '';
-  if (!bundle || !bundle.entry) { container.textContent = 'No FHIR bundle data'; return; }
-  container.innerHTML += '<div><span class="key">resourceType</span>: <span class="string">"' + bundle.resourceType + '"</span></div>';
-  container.innerHTML += '<div><span class="key">type</span>: <span class="string">"' + bundle.type + '"</span></div>';
-  container.innerHTML += '<div><span class="key">entry</span>: <span class="number">' + bundle.entry.length + '</span> resources</div>';
-  bundle.entry.forEach((e, i) => {
-    const r = e.resource || {};
+  if (!wco || !wco.declaration) { container.textContent = 'No WCO declaration data'; return; }
+  container.innerHTML += '<div><span class="key">resourceType</span>: <span class="string">"' + wco.resourceType + '"</span></div>';
+  container.innerHTML += '<div><span class="key">specification</span>: <span class="string">"' + wco.specification + '"</span></div>';
+  container.innerHTML += '<div><span class="key">declaration_id</span>: <span class="string">"' + wco.declaration_id + '"</span></div>';
+  const goodsItems = wco.declaration?.GoodsShipment?.GovernmentAgencyGoodsItem || [];
+  container.innerHTML += '<div><span class="key">GovernmentAgencyGoodsItem</span>: <span class="number">' + goodsItems.length + '</span> items</div>';
+  goodsItems.forEach((item, i) => {
+    const com = item.Commodity || {};
+    const cls = (com.Classification || [])[0] || {};
+    const meas = item.GoodsMeasure || {};
     container.innerHTML += \`
       <div style="margin:8px 0 4px 16px;padding:8px;background:#1e293b;border-radius:6px">
-        <div class="collapsible open" onclick="toggleFhirEntry(\${i})">\${r.resourceType} #\${i+1}</div>
-        <div id="fhirEntry\${i}" class="fhir-entry">\${renderFhirResource(r)}</div>
+        <div class="collapsible open" onclick="toggleWcoEntry(\${i})">Item #\${item.SequenceNumeric || (i+1)} — HS \${cls.ID || 'N/A'}</div>
+        <div id="wcoEntry\${i}" class="wco-entry">
+          <div style="padding:4px 0 0 16px">
+            <div><span class="key">HS Code</span>: <span class="string">"\${cls.ID || ''}"</span></div>
+            <div><span class="key">Description</span>: <span class="string">"\${com.Description || ''}"</span></div>
+            <div><span class="key">Value</span>: <span class="number">\${meas.CustomsValueAmount?.Value || 0}</span></div>
+            <div><span class="key">Net Weight</span>: <span class="number">\${meas.NetNetWeightMeasure?.Value || 0}</span> \${meas.NetNetWeightMeasure?.UnitCode || 'KGM'}</div>
+            <div><span class="key">Qty</span>: <span class="number">\${meas.QuantityQuantity?.Value || 0}</span></div>
+            <div><span class="key">Origin</span>: <span class="string">"\${(item.TradeCountry || [])[0]?.ID || ''}"</span></div>
+          </div>
+        </div>
       </div>\`;
   });
 }
 
-function renderFhirResource(r) {
-  let html = '<div style="padding:4px 0 0 16px">';
-  for (const [key, val] of Object.entries(r)) {
-    if (typeof val === 'string') html += '<div><span class="key">' + key + '</span>: <span class="string">"' + val + '"</span></div>';
-    else if (typeof val === 'number') html += '<div><span class="key">' + key + '</span>: <span class="number">' + val + '</span></div>';
-    else if (Array.isArray(val)) html += '<div><span class="key">' + key + '</span>: [' + val.length + ' items]</div>';
-    else if (typeof val === 'object' && val) html += '<div><span class="key">' + key + '</span>: {...}</div>';
-  }
-  return html + '</div>';
-}
-
-function toggleFhirEntry(idx) {
-  const el = document.getElementById('fhirEntry' + idx);
+function toggleWcoEntry(idx) {
+  const el = document.getElementById('wcoEntry' + idx);
   const header = el.previousElementSibling;
   if (el.style.display === 'none') { el.style.display = 'block'; header.classList.add('open'); }
   else { el.style.display = 'none'; header.classList.remove('open'); }
@@ -420,40 +454,51 @@ function toggleFhirEntry(idx) {
 async function runUpload() {
   const btn = document.getElementById('btnUpload');
   btn.disabled = true;
-  btn.innerHTML = '<span class="loader"></span> Uploading...';
+  btn.innerHTML = '<span class="loader"></span> Submitting...';
 
   try {
     const src = DATA_SOURCES[currentSource];
-    const patient = src.patients[currentSource === 'cms' ? selectedPatientIdx : 0];
+    const decl = src.declarations[currentSource === 'trade' ? selectedDeclIdx : 0];
 
     const translateRes = await fetch(BASE + '/api/v1/translate', {
       method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
       body: JSON.stringify({
-        clinic_id: CLINIC_ID,
-        patient_id: patient.id,
-        patient_data: {name:{first:patient.name.split(' ')[0],last:patient.name.split(' ').slice(1).join(' ')||patient.name.split(' ')[0]},hkid:patient.hkid,dob:patient.dob,gender:patient.gender},
-        diagnoses: patient.diagnoses.map(d => ({code: d.code, description: d.desc})),
-        medications: patient.medications.map(m => ({name: m.name, dosage: m.dosage, frequency: m.freq})),
-        lab_results: patient.labs.map(l => ({test: l.test, value: l.value, unit: l.unit, reference: l.ref})),
-        clinical_notes: patient.notes
+        trader_id: TRADER_ID,
+        declaration_id: decl.id,
+        declaration_data: {
+          declaration_number: decl.declNo,
+          consignor_name: decl.consignor,
+          consignee_name: decl.consignee,
+          port_of_loading: decl.pol,
+          port_of_discharge: decl.pod,
+          incoterms: decl.incoterms,
+          container_number: decl.container,
+          gross_weight: decl.grossWeight,
+          net_weight: decl.netWeight,
+          number_of_packages: decl.packages,
+          total_declared_value: decl.totalValue,
+          declared_currency: decl.currency
+        },
+        commodities: decl.commodities.map(c => ({description: c.desc, hs_code_hint: c.hs_hint})),
+        goods_items: decl.goodsItems.map(g => ({description: g.desc, quantity: g.qty, unit: g.unit, declared_value: g.val, weight: g.wgt, country_of_origin: g.origin})),
+        commercial_notes: decl.notes
       })
     });
     const translateData = await translateRes.json();
-    const fhirBundle = translateData.fhir_bundle;
+    const wcoDecl = translateData.wco_declaration;
 
     const uploadRes = await fetch(BASE + '/api/v1/upload', {
       method: 'POST', headers: {'X-API-Key': API_KEY, 'Content-Type': 'application/json'},
-      body: JSON.stringify({clinic_id: CLINIC_ID, patient_id: patient.id, fhir_bundle: fhirBundle, patient_consent: true})
+      body: JSON.stringify({trader_id: TRADER_ID, declaration_id: decl.id, wco_declaration: wcoDecl, trader_consent: true})
     });
     const uploadData = await uploadRes.json();
-    document.getElementById('ehealthRef').textContent = uploadData.ehealth_reference;
+    document.getElementById('tswRef').textContent = uploadData.tsw_reference;
     document.getElementById('resultUpload').classList.remove('hidden');
 
-    const certRes = await fetch(BASE + '/api/v1/certification/' + CLINIC_ID, {headers: {'X-API-Key': API_KEY}});
+    const certRes = await fetch(BASE + '/api/v1/certification/' + TRADER_ID, {headers: {'X-API-Key': API_KEY}});
     const certData = await certRes.json();
     document.getElementById('uploadStatus').textContent = certData.current_level.toUpperCase() + ' certified';
-    const badgeUrl = '/badges/' + certData.current_level + '.svg';
-    document.getElementById('certBadge').src = badgeUrl;
+    document.getElementById('certBadge').src = '/badges/' + certData.current_level + '.svg';
     document.getElementById('badgeArea').classList.remove('hidden');
 
   } catch(err) {
@@ -461,7 +506,7 @@ async function runUpload() {
     console.error(err);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '📤 Upload to eHealth+';
+    btn.innerHTML = '📤 Submit to TSW';
   }
 }
 
@@ -476,7 +521,7 @@ function setStep(n) {
   }
 }
 
-renderCmsPatients();
+renderTradeDeclarations();
 </script>
 </body>
 </html>

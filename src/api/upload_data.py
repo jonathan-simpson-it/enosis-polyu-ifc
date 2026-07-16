@@ -1,8 +1,9 @@
-"""Upload-data endpoints — accept file uploads and direct data submissions from doctors."""
+"""Upload-data endpoints — accept trade declaration file uploads and direct submissions."""
 
 from __future__ import annotations
 
 import io
+import json
 import uuid
 from typing import Any
 
@@ -10,19 +11,18 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 from src.database import get_db
-from src.models import Clinic, Patient
+from src.models import Trader, Declaration
 from src.schemas import (
     UploadDataRequest,
     UploadDataResponse,
     UploadDataStatusResponse,
-    PatientData,
+    DeclarationData,
 )
 from src.services.ocr import OCRService
 from src.utils.logger import logger
 
 router = APIRouter(prefix="/api/v1", tags=["Upload Data"])
 
-# In-memory job store for v0 (no Redis)
 _jobs: dict[str, dict[str, Any]] = {}
 
 
@@ -30,11 +30,11 @@ _jobs: dict[str, dict[str, Any]] = {}
 async def upload_data(
     db: Session = Depends(get_db),
     file: UploadFile | None = File(None, description="Image file (PNG/JPG) for OCR, or JSON/CSV data file"),
-    clinic_id: str | None = Form(None),
-    clinic_name: str = Form("Direct Upload"),
+    trader_id: str | None = Form(None),
+    trader_name: str = Form("Direct Upload"),
     source_description: str = Form(""),
 ):
-    """Accept file uploads or direct data from doctors.
+    """Accept trade declaration file uploads.
 
     Accepts either:
     - **Multipart file upload** (image → OCR, or JSON/CSV → parsed data)
@@ -42,13 +42,12 @@ async def upload_data(
 
     Returns a job_id for status polling.
     """
-    resolved_clinic_id = clinic_id or str(uuid.uuid4())
+    resolved_trader_id = trader_id or str(uuid.uuid4())
 
-    # Ensure clinic exists
-    clinic = db.query(Clinic).filter(Clinic.id == resolved_clinic_id).first()
-    if not clinic:
-        clinic = Clinic(id=resolved_clinic_id, name=clinic_name, cms_type="direct_upload")
-        db.add(clinic)
+    trader = db.query(Trader).filter(Trader.id == resolved_trader_id).first()
+    if not trader:
+        trader = Trader(id=resolved_trader_id, name=trader_name, source_system="direct_upload")
+        db.add(trader)
         db.commit()
 
     job_id = str(uuid.uuid4())
@@ -57,13 +56,13 @@ async def upload_data(
     _jobs[job_id] = {
         "job_id": job_id,
         "status": "processing",
-        "clinic_id": resolved_clinic_id,
+        "trader_id": resolved_trader_id,
         "source_type": source_type,
         "records_extracted": 0,
     }
 
     try:
-        patients_data: list[dict[str, Any]] = []
+        declarations_data: list[dict[str, Any]] = []
 
         if file:
             content_type = file.content_type or ""
@@ -74,58 +73,58 @@ async def upload_data(
             if content_type.startswith("image/"):
                 try:
                     text = OCRService().extract_text(raw_bytes)
-                    structured = OCRService().extract_clinical_notes(raw_bytes)
-                    medications = structured.get("structured", {}).get("medications", [])
+                    structured = OCRService().extract_manifest_data(raw_bytes)
+                    commodities = structured.get("structured", {}).get("commodities", [])
                 except Exception as ocr_err:
                     logger.warning(f"OCR failed for {filename}: {ocr_err}")
                     text = f"[OCR unavailable: {ocr_err}]"
-                    medications = []
+                    commodities = []
 
-                patient_id = str(uuid.uuid4())[:8]
+                declaration_id = str(uuid.uuid4())[:8]
                 record: dict[str, Any] = {
-                    "patient_id": patient_id,
-                    "name": "",
-                    "hkid": "",
-                    "dob": "",
-                    "gender": "",
-                    "diagnoses": [],
-                    "medications": medications,
-                    "lab_results": [],
-                    "clinical_notes": text,
+                    "declaration_id": declaration_id,
+                    "declaration_number": structured.get("structured", {}).get("invoice_number", ""),
+                    "consignor_name": "",
+                    "consignee_name": "",
+                    "commodities": commodities,
+                    "goods_items": [],
+                    "measures": [],
+                    "commercial_notes": text,
+                    "container_number": structured.get("structured", {}).get("container_number", ""),
+                    "gross_weight": structured.get("structured", {}).get("gross_weight", 0),
+                    "country_of_origin": structured.get("structured", {}).get("country_of_origin", ""),
                     "source_file": filename,
                     "source_type": "ocr_image",
                 }
-                patients_data.append(record)
+                declarations_data.append(record)
 
             elif content_type.endswith("json") or filename.endswith(".json"):
-                import json
                 raw_json = json.loads(raw_bytes.decode("utf-8"))
 
                 if isinstance(raw_json, list):
                     for item in raw_json:
-                        patients_data.append(_normalize_record(item, filename))
+                        declarations_data.append(_normalize_declaration_record(item, filename))
                 else:
-                    patients_data.append(_normalize_record(raw_json, filename))
+                    declarations_data.append(_normalize_declaration_record(raw_json, filename))
 
             elif content_type.endswith("csv") or filename.endswith(".csv"):
                 import csv
                 text = raw_bytes.decode("utf-8-sig")
                 reader = csv.DictReader(io.StringIO(text))
                 for row in reader:
-                    patients_data.append(_normalize_csv_row(row, filename))
+                    declarations_data.append(_normalize_csv_row(row, filename))
             else:
                 text = raw_bytes.decode("utf-8", errors="replace")
-                patient_id = str(uuid.uuid4())[:8]
-                patients_data.append({
-                    "patient_id": patient_id,
-                    "name": "",
-                    "hkid": "",
-                    "dob": "",
-                    "gender": "",
-                    "diagnoses": [],
-                    "medications": [],
-                    "lab_results": [],
-                    "clinical_notes": text,
+                declaration_id = str(uuid.uuid4())[:8]
+                declarations_data.append({
+                    "declaration_id": declaration_id,
+                    "declaration_number": "",
+                    "consignor_name": "",
+                    "consignee_name": "",
+                    "commodities": [],
+                    "goods_items": [],
+                    "measures": [],
+                    "commercial_notes": text,
                     "source_file": filename,
                     "source_type": "text_file",
                 })
@@ -133,12 +132,12 @@ async def upload_data(
         else:
             raise HTTPException(status_code=400, detail="No file provided. For direct JSON submission, use POST /api/v1/upload-data/direct instead.")
 
-        saved_count = _save_patients(db, resolved_clinic_id, patients_data)
+        saved_count = _save_declarations(db, resolved_trader_id, declarations_data)
 
         _jobs[job_id].update({
             "status": "completed",
             "records_extracted": saved_count,
-            "data": patients_data,
+            "data": declarations_data,
         })
 
         return UploadDataResponse(
@@ -159,41 +158,51 @@ async def upload_data(
 
 @router.post("/upload-data/direct", response_model=UploadDataResponse)
 async def upload_data_direct(request: UploadDataRequest, db: Session = Depends(get_db)):
-    """Accept direct clinical data submission as JSON body (no file upload).
+    """Accept direct trade declaration data submission as JSON body (no file upload)."""
+    resolved_trader_id = request.trader_id or str(uuid.uuid4())
 
-    Doctors or frontends can POST structured patient data directly.
-    """
-    resolved_clinic_id = request.clinic_id or str(uuid.uuid4())
-
-    clinic = db.query(Clinic).filter(Clinic.id == resolved_clinic_id).first()
-    if not clinic:
-        clinic = Clinic(id=resolved_clinic_id, name=request.clinic_name, cms_type="direct_submission")
-        db.add(clinic)
+    trader = db.query(Trader).filter(Trader.id == resolved_trader_id).first()
+    if not trader:
+        trader = Trader(id=resolved_trader_id, name=request.trader_name, source_system="direct_submission")
+        db.add(trader)
         db.commit()
 
     job_id = str(uuid.uuid4())
 
-    patient_data = request.patient_data
+    decl_data = request.declaration_data
     record = {
-        "patient_id": patient_data.patient_id,
-        "name": patient_data.name,
-        "hkid": patient_data.hkid,
-        "dob": patient_data.dob,
-        "gender": patient_data.gender,
-        "diagnoses": patient_data.diagnoses,
-        "medications": patient_data.medications,
-        "lab_results": patient_data.lab_results,
-        "clinical_notes": patient_data.clinical_notes,
+        "declaration_id": decl_data.declaration_id,
+        "declaration_number": decl_data.declaration_number,
+        "consignor_name": decl_data.consignor_name,
+        "consignor_address": decl_data.consignor_address,
+        "consignee_name": decl_data.consignee_name,
+        "consignee_address": decl_data.consignee_address,
+        "port_of_loading": decl_data.port_of_loading,
+        "port_of_discharge": decl_data.port_of_discharge,
+        "incoterms": decl_data.incoterms,
+        "total_declared_value": decl_data.total_declared_value,
+        "gross_weight": decl_data.gross_weight,
+        "net_weight": decl_data.net_weight,
+        "number_of_packages": decl_data.number_of_packages,
+        "container_number": decl_data.container_number,
+        "country_of_origin": decl_data.country_of_origin,
+        "country_of_destination": decl_data.country_of_destination,
+        "transport_mode": decl_data.transport_mode,
+        "declaration_date": decl_data.declaration_date,
+        "commodities": decl_data.commodities,
+        "goods_items": decl_data.goods_items,
+        "measures": decl_data.measures,
+        "commercial_notes": decl_data.commercial_notes,
         "source_type": "direct_submission",
         "source_description": request.source_description,
     }
 
-    saved_count = _save_patients(db, resolved_clinic_id, [record])
+    saved_count = _save_declarations(db, resolved_trader_id, [record])
 
     _jobs[job_id] = {
         "job_id": job_id,
         "status": "completed",
-        "clinic_id": resolved_clinic_id,
+        "trader_id": resolved_trader_id,
         "source_type": "direct_submission",
         "records_extracted": saved_count,
         "data": [record],
@@ -224,73 +233,96 @@ async def get_upload_data_status(job_id: str):
     )
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
-
-def _normalize_record(item: dict, filename: str) -> dict[str, Any]:
-    """Normalize a JSON dict into a consistent patient record."""
+def _normalize_declaration_record(item: dict, filename: str) -> dict[str, Any]:
     return {
-        "patient_id": item.get("patient_id", item.get("id", str(uuid.uuid4())[:8])),
-        "name": item.get("name", ""),
-        "hkid": item.get("hkid", item.get("hk_id", item.get("id_number", ""))),
-        "dob": item.get("dob", item.get("date_of_birth", "")),
-        "gender": item.get("gender", ""),
-        "diagnoses": item.get("diagnoses", []),
-        "medications": item.get("medications", []),
-        "lab_results": item.get("lab_results", item.get("lab_results", [])),
-        "clinical_notes": item.get("clinical_notes", item.get("notes", "")),
+        "declaration_id": item.get("declaration_id", item.get("id", str(uuid.uuid4())[:8])),
+        "declaration_number": item.get("declaration_number", item.get("decl_no", "")),
+        "consignor_name": item.get("consignor_name", item.get("consignor", "")),
+        "consignee_name": item.get("consignee_name", item.get("consignee", "")),
+        "port_of_loading": item.get("port_of_loading", ""),
+        "port_of_discharge": item.get("port_of_discharge", ""),
+        "incoterms": item.get("incoterms", ""),
+        "total_declared_value": item.get("total_declared_value", 0),
+        "gross_weight": item.get("gross_weight", item.get("gross_weight", 0)),
+        "net_weight": item.get("net_weight", 0),
+        "number_of_packages": item.get("number_of_packages", 1),
+        "container_number": item.get("container_number", ""),
+        "country_of_origin": item.get("country_of_origin", ""),
+        "country_of_destination": item.get("country_of_destination", ""),
+        "transport_mode": item.get("transport_mode", ""),
+        "declaration_date": item.get("declaration_date", ""),
+        "commodities": item.get("commodities", []),
+        "goods_items": item.get("goods_items", item.get("items", [])),
+        "measures": item.get("measures", []),
+        "commercial_notes": item.get("commercial_notes", item.get("notes", "")),
         "source_file": filename,
         "source_type": "json_file",
     }
 
 
 def _normalize_csv_row(row: dict, filename: str) -> dict[str, Any]:
-    """Normalize a CSV row into a consistent patient record."""
     def parse_list_field(value: str) -> list:
         if not value:
             return []
         try:
-            import json
             return json.loads(value)
         except (json.JSONDecodeError, TypeError):
             return [{"value": v.strip()} for v in value.split(";") if v.strip()]
 
     return {
-        "patient_id": row.get("patient_id", row.get("id", str(uuid.uuid4())[:8])),
-        "name": f"{row.get('first_name', '')} {row.get('last_name', '')}".strip(),
-        "hkid": row.get("hkid", row.get("hk_id", "")),
-        "dob": row.get("dob", row.get("date_of_birth", "")),
-        "gender": row.get("gender", ""),
-        "diagnoses": parse_list_field(row.get("diagnoses", "")),
-        "medications": parse_list_field(row.get("medications", "")),
-        "lab_results": parse_list_field(row.get("lab_results", "")),
-        "clinical_notes": row.get("clinical_notes", row.get("notes", "")),
+        "declaration_id": row.get("declaration_id", row.get("id", str(uuid.uuid4())[:8])),
+        "declaration_number": row.get("declaration_number", row.get("decl_no", "")),
+        "consignor_name": row.get("consignor_name", row.get("consignor", "")),
+        "consignee_name": row.get("consignee_name", row.get("consignee", "")),
+        "port_of_loading": row.get("port_of_loading", ""),
+        "port_of_discharge": row.get("port_of_discharge", ""),
+        "incoterms": row.get("incoterms", ""),
+        "total_declared_value": float(row.get("total_declared_value", 0)),
+        "gross_weight": float(row.get("gross_weight", 0)),
+        "net_weight": float(row.get("net_weight", 0)),
+        "number_of_packages": int(row.get("number_of_packages", 1)),
+        "container_number": row.get("container_number", ""),
+        "country_of_origin": row.get("country_of_origin", ""),
+        "country_of_destination": row.get("country_of_destination", ""),
+        "transport_mode": row.get("transport_mode", ""),
+        "declaration_date": row.get("declaration_date", ""),
+        "commodities": parse_list_field(row.get("commodities", "")),
+        "goods_items": parse_list_field(row.get("goods_items", "")),
+        "measures": parse_list_field(row.get("measures", "")),
+        "commercial_notes": row.get("commercial_notes", row.get("notes", "")),
         "source_file": filename,
         "source_type": "csv_file",
     }
 
 
-def _save_patients(db: Session, clinic_id: str, patients_data: list[dict[str, Any]]) -> int:
-    """Save extracted patient records to the database. Returns count saved."""
+def _save_declarations(db: Session, trader_id: str, declarations_data: list[dict[str, Any]]) -> int:
     saved = 0
-    for pdata in patients_data:
-        if not pdata or not pdata.get("hkid"):
+    for ddata in declarations_data:
+        if not ddata or not ddata.get("declaration_number"):
             continue
 
-        full_name = pdata.get("name", "")
-        parts = full_name.rsplit(" ", 1) if " " in full_name else [full_name, ""]
-        last_name = parts[1] if len(parts) > 1 else parts[0]
-        first_name = parts[0] if len(parts) > 1 else ""
-
-        patient = Patient(
-            clinic_id=clinic_id,
-            hkid=pdata.get("hkid", ""),
-            first_name=first_name,
-            last_name=last_name,
-            dob=pdata.get("dob", ""),
-            gender=pdata.get("gender", ""),
+        declaration = Declaration(
+            trader_id=trader_id,
+            declaration_number=ddata.get("declaration_number", ""),
+            consignor_name=ddata.get("consignor_name", ""),
+            consignor_address=ddata.get("consignor_address", ""),
+            consignee_name=ddata.get("consignee_name", ""),
+            consignee_address=ddata.get("consignee_address", ""),
+            port_of_loading=ddata.get("port_of_loading", ""),
+            port_of_discharge=ddata.get("port_of_discharge", ""),
+            incoterms=ddata.get("incoterms", ""),
+            total_declared_value=ddata.get("total_declared_value", 0.0),
+            gross_weight=ddata.get("gross_weight", 0.0),
+            net_weight=ddata.get("net_weight", 0.0),
+            number_of_packages=ddata.get("number_of_packages", 1),
+            container_number=ddata.get("container_number", ""),
+            country_of_origin=ddata.get("country_of_origin", ""),
+            country_of_destination=ddata.get("country_of_destination", ""),
+            transport_mode=ddata.get("transport_mode", ""),
+            declaration_date=ddata.get("declaration_date", ""),
+            commercial_notes=ddata.get("commercial_notes", ""),
         )
-        db.add(patient)
+        db.add(declaration)
         saved += 1
 
     db.commit()

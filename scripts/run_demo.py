@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Enosis v0 — End-to-end demo script for PolyU IFC 2026.
+Enosis v0 — End-to-end demo script for PolyU IFC 2026 (Trading Domain).
 
 Demonstrates the full data flow:
   1. Health check
-  2. Ingest patient data from mock CMS
-  3. Translate to ICD-10 / SNOMED-CT / FHIR R5
-  4. Upload to mock eHealth+
-  5. View Smart Clinic Certification
+  2. Ingest trade declaration data from mock Trade Declaration System
+  3. Translate to HS Codes / WCO JSON
+  4. Submit to mock HK TSW Phase 3
+  5. View Smart Trader Certification
 """
 
 import sys
@@ -23,30 +23,27 @@ BASE_URL = os.environ.get("ENOSIS_URL", "http://localhost:8000")
 API_KEY = os.environ.get("ENOSIS_API_KEY", "dev-api-key-123456")
 HEADERS = {"X-API-Key": API_KEY, "Content-Type": "application/json"}
 
-CLINIC_ID = "c1010101-0000-4000-a000-000000000001"
+TRADER_ID = "t1010101-0000-4000-a000-000000000001"
 
 
 def section(title: str):
-    """Print a section header."""
     print(f"\n{'═' * 60}")
     print(f"  {title}")
     print(f"{'═' * 60}")
 
 
 def step(n: int, title: str):
-    """Print a step header."""
     print(f"\n── Step {n}: {title} ──")
 
 
 def main():
     print()
     print("╔" + "═" * 58 + "╗")
-    print("║" + "   🏥  ENOSIS v0  —  Hackathon Demo".center(58) + "║")
+    print("║" + "   🚢  ENOSIS v0  —  Trade Domain Demo".center(58) + "║")
     print("║" + "   Universal Data Translation Layer".center(58) + "║")
-    print("║" + "   PolyU IFC 2026".center(58) + "║")
+    print("║" + "   HK TSW Phase 3 — PolyU IFC 2026".center(58) + "║")
     print("╚" + "═" * 58 + "╝")
 
-    # ── Step 1: Health Check ──
     step(1, "Health Check")
     try:
         resp = httpx.get(f"{BASE_URL}/health", timeout=10)
@@ -60,26 +57,24 @@ def main():
         print(f"  → Is the server running? Try: docker-compose up --build")
         return
 
-    # ── Step 2: Ingest ──
-    step(2, "Ingest Patient Data from Mock CMS")
+    step(2, "Ingest Declaration Data from Mock Trade System")
     ingest_payload = {
-        "clinic_id": CLINIC_ID,
-        "clinic_name": "Central Clinic",
-        "cms_type": "mock",
-        "cms_url": "http://localhost:8080/patient.html",
-        "patient_ids": ["P001", "P002", "P003"],
+        "trader_id": TRADER_ID,
+        "trader_name": "GBA Trading Ltd",
+        "source_system": "mock_trade",
+        "source_url": "http://localhost:8080/declaration.html",
+        "declaration_ids": ["D001", "D002", "D003"],
     }
-    print(f"  Scraping {len(ingest_payload['patient_ids'])} patients from mock CMS...")
+    print(f"  Scraping {len(ingest_payload['declaration_ids'])} declarations from mock trade system...")
 
     try:
         resp = httpx.post(f"{BASE_URL}/api/v1/ingest", json=ingest_payload, headers=HEADERS, timeout=30)
         resp.raise_for_status()
         ingest_result = resp.json()
         job_id = ingest_result["job_id"]
-        print(f"  ✓ Job started:       {job_id}")
-        print(f"  ✓ Patients scraped:  {ingest_result['patients_scraped']}")
+        print(f"  ✓ Job started:          {job_id}")
+        print(f"  ✓ Declarations scraped: {ingest_result['declarations_scraped']}")
 
-        # Poll for completion
         print("  Waiting for completion...", end=" ", flush=True)
         time.sleep(2)
 
@@ -87,36 +82,40 @@ def main():
         resp.raise_for_status()
         status = resp.json()
         print(f"{status['status'].upper()}")
-        print(f"  ✓ Patients found:    {status['patients_found']}")
-        print(f"  ✓ Patients extracted:{status['patients_extracted']}")
+        print(f"  ✓ Declarations found:    {status['declarations_found']}")
+        print(f"  ✓ Declarations extracted: {status['declarations_extracted']}")
     except Exception as e:
         print(f"  ✗ Ingest failed: {e}")
-        print(f"  → Ensure mock CMS is running at http://localhost:8080")
+        print(f"  → Ensure mock trade system is running at http://localhost:8080")
         return
 
-    # ── Step 3: Translate ──
-    step(3, "Translate Clinical Data to FHIR R5")
+    step(3, "Translate Trade Data to HS Codes and WCO JSON")
     translate_payload = {
-        "clinic_id": CLINIC_ID,
-        "patient_id": "P001",
-        "patient_data": {
-            "name": {"first": "Tai Man", "last": "Chan"},
-            "hkid": "A1234567",
-            "dob": "1955-01-01",
-            "gender": "M",
+        "trader_id": TRADER_ID,
+        "declaration_id": "D001",
+        "declaration_data": {
+            "declaration_number": "DEC-2026-001",
+            "consignor_name": "GBA Trading Ltd",
+            "consignee_name": "HK Electronics Ltd",
+            "port_of_loading": "Yantian, Shenzhen",
+            "port_of_discharge": "Hong Kong",
+            "incoterms": "CIF",
+            "container_number": "MSCU4820347",
+            "gross_weight": 910.0,
+            "net_weight": 850.0,
+            "number_of_packages": 12,
+            "total_declared_value": 630000.0,
+            "declared_currency": "HKD",
         },
-        "diagnoses": [
-            {"code": "E11.9", "description": "Type 2 diabetes mellitus without complications"},
-            {"code": "I10", "description": "Essential (primary) hypertension"},
+        "commodities": [
+            {"description": "Integrated circuits, electronic", "hs_code_hint": "8542"},
+            {"description": "Printed circuit boards", "hs_code_hint": "8534"},
         ],
-        "medications": [
-            {"name": "Metformin", "dosage": "500mg", "frequency": "Twice daily"},
-            {"name": "Lisinopril", "dosage": "10mg", "frequency": "Once daily"},
+        "goods_items": [
+            {"description": "IC chips 7400 series - 5000 pcs", "quantity": 5000, "unit": "PCE", "declared_value": 450000.0, "weight": 120.0, "country_of_origin": "CN"},
+            {"description": "PCB assemblies - 200 pcs", "quantity": 200, "unit": "PCE", "declared_value": 180000.0, "weight": 85.0, "country_of_origin": "CN"},
         ],
-        "lab_results": [
-            {"test": "HbA1c", "value": "7.2", "unit": "%", "reference": "< 7.0"},
-        ],
-        "clinical_notes": "Patient presents with fatigue and increased thirst. BP 140/90.",
+        "commercial_notes": "Importer: HK Electronics Ltd. Goods manufactured in Shenzhen. CIF Hong Kong via Yantian port.",
     }
 
     try:
@@ -124,88 +123,85 @@ def main():
         resp.raise_for_status()
         translate_result = resp.json()
 
-        n_resources = len(translate_result["fhir_bundle"].get("entry", []))
+        n_goods_items = len(translate_result.get("wco_declaration", {}).get("declaration", {}).get("GoodsShipment", {}).get("GovernmentAgencyGoodsItem", []))
         n_translations = len(translate_result.get("translations", []))
         confidences = [t["confidence"] for t in translate_result.get("translations", []) if t.get("confidence")]
         avg_conf = sum(confidences) / len(confidences) if confidences else 0
 
         print(f"  ✓ Job ID:            {translate_result['job_id']}")
-        print(f"  ✓ FHIR resources:    {n_resources}")
+        print(f"  ✓ WCO goods items:   {n_goods_items}")
         print(f"  ✓ Translations:      {n_translations}")
         print(f"  ✓ Avg confidence:    {avg_conf:.1%}")
 
-        fhir_bundle = translate_result["fhir_bundle"]
-        translations = translate_result["translations"]
+        wco_declaration = translate_result.get("wco_declaration", {})
+        translations = translate_result.get("translations", [])
     except Exception as e:
         print(f"  ✗ Translate failed: {e}")
         print(f"  → Check DEEPSEEK_API_KEY in .env")
-        # Continue with mock data so demo doesn't break
-        print("  → Falling back to mock FHIR bundle for demo...")
-        fhir_bundle = {
-            "resourceType": "Bundle",
-            "type": "transaction",
-            "entry": [
-                {"resource": {"resourceType": "Patient", "id": str(uuid.uuid4())}},
-                {"resource": {"resourceType": "Condition", "id": str(uuid.uuid4())}},
-            ],
+        print("  → Falling back to mock WCO declaration for demo...")
+        wco_declaration = {
+            "resourceType": "WCODeclaration",
+            "type": "customs_declaration",
+            "declaration_id": str(uuid.uuid4()),
+            "declaration": {
+                "Declaration": {"ID": "DEC-2026-001", "FunctionCode": "9"},
+                "GoodsShipment": {"GovernmentAgencyGoodsItem": []},
+            },
         }
         translations = []
 
-    # ── Step 4: Upload ──
-    step(4, "Upload to eHealth+ (Mock)")
+    step(4, "Submit to HK TSW Phase 3 (Mock)")
     upload_payload = {
-        "clinic_id": CLINIC_ID,
-        "patient_id": "P001",
-        "fhir_bundle": fhir_bundle,
-        "patient_consent": True,
+        "trader_id": TRADER_ID,
+        "declaration_id": "D001",
+        "wco_declaration": wco_declaration,
+        "trader_consent": True,
     }
 
     try:
         resp = httpx.post(f"{BASE_URL}/api/v1/upload", json=upload_payload, headers=HEADERS, timeout=10)
         resp.raise_for_status()
         upload_result = resp.json()
-        print(f"  ✓ Upload ID:         {upload_result['upload_id']}")
+        print(f"  ✓ Submission ID:     {upload_result['upload_id']}")
         print(f"  ✓ Status:            {upload_result['status']}")
-        print(f"  ✓ eHealth+ Ref:      {upload_result['ehealth_reference']}")
+        print(f"  ✓ TSW Reference:     {upload_result['tsw_reference']}")
         print(f"  ✓ Message:           {upload_result['message']}")
     except Exception as e:
         print(f"  ✗ Upload failed: {e}")
         return
 
-    # ── Step 5: Certification ──
-    step(5, "Smart Clinic Certification")
+    step(5, "Smart Trader Certification")
     try:
-        resp = httpx.get(f"{BASE_URL}/api/v1/certification/{CLINIC_ID}", headers=HEADERS, timeout=10)
+        resp = httpx.get(f"{BASE_URL}/api/v1/certification/{TRADER_ID}", headers=HEADERS, timeout=10)
         resp.raise_for_status()
         cert = resp.json()
 
         level_emoji = {"bronze": "🥉", "silver": "🥈", "gold": "🥇", "platinum": "💎", "diamond": "👑", "none": "⚪"}
         emoji = level_emoji.get(cert["current_level"], "🏅")
 
-        print(f"  ✓ Clinic:            {cert['clinic_name']}")
+        print(f"  ✓ Trader:            {cert['trader_name']}")
         print(f"  ✓ Level:             {emoji} {cert['current_level'].upper()} — {cert['level_name']}")
-        print(f"  ✓ Records uploaded:  {cert['records_uploaded']}")
+        print(f"  ✓ Declarations:      {cert['declarations_submitted']}")
         print(f"  ✓ Accuracy rate:     {cert['accuracy_rate']:.0%}")
         print(f"  ✓ Badge:             {cert['badge_url']}")
         if cert.get("next_level") and not cert["next_level"].get("achieved"):
             nl = cert["next_level"]
-            print(f"  ✓ Next level:        {nl['name']} ({nl['records_required']} records, {nl['accuracy_required']:.0%} accuracy)")
+            print(f"  ✓ Next level:        {nl['name']} ({nl['records_required']} declarations, {nl['accuracy_required']:.0%} accuracy)")
         print(f"  ✓ Progress:          {cert['progress']:.0%}")
     except Exception as e:
         print(f"  ✗ Certification check failed: {e}")
         return
 
-    # ── Summary ──
     section("DEMO COMPLETE ✓")
     print(f"""
-   ✅ Extracted patient data from mock clinic CMS
-   ✅ Translated to FHIR R5 ({len(fhir_bundle.get('entry', []))} resources)
-   ✅ Uploaded to mock eHealth+ (ref: {upload_result['ehealth_reference']})
-   ✅ Earned {cert['current_level'].upper()} Smart Clinic Certification
+   ✅ Extracted declaration data from mock trade system
+   ✅ Translated to HS Codes and WCO JSON ({n_goods_items if 'n_goods_items' in dir() else 0} goods items)
+   ✅ Submitted to mock TSW Phase 3 (ref: {upload_result['tsw_reference']})
+   ✅ Earned {cert['current_level'].upper()} Smart Trader Certification
 
    Next Steps:
    • API Docs:  {BASE_URL}/docs
-   • Mock CMS:  http://localhost:8080
+   • Mock Trade System:  http://localhost:8080
    • Badges:    {BASE_URL}/badges/gold.svg
 """)
 
