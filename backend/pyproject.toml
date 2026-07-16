@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "enosis-udie"
+version = "0.1.0"
+description = "Universal AI-Ready Data Ingestion Engine"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.alembic]
+script_location = "alembic"
+sqlalchemy.url = "postgresql://enosis:enosis@localhost:5432/enosis"
