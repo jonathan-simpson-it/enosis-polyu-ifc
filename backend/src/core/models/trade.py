@@ -12,7 +12,7 @@ from backend.src.core.database import Base
 
 
 def _utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class HSCode(Base):
@@ -54,6 +54,8 @@ class Declaration(Base):
     country_of_origin = Column(String(100))
     country_of_destination = Column(String(100))
     transport_mode = Column(String(50))
+    raw_text = Column(Text, nullable=True)
+    parsed_data = Column(JSONB, nullable=True)
     commercial_notes = Column(Text)
     created_at = Column(DateTime, default=_utcnow)
 

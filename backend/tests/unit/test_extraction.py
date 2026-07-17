@@ -46,13 +46,20 @@ def test_confidence_scoring():
         "dates": ["2026-07-15"],
         "countries": ["CN"],
         "commodity_descriptions": ["Integrated circuits"],
+        "commodities": [{"hs_code": "8542.31.00", "description": "Integrated circuits"}],
+        "labeled_fields": {
+            "consignor_name": "Shipper Co",
+            "consignee_name": "Receiver Ltd",
+            "port_of_loading": "Yantian",
+            "port_of_discharge": "Hong Kong",
+        },
     }
 
     scores = score_extraction_confidence(entities, "Test text with enough content " * 10)
     assert scores["hs_codes"] > 0
-    assert scores["overall"] >= 0.80
+    assert scores["overall"] >= 0.75
 
-    empty_scores = score_extraction_confidence({"hs_codes": [], "container_numbers": [], "weights": [], "dates": []}, "short")
+    empty_scores = score_extraction_confidence({"hs_codes": [], "container_numbers": [], "weights": [], "dates": [], "commodities": [], "labeled_fields": {}}, "short")
     assert empty_scores["overall"] < 0.80
 
     assert needs_human_review(0.70, threshold=0.85) is True

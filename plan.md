@@ -9,19 +9,19 @@
 ### Core Platform — All Complete
 - [x] FastAPI + PostgreSQL + pgvector async backend
 - [x] Multi-tenant auth (JWT + API keys, org accounts, user roles)
-- [x] Document processing pipeline (PDF, Excel, OCR, CSV, JSON)
-- [x] PII redaction and file validation
-- [x] Regex-based NER (HS codes, containers, weights, values, dates)
-- [x] pgvector similarity search for HS code matching
-- [x] Deterministic confidence scoring
-- [x] DeepSeek API fallback for WCO JSON generation
+- [x] Document processing pipeline (PDF, Excel, OCR, CSV, JSON) - **fixed pipeline end-to-end** (was broken: text not persisted, extraction ran on empty string, no commodity rows created)
+- [x] PII redaction and file validation - **fixed: now wired into upload path; passport regex tightened to avoid container number collision**
+- [x] Regex-based NER (HS codes, containers, weights, values, dates) - **extended: labeled-field parsing (consignor/consignee/ports/incoterms), numbered commodity-block parsing, full-country name mapping, DD-MMM-YYYY dates, CSV structured-data support**
+- [x] pgvector similarity search for HS code matching (unwired; embeddings require sentence-transformers install)
+- [x] Deterministic confidence scoring - **updated: now accounts for commodity count, header field coverage**
+- [x] DeepSeek API fallback for WCO JSON generation (unwired; translator.py exists but no endpoint calls it)
 - [x] WCO Data Model v3.11 JSON builder
 - [x] TSW Phase 3 export format
 - [x] Schema validation (HS code format, business rules)
-- [x] Export API (WCO JSON, TSW JSON)
-- [x] Mock TSW submission
-- [x] Next.js + TypeScript dashboard (6 pages: dashboard, upload, documents, review, exports, settings)
-- [x] GitHub Actions CI/CD (backend + frontend)
+- [x] Export API (WCO JSON, TSW JSON, WCO XML) - **fixed: WCO XML now produces real XML (was JSON string masquerading as XML); TSW JSON export fixed (schema registry import)**
+- [x] Mock TSW submission - **fixed: now lenient with missing header fields; in-memory mock returns reference**
+- [x] Next.js + TypeScript dashboard (6 pages: dashboard, upload, documents, review, exports, settings) - **all rewired to real API; review page now has full HITL editing (editable header fields + commodities table)**
+- [ ] GitHub Actions CI/CD (not yet created; no .github/ directory)
 - [x] Docker Compose (3 services: PostgreSQL + API + Frontend)
 - [x] 28 HS codes in knowledge base with embedding support
 

@@ -1,0 +1,52 @@
+INVOICE #: INV-2026-0715-0042
+DATE: 15-JUL-2026
+
+CONSIGNOR: Shenzhen Electronics Trading Co., Ltd.
+           15 Huaqiang Bei Road, Futian District
+           Shenzhen, Guangdong, 518000
+
+CONSIGNEE: HK Digital Logistics Ltd.
+           22/F Enterprise Building
+           118 Connaught Road West, Hong Kong
+
+SHIPMENT DETAILS:
+===============
+Container: MSCU4820137
+Port of Loading: Yantian, Shenzhen
+Port of Discharge: Hong Kong
+Vessel: MSC GENEVA V.126W
+Incoterms: CIF Hong Kong
+
+COMMODITIES:
+-----------
+1. "Portable laptop computers, brand: Lenovo ThinkPad X1"
+   HS Code: 8471.30.00
+   Quantity: 500 units
+   Unit Price: USD 850.00
+   Total Value: USD 425,000.00
+   Gross Weight: 750.0 kg
+   Net Weight: 680.0 kg
+   Country of Origin: China
+
+2. "Solid-state storage drives, 1TB, NVMe"
+   HS Code: 8523.51.00
+   Quantity: 1,000 units
+   Unit Price: USD 89.00
+   Total Value: USD 89,000.00
+   Gross Weight: 120.0 kg
+   Net Weight: 110.0 kg
+   Country of Origin: China
+
+3. "Electronic integrated circuits, processor controllers"
+   HS Code: 8542.31.00
+   Quantity: 10,000 units
+   Unit Price: USD 12.50
+   Total Value: USD 125,000.00
+   Gross Weight: 45.0 kg
+   Net Weight: 42.0 kg
+   Country of Origin: Taiwan
+
+TOTAL DECLARED VALUE: USD 639,000.00
+TOTAL GROSS WEIGHT: 915.0 kg
+TOTAL NET WEIGHT: 832.0 kg
+NUMBER OF PACKAGES: 28 pallets

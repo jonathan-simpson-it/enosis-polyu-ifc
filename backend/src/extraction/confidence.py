@@ -27,8 +27,9 @@ def score_extraction_confidence(
 ) -> dict[str, float]:
     scores: dict[str, float] = {}
 
-    if entities.get("hs_codes"):
-        scores["hs_codes"] = min(0.95, 0.75 + len(entities["hs_codes"]) * 0.05)
+    hs_count = len(entities.get("hs_codes", []))
+    if hs_count:
+        scores["hs_codes"] = min(0.95, 0.75 + hs_count * 0.05)
     else:
         scores["hs_codes"] = 0.0
 
@@ -47,15 +48,35 @@ def score_extraction_confidence(
     else:
         scores["dates"] = 0.0
 
-    if len(raw_text) > 100:
+    commodities = entities.get("commodities", [])
+    labeled = entities.get("labeled_fields", {})
+
+    # Boost confidence based on how many fields we extracted
+    header_fields_found = sum(
+        1 for k in ("consignor_name", "consignee_name", "port_of_loading", "port_of_discharge", "incoterms", "total_value")
+        if labeled.get(k)
+    )
+
+    commodity_count = len(commodities)
+
+    # Overall confidence based on data richness
+    if commodity_count >= 3 and header_fields_found >= 4:
+        scores["overall"] = 0.88
+    elif commodity_count >= 2:
         scores["overall"] = 0.80
-    elif len(raw_text) > 50:
+    elif commodity_count >= 1:
+        scores["overall"] = 0.70
+    elif entities.get("hs_codes"):
         scores["overall"] = 0.60
+    elif len(raw_text) > 100:
+        scores["overall"] = 0.50
+    elif len(raw_text) > 50:
+        scores["overall"] = 0.40
     else:
         scores["overall"] = 0.30
 
-    if entities.get("hs_codes") and entities.get("weights") and entities.get("dates"):
-        scores["overall"] = min(0.95, scores["overall"] + 0.15)
+    if hs_count and commodity_count:
+        scores["overall"] = min(0.95, scores["overall"] + 0.05)
 
     return scores
 

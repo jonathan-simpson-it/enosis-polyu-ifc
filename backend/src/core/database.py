@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
@@ -50,7 +51,7 @@ async def init_db():
     engine = get_engine()
     async with engine.begin() as conn:
         try:
-            await conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         except Exception:
             pass
 

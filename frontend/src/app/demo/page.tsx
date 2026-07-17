@@ -3,459 +3,507 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
-  Hospital,
   FileText,
-  PencilLine,
   ArrowRight,
   CheckCircle,
-  Clock,
-  FloppyDisk,
+  WarningCircle,
+  Download,
+  Cube,
+  MagnifyingGlass,
+  Gear,
+  SealCheck,
+  Database,
 } from "@phosphor-icons/react";
-import { StepIndicator } from "@/components/step-indicator";
-import { ConfidenceBar } from "@/components/confidence-bar";
-import { FhirViewer } from "@/components/fhir-viewer";
-import { Badge } from "@/components/badge";
-import { api, type TranslateResponse, type UploadResponse, type CertificationResponse } from "@/lib/api";
+import { api } from "@/lib/api";
 
-type SourceType = "cms" | "lab" | "custom";
+const SAMPLE_FILES = [
+  {
+    id: "invoice",
+    label: "Trade Invoice",
+    desc: "PDF extract: HS codes, weights, containers",
+    preview: "INV-2026-0715-0042  |  Lenovo ThinkPad X1  |  HS: 8471.30.00  |  USD 639,000.00",
+  },
+  {
+    id: "packing",
+    label: "Packing List",
+    desc: "CSV: 5 commodity lines with HS codes",
+    preview: "6110.20.00 Cotton pullovers  |  8471.30.00 Laptops  |  9018.11.00 ECG",
+  },
+  {
+    id: "wechat",
+    label: "WeChat Screenshot",
+    desc: "OCR text: messy Chinese cargo manifest",
+    preview: "东莞华强电子 → 香港捷运物流  |  HS: 85423100  |  USD ~85,000",
+  },
+];
 
-interface Patient {
-  id: string;
-  name: string;
-  hkid: string;
-  dob: string;
-  gender: string;
-  diagnoses: { code: string; desc: string }[];
-  medications: { name: string; dosage: string; freq: string }[];
-  labs: { test: string; value: string; unit: string; ref: string }[];
-  notes: string;
-}
+const CORE_TECH = [
+  { id: "docformer", name: "DocFormer-Trade", desc: "Layout-aware multi-modal model", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { id: "hierarchical", name: "HierarchicalHS", desc: "Deep taxonomy HS code mapping", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  { id: "uncertainty", name: "UncertaintyGuard", desc: "Conformal prediction p<0.05", color: "bg-violet-50 text-violet-700 border-violet-200" },
+  { id: "metaschema", name: "MetaSchema", desc: "Zero-shot schema transfer", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { id: "tradebench", name: "TradeBench", desc: "Multi-vertical benchmark", color: "bg-amber-50 text-amber-700 border-amber-200" },
+];
 
-const DATA_SOURCES: Record<SourceType, { label: string; icon: typeof Hospital; patients: Patient[] }> = {
-  cms: {
-    label: "Mock Clinic CMS",
-    icon: Hospital,
-    patients: [
-      { id: "P001", name: "Leung Hin Wa", hkid: "U2167390", dob: "1977-03-26", gender: "M",
-        diagnoses: [{ code: "I10", desc: "Essential (primary) hypertension" }],
-        medications: [{ name: "Sertraline", dosage: "50mg", freq: "Once daily" }],
-        labs: [{ test: "Fasting Glucose", value: "8.3", unit: "mmol/L", ref: "4.0-6.0" }, { test: "HbA1c", value: "8.6", unit: "%", ref: "< 7.0" }, { test: "Total Cholesterol", value: "6.5", unit: "mmol/L", ref: "< 5.2" }, { test: "Creatinine", value: "107.1", unit: "umol/L", ref: "60-110" }],
-        notes: "Patient presents with numbness in feet. Referred to specialist." },
-      { id: "P002", name: "Fong Chun Kit", hkid: "B3999814", dob: "1949-01-17", gender: "M",
-        diagnoses: [{ code: "D64.9", desc: "Anemia, unspecified" }, { code: "I10", desc: "Essential hypertension" }, { code: "J44.9", desc: "COPD, unspecified" }],
-        medications: [{ name: "Sertraline", dosage: "50mg", freq: "Once daily" }, { name: "Metformin", dosage: "500mg", freq: "Twice daily" }, { name: "Omeprazole", dosage: "20mg", freq: "Once daily" }],
-        labs: [{ test: "White Cell Count", value: "3.0", unit: "x10^9/L", ref: "4.0-11.0" }, { test: "TSH", value: "1.3", unit: "mIU/L", ref: "0.4-4.0" }, { test: "Triglycerides", value: "3.4", unit: "mmol/L", ref: "< 1.7" }, { test: "Hb", value: "11.9", unit: "g/dL", ref: "13-17" }],
-        notes: "Routine check. Gait normal. Advised food diary and reduced sodium." },
-      { id: "P003", name: "Wan Sze Man", hkid: "N6452810", dob: "1994-04-15", gender: "F",
-        diagnoses: [{ code: "E78.5", desc: "Hyperlipidemia, unspecified" }, { code: "E11.9", desc: "Type 2 diabetes mellitus" }],
-        medications: [{ name: "Lisinopril", dosage: "10mg", freq: "Once daily" }, { name: "Metformin", dosage: "500mg", freq: "Twice daily" }],
-        labs: [{ test: "Triglycerides", value: "3.2", unit: "mmol/L", ref: "< 1.7" }, { test: "BMI", value: "32.1", unit: "kg/m2", ref: "18.5-24.9" }, { test: "AST", value: "35.1", unit: "U/L", ref: "< 37" }, { test: "Blood Pressure Systolic", value: "127.1", unit: "mmHg", ref: "< 130" }],
-        notes: "Shortness of breath on exertion. Prescribed Lisinopril. Follow-up in 3 months." },
-    ],
+const MOCK_EXTRACTION = {
+  declaration_id: "demo-mock-0001",
+  status: "extracted",
+  confidence_avg: 0.84,
+  entities: {
+    hs_codes: ["8471.30.00", "8523.51.00", "8542.31.00", "6110.20.00"],
+    container_numbers: ["MSCU4820137", "OOLU8125479"],
+    weights: [915.0, 120.0, 45.0, 400.0],
+    quantities: [500, 1000, 10000, 2000],
+    dates: ["2026-07-15", "2026-07-14"],
+    invoice_numbers: ["INV-2026-0715-0042"],
+    total_values: [639000.0, 89000.0, 125000.0, 30000.0],
   },
-  lab: {
-    label: "Lab Report (OCR)",
-    icon: FileText,
-    patients: [{
-      id: "P004", name: "Tam Ho Yin", hkid: "R9241808", dob: "1954-07-09", gender: "M",
-      diagnoses: [{ code: "G47.9", desc: "Sleep disorder, unspecified" }, { code: "I25.1", desc: "Atherosclerotic heart disease" }],
-      medications: [{ name: "Warfarin", dosage: "3mg", freq: "Once daily" }, { name: "Sertraline", dosage: "50mg", freq: "Once daily" }],
-      labs: [{ test: "CRP", value: "18.0", unit: "mg/L", ref: "< 5" }, { test: "Heart Rate", value: "55.6", unit: "bpm", ref: "60-100" }, { test: "Fasting Glucose", value: "5.2", unit: "mmol/L", ref: "4.0-6.0" }, { test: "HbA1c", value: "7.3", unit: "%", ref: "< 7.0" }],
-      notes: "Difficulty sleeping and feeling anxious. ECG sinus rhythm with LVH.",
-    }],
+  confidence_scores: {
+    hs_codes: 0.94,
+    containers: 0.88,
+    weights: 0.92,
+    dates: 0.96,
+    invoice_numbers: 0.97,
+    overall: 0.84,
   },
-  custom: {
-    label: "Custom Clinical Text",
-    icon: PencilLine,
-    patients: [{
-      id: "P005", name: "Lee Ka Ho", hkid: "A9876543", dob: "1970-03-22", gender: "M",
-      diagnoses: [{ code: "E78.5", desc: "Hyperlipidemia, unspecified" }],
-      medications: [{ name: "Atorvastatin", dosage: "20mg", freq: "Nocte" }],
-      labs: [{ test: "Total Cholesterol", value: "6.2", unit: "mmol/L", ref: "< 5.2" }, { test: "LDL", value: "3.8", unit: "mmol/L", ref: "< 2.6" }],
-      notes: "Routine health check. Elevated cholesterol. Advised diet and exercise.",
-    }],
-  },
+  needs_review: true,
 };
 
-const CLINIC_ID = "c1010101-0000-4000-a000-000000000001";
+const STEPS = [
+  { num: 1, label: "Unstructured Intake" },
+  { num: 2, label: "Enosis Engine" },
+  { num: 3, label: "Verification API" },
+  { num: 4, label: "Structured Export" },
+];
 
 export default function DemoPage() {
   const reduce = useReducedMotion();
-  const [source, setSource] = useState<SourceType>("cms");
-  const [selectedIdx, setSelectedIdx] = useState(0);
+
   const [step, setStep] = useState(1);
-  const [translating, setTranslating] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [translateResult, setTranslateResult] = useState<TranslateResponse | null>(null);
-  const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
-  const [certResult, setCertResult] = useState<CertificationResponse | null>(null);
+  const [selectedFile, setSelectedFile] = useState<typeof SAMPLE_FILES[0] | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [extraction, setExtraction] = useState<any>(null);
+  const [exportResult, setExportResult] = useState<any>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [offlineMode, setOfflineMode] = useState(false);
 
-  const sourceData = DATA_SOURCES[source];
-  const patient = sourceData.patients[source === "cms" ? selectedIdx : 0];
-
-  const runTranslation = useCallback(async () => {
-    setTranslating(true);
+  const handleProcess = useCallback(async () => {
+    if (!selectedFile) return;
+    setProcessing(true);
     setError(null);
-    setTranslateResult(null);
-    setUploadResult(null);
-    setCertResult(null);
-    setStep(3);
+    setStep(2);
+
+    if (offlineMode) {
+      setTimeout(() => {
+        setExtraction(MOCK_EXTRACTION);
+        setStep(4);
+        setProcessing(false);
+      }, 1000);
+      return;
+    }
 
     try {
-      await api.ingest({
-        clinic_id: CLINIC_ID,
-        clinic_name: "Central Clinic",
-        cms_type: "demo",
-        cms_url: "http://localhost:8080",
-        patient_ids: [patient.id],
-      }).catch(() => {});
+      const blob = await fetch(`/data/mock/${selectedFile.id === "wechat" ? "wechat-scan.txt" : selectedFile.id === "packing" ? "packing-list.csv" : "invoice-sample.txt"}`).then((r) => {
+        if (!r.ok) throw new Error(`File not found (${r.status})`);
+        return r.blob();
+      });
 
+      const file = new File([blob], `${selectedFile.label.replace(/\s/g, "_")}.txt`, {
+        type: "text/plain",
+      });
+
+      const upload = await api.uploadDocument(file);
+      setStep(3);
+      const res = await api.processDocument(upload.declaration_id);
+      setExtraction(res);
       setStep(4);
-
-      const result = await api.translate({
-        clinic_id: CLINIC_ID,
-        patient_id: patient.id,
-        patient_data: {
-          name: { first: patient.name.split(" ")[0], last: patient.name.split(" ").slice(1).join(" ") || patient.name.split(" ")[0] },
-          hkid: patient.hkid,
-          dob: patient.dob,
-          gender: patient.gender,
-        },
-        diagnoses: patient.diagnoses.map((d) => ({ code: d.code, description: d.desc })),
-        medications: patient.medications.map((m) => ({ name: m.name, dosage: m.dosage, frequency: m.freq })),
-        lab_results: patient.labs.map((l) => ({ test: l.test, value: l.value, unit: l.unit, reference: l.ref })),
-        clinical_notes: patient.notes,
-      });
-
-      setTranslateResult(result);
-      setStep(5);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Translation failed");
+    } catch (err: any) {
+      setError(err.message);
+      setStep(1);
     } finally {
-      setTranslating(false);
+      setProcessing(false);
     }
-  }, [patient, source, selectedIdx]);
+  }, [selectedFile, offlineMode]);
 
-  const runUpload = useCallback(async () => {
-    if (!translateResult) return;
-    setUploading(true);
-    setError(null);
-
+  const handleExport = useCallback(async (format: string) => {
+    if (!extraction) return;
     try {
-      const upload = await api.upload({
-        clinic_id: CLINIC_ID,
-        patient_id: patient.id,
-        fhir_bundle: translateResult.fhir_bundle,
-        patient_consent: true,
-      });
-      setUploadResult(upload);
-
-      const cert = await api.certification(CLINIC_ID);
-      setCertResult(cert);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
+      const res = await api.exportDocument(extraction.declaration_id, format);
+      setExportResult(res);
+      const blob = new Blob([JSON.stringify(res.export, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `enosis-demo-${format}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.message);
     }
-  }, [translateResult, patient]);
+  }, [extraction]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!extraction) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await api.submitToTsw(extraction.declaration_id);
+      setExportResult({ tsw_reference: res.tsw_reference });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [extraction]);
+
+  const fieldStatus = (score: number) => {
+    if (score >= 0.95) return { icon: CheckCircle, label: "Auto-approved", color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500" };
+    if (score >= 0.8) return { icon: WarningCircle, label: "Needs review", color: "text-amber-600", bg: "bg-amber-50", bar: "bg-amber-500" };
+    return { icon: WarningCircle, label: "Review required", color: "text-red-600", bg: "bg-red-50", bar: "bg-red-500" };
+  };
 
   const fadeUp = (delay = 0) =>
     reduce ? {} : {
-      initial: { opacity: 0, y: 16 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] as const },
+      initial: reduce ? false : { opacity: 0, y: 16 } as const,
+      animate: { opacity: 1, y: 0 } as const,
+      transition: { duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] as const } as const,
     };
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      {/* Page header */}
-      <motion.div {...fadeUp()} className="mb-10 text-center">
+    <div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+      {/* Header */}
+      <motion.div {...fadeUp()} className="mb-10">
         <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-3">
           Interactive Pipeline Demo
         </p>
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900">
-          AI Translation in Action
+          Ingestion &amp; Normalization Pipeline
         </h1>
-        <p className="mt-3 text-zinc-500 max-w-xl mx-auto leading-relaxed">
-          Watch Enosis transform raw clinical data into standardized FHIR R5
-          and upload it to eHealth+ — automatically, with zero clinic effort.
+        <p className="mt-3 text-zinc-500 max-w-2xl leading-relaxed">
+          From unstructured trade documents to verified, structured data — powered by 5 novel research contributions.
         </p>
       </motion.div>
 
-      {/* Step indicator */}
-      <motion.div {...fadeUp(0.1)} className="mb-10">
-        <StepIndicator current={step} />
-      </motion.div>
-
-      {/* Step 1: Source Selection */}
-      <motion.div {...fadeUp(0.15)} className="mb-6">
-        <div className="flex gap-2">
-          {(Object.entries(DATA_SOURCES) as [SourceType, typeof sourceData][]).map(([key, src]) => {
-            const active = source === key;
-            return (
-              <button
-                key={key}
-                onClick={() => { setSource(key); setSelectedIdx(0); setTranslateResult(null); setUploadResult(null); setCertResult(null); setError(null); setStep(1); }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                }`}
-              >
-                <src.icon weight="bold" className="h-4 w-4" />
-                {src.label}
-              </button>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* Step 1b: Patient selection for CMS */}
-      {source === "cms" && (
-        <motion.div {...fadeUp(0.2)} className="mb-6">
-          <p className="text-sm font-medium text-zinc-500 mb-3">Select a patient</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {sourceData.patients.map((p, idx) => (
-              <button
-                key={p.id}
-                onClick={() => { setSelectedIdx(idx); setTranslateResult(null); setUploadResult(null); setCertResult(null); setError(null); }}
-                className={`text-left rounded-xl border-2 p-4 transition-all ${
-                  idx === selectedIdx
-                    ? "border-blue-500 bg-blue-50/50"
-                    : "border-zinc-200 bg-white hover:border-zinc-300"
-                }`}
-              >
-                <p className="text-sm font-semibold text-zinc-900">{p.name}</p>
-                <p className="text-xs text-zinc-400 mt-1">{p.id} · {p.hkid}</p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {p.diagnoses.map((d) => (
-                    <span key={d.code} className="text-[11px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">
-                      {d.code}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Patient detail card */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${source}-${patient.id}`}
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-lg font-semibold text-zinc-900">{patient.name}</p>
-              <p className="text-sm text-zinc-400">
-                {patient.hkid} · {patient.dob} · {patient.gender === "M" ? "Male" : "Female"}
-              </p>
-            </div>
-            <span className="text-xs font-mono px-2 py-1 rounded-md bg-zinc-100 text-zinc-500">
-              {patient.id}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Diagnoses</p>
-              <div className="space-y-1">
-                {patient.diagnoses.map((d) => (
-                  <p key={d.code} className="text-zinc-700">
-                    {d.code} — {d.desc}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Medications</p>
-              <div className="space-y-1">
-                {patient.medications.map((m) => (
-                  <p key={m.name} className="text-zinc-700">
-                    {m.name} {m.dosage}, {m.freq}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Lab Results</p>
-              <div className="space-y-1">
-                {patient.labs.map((l) => (
-                  <p key={l.test} className="text-zinc-700">
-                    {l.test}: {l.value} {l.unit}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {patient.notes && (
-            <div className="mt-4 pt-4 border-t border-zinc-100">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-1">Clinical Notes</p>
-              <p className="text-sm text-zinc-600 italic">{patient.notes}</p>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Translate button */}
-      <motion.div {...fadeUp(0.25)} className="mb-8">
+      {/* Offline mode toggle */}
+      <motion.div {...fadeUp(0.03)} className="mb-6 flex items-center justify-end gap-3">
+        <span className="text-xs text-zinc-400">API backend unavailable?</span>
         <button
-          onClick={runTranslation}
-          disabled={translating}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setOfflineMode(!offlineMode)}
+          className={`inline-flex h-7 items-center rounded-full px-3 text-[11px] font-medium transition ${
+            offlineMode
+              ? "bg-amber-100 text-amber-700 border border-amber-200"
+              : "bg-zinc-100 text-zinc-500 border border-zinc-200"
+          }`}
         >
-          {translating ? (
-            <>
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Translating via DeepSeek...
-            </>
-          ) : (
-            <>
-              <ArrowRight weight="bold" className="h-4 w-4" />
-              Translate via DeepSeek
-            </>
-          )}
+          {offlineMode ? "Offline Demo Mode" : "Use Mock Data"}
         </button>
       </motion.div>
 
-      {/* Error state */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-          >
-            {error}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Translation results */}
-      <AnimatePresence>
-        {translateResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-6"
-          >
-            {/* Confidence bars */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-zinc-900">Translation Results</h2>
-                <span className="text-sm font-medium text-emerald-600">
-                  {translateResult.translations.length > 0
-                    ? `${(translateResult.translations.reduce((s, t) => s + t.confidence, 0) / translateResult.translations.length * 100).toFixed(1)}% avg`
-                    : ""}
+      {/* Step indicator */}
+      <motion.div {...fadeUp(0.05)} className="mb-10">
+        <div className="flex items-center justify-between gap-0">
+          {STEPS.map((s, i) => (
+            <div key={s.num} className="flex items-center gap-2 flex-1">
+              <div className={`flex items-center gap-2 ${step > s.num ? "text-emerald-600" : step === s.num ? "text-blue-600" : "text-zinc-300"}`}>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                  step > s.num ? "bg-emerald-500 text-white" :
+                  step === s.num ? "bg-blue-600 text-white ring-2 ring-blue-200" :
+                  "bg-zinc-100 text-zinc-400"
+                }`}>
+                  {step > s.num ? <CheckCircle weight="bold" className="h-4 w-4" /> : s.num}
+                </div>
+                <span className={`text-sm font-medium hidden sm:inline ${step >= s.num ? "text-zinc-800" : "text-zinc-400"}`}>
+                  {s.label}
                 </span>
               </div>
-              <div>
-                {translateResult.translations.map((t, i) => (
-                  <ConfidenceBar
-                    key={i}
-                    label={t.mapping_standard}
-                    original={t.original}
-                    translated={t.translated}
-                    confidence={t.confidence}
-                  />
-                ))}
+              {i < STEPS.length - 1 && (
+                <div className={`flex-1 h-px mx-3 ${step > s.num ? "bg-emerald-300" : "bg-zinc-200"}`} />
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Step 1: Unstructured Intake */}
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-8"
+          >
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                  <FileText weight="bold" className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-zinc-900">Unstructured Intake</p>
+                  <p className="text-sm text-zinc-500">Select a sample SME trade document to process</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {SAMPLE_FILES.map((f) => {
+                  const active = selectedFile?.id === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => { setSelectedFile(f); }}
+                      className={`text-left rounded-xl border-2 p-5 transition-all ${
+                        active ? "border-blue-500 bg-blue-50/50" : "border-zinc-200 bg-white hover:border-zinc-300"
+                      }`}
+                    >
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl mb-3 ${
+                        active ? "bg-blue-100 text-blue-600" : "bg-zinc-100 text-zinc-500"
+                      }`}>
+                        <FileText weight="bold" className="h-5 w-5" />
+                      </div>
+                      <p className="text-sm font-semibold text-zinc-900">{f.label}</p>
+                      <p className="text-xs text-zinc-400 mt-1 mb-2">{f.desc}</p>
+                      <div className="rounded-lg bg-zinc-50 p-2.5 border border-zinc-100">
+                        <p className="text-[11px] font-mono text-zinc-500 leading-relaxed truncate">
+                          {f.preview}
+                        </p>
+                      </div>
+                      {active && (
+                        <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-600 font-medium">
+                          <CheckCircle weight="bold" className="h-3.5 w-3.5" />
+                          Selected
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* FHIR viewer */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-zinc-900">FHIR R5 Bundle</h2>
-                <span className="text-xs text-zinc-400">
-                  {(translateResult.fhir_bundle?.entry as unknown[])?.length || 0} resources
-                </span>
+            {selectedFile && (
+              <div className="flex justify-center">
+                <button
+                  onClick={handleProcess}
+                  disabled={processing}
+                  className="inline-flex h-12 items-center justify-center gap-2.5 rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 shadow-sm"
+                >
+                  <ArrowRight weight="bold" className="h-4 w-4" />
+                  Process via Enosis Engine
+                </button>
               </div>
-              <FhirViewer bundle={translateResult.fhir_bundle} />
-            </div>
-
-            {/* Upload button */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={runUpload}
-                disabled={uploading}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {uploading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Uploading to eHealth+...
-                  </>
-                ) : (
-                  <>
-                    <FloppyDisk weight="bold" className="h-4 w-4" />
-                    Upload to eHealth+
-                  </>
-                )}
-              </button>
-            </div>
+            )}
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Upload result + certification */}
-      <AnimatePresence>
-        {uploadResult && certResult && (
+        {/* Step 2: Enosis Engine (processing) */}
+        {step === 2 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            key="step2"
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-8 text-center"
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-2xl border border-zinc-200 bg-white p-10 text-center mb-8"
           >
-            <div className="flex justify-center mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                <CheckCircle weight="bold" className="h-8 w-8 text-emerald-600" />
-              </div>
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+              <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
             </div>
-            <h3 className="text-xl font-semibold text-emerald-800 mb-1">
-              Successfully Uploaded to eHealth+
-            </h3>
-            <p className="text-sm text-emerald-600 font-mono mb-6">
-              Reference: {uploadResult.ehealth_reference}
+            <h2 className="text-xl font-semibold text-zinc-900 mb-2">Enosis Engine</h2>
+            <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">
+              Processing via 5 core research contributions
             </p>
-            <div className="flex justify-center">
-              <Badge
-                level={certResult.current_level}
-                records={certResult.records_uploaded}
-                accuracy={certResult.accuracy_rate}
-              />
+            <div className="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
+              {CORE_TECH.map((tech) => (
+                <div key={tech.id} className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${tech.color} animate-pulse`}>
+                  {tech.name}
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Token usage */}
-      {translateResult?.token_usage && (
+      {/* Error banner */}
+      {error && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-8 text-center"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
         >
-          <p className="text-xs text-zinc-400 font-mono">
-            Token usage: {translateResult.token_usage.input_tokens} in · {translateResult.token_usage.output_tokens} out
-          </p>
+          {error}. Using mock data for demonstration.
         </motion.div>
       )}
+
+      {/* Step 3-4: Verification API + Export */}
+      {extraction && step >= 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-6"
+        >
+          {/* Step 3: Verification API */}
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
+                <MagnifyingGlass weight="bold" className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-zinc-900">Verification API</p>
+                <p className="text-sm text-zinc-500">HS code labeling &amp; structure validation</p>
+              </div>
+            </div>
+
+            {/* HS Codes detected */}
+            <div className="mb-5">
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">HS Codes Detected</p>
+              <div className="flex flex-wrap gap-2">
+                {extraction.entities?.hs_codes?.length > 0 ? (
+                  extraction.entities.hs_codes.map((code: string, i: number) => (
+                    <span key={i} className="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-mono text-blue-700 border border-blue-100">
+                      {code}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-zinc-400">No HS codes detected</span>
+                )}
+              </div>
+            </div>
+
+            {/* Container Numbers */}
+            {extraction.entities?.container_numbers?.length > 0 && (
+              <div className="mb-5">
+                <p className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Container Numbers</p>
+                <div className="flex flex-wrap gap-2">
+                  {extraction.entities.container_numbers.map((n: string, i: number) => (
+                    <span key={i} className="font-mono text-sm text-zinc-700 bg-zinc-50 px-3 py-1.5 rounded-lg border border-zinc-100">{n}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Confidence Scores */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Confidence Scores</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-400">Threshold 95%</span>
+                  <span className={`text-xs font-medium ${extraction.confidence_avg >= 0.8 ? "text-emerald-600" : "text-amber-600"}`}>
+                    {(extraction.confidence_avg * 100).toFixed(0)}% avg
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                {Object.entries(extraction.confidence_scores || {}).filter(([k]) => k !== "overall").map(([key, val]) => {
+                  const score = val as number;
+                  const status = fieldStatus(score);
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <status.icon weight="bold" className={`h-4 w-4 shrink-0 ${status.color}`} />
+                      <span className="text-sm w-28 capitalize text-zinc-600">{key.replace(/_/g, " ")}</span>
+                      <div className="flex-1 h-2.5 rounded-full bg-zinc-100 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${status.bar}`}
+                          style={{ width: `${score * 100}%` }}
+                        />
+                      </div>
+                      <span className={`text-sm w-12 text-right font-medium ${status.color}`}>
+                        {(score * 100).toFixed(0)}%
+                      </span>
+                      <span className={`text-xs w-24 text-right ${status.color}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Step 4: Structured Export */}
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
+                <Database weight="bold" className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-zinc-900">Structured Export</p>
+                <p className="text-sm text-zinc-500">Instant handoff to TSW, WCO, HKMA CDI</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => handleExport("wco_json")}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+              >
+                <Download weight="bold" className="h-4 w-4" />
+                WCO Data Model v3.11
+              </button>
+              <button
+                onClick={() => handleExport("tsw_json")}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-800 px-5 text-sm font-semibold text-white transition hover:bg-zinc-700 active:scale-[0.98]"
+              >
+                <Download weight="bold" className="h-4 w-4" />
+                TSW Phase 3 JSON
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border-2 border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.98] disabled:opacity-50"
+              >
+                {submitting ? "Submitting..." : "Submit to Mock TSW"}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit result */}
+          {exportResult && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-8 text-center"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+                  <CheckCircle weight="bold" className="h-8 w-8 text-emerald-600" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-emerald-800 mb-1">
+                {exportResult.tsw_reference ? "Submitted to Mock TSW" : "Export Complete"}
+              </h3>
+              {exportResult.tsw_reference && (
+                <p className="text-sm text-emerald-600 font-mono">
+                  Reference: {exportResult.tsw_reference}
+                </p>
+              )}
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Core Technologies Footer */}
+      <motion.div {...fadeUp(0.2)} className="mt-12 pt-8 border-t border-zinc-200">
+        <p className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-4 text-center">
+          Platform Core Technologies
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {CORE_TECH.map((tech, i) => (
+            <motion.div
+              key={tech.id}
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="rounded-xl border border-zinc-200 bg-white p-4 text-center"
+            >
+              <p className="text-sm font-semibold text-zinc-900">{tech.name}</p>
+              <p className="text-xs text-zinc-500 mt-1">{tech.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 }

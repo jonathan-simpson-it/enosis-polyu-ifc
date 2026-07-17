@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Enosis — Universal Data Translation Layer",
+  title: "GBA Trade Document Engine — Enosis",
   description:
-    "Ingest data from ANY source, in ANY format → Output in a unified, machine-readable schema. Zero work. Zero friction. Just automatic translation.",
+    "Translate any trade document into TSW-compliant schemas. PDF invoices, Excel packing lists, or WeChat screenshots — one click to WCO XML.",
 };
 
 export default function RootLayout({

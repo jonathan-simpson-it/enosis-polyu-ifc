@@ -1,0 +1,29 @@
+INVOICE NO: INV-TEST-001
+DATE: 2026-07-17
+
+From: Test Supplier Ltd., Unit 4, 123 Queen's Road East, Wan Chai, Hong Kong
+To: Test Buyer Inc., 456 Nathan Road, Tsim Sha Tsui, Kowloon, Hong Kong
+
+Item 1: Test integrated circuit boards
+  HS Code: 8542.31.00
+  Quantity: 1000 units
+  Unit Price: HKD 15.00
+  Total: HKD 15,000.00
+  Weight: 25 KG
+  Origin: CN
+
+Item 2: Test LED displays
+  HS Code: 8541.41.00
+  Quantity: 500 units
+  Unit Price: HKD 220.00
+  Total: HKD 110,000.00
+  Weight: 180 KG
+  Origin: CN
+
+Container: TEST1234567
+Port of Loading: Hong Kong
+Port of Discharge: Shenzhen
+Incoterms: FOB Hong Kong
+
+Total Value: HKD 125,000.00
+Total Weight: 205 KG

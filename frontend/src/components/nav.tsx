@@ -3,16 +3,20 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck } from "@phosphor-icons/react";
+
+const APP_ROUTES = ["/dashboard", "/upload", "/documents", "/exports", "/settings"];
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/demo", label: "Demo" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/login", label: "Sign In" },
 ];
 
 export function Nav() {
   const path = usePathname();
+
+  // Hide marketing nav on app pages (sidebar handles nav there)
+  if (APP_ROUTES.some((r) => path.startsWith(r))) return null;
 
   return (
     <motion.header

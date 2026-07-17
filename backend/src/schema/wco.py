@@ -93,11 +93,28 @@ def build_wco_json(
 
 
 def build_wco_xml(declaration_data: dict[str, Any], commodities: list[dict[str, Any]]) -> str:
+    import xml.etree.ElementTree as ET
+
     json_data = build_wco_json(declaration_data, commodities)
 
-    import json
+    def dict_to_xml(parent: ET.Element, data: dict[str, Any]):
+        for key, value in data.items():
+            child = ET.SubElement(parent, key)
+            if isinstance(value, dict):
+                dict_to_xml(child, value)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        dict_to_xml(child, item)
+                    else:
+                        elem = ET.SubElement(child, "Item")
+                        elem.text = str(item)
+            else:
+                child.text = str(value) if value is not None else ""
 
-    return json.dumps(json_data, indent=2)
+    root = ET.Element("WCODeclaration")
+    dict_to_xml(root, json_data)
+    return ET.tostring(root, encoding="unicode", xml_declaration=True)
 
 
 registry.register("wco_json", build_wco_json)

@@ -1,0 +1,26 @@
+WECHAT SCREENSHOT — OCR EXTRACTED TEXT
+───────────────────────────────────────
+
+[WeChat Chat — 14 Jul 2026 14:32]
+
+小李: 张总，今天发货单号是多少？帮我查一下。
+张总: 等下，我拍给你。
+
+— Image Description: Handwritten cargo manifest on notebook paper —
+
+Extracted text (OCR confidence: 78%):
+"发件人: 东莞华强电子
+收货人: 香港捷运物流
+货柜: OOLU8125479
+货物:
+1. 电子元器件 500箱 HS Code: 85423100 重量: 250kg
+2. LED 显示屏 200箱 重量: 180kg
+总价值: 约 USD 85,000
+目的地: 香港 → 转口 越南"
+
+[Image Description ends]
+
+— Additional text from chat —
+
+小李: 收到，谢谢张总！
+张总: 不客气，报关单你那边处理。

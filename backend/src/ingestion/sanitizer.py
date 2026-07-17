@@ -9,7 +9,7 @@ PII_PATTERNS = {
     "hkid": r"[A-Z]\d{6}\(?\d\)?",
     "phone_hk": r"(?:\+852)?\d{8}",
     "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-    "passport": r"[A-Z]{2}\d{7}",
+    "passport": r"\b[A-Z]{2}\d{7}\b",
     "br_number": r"BR-\d{8}",
 }
 
@@ -31,7 +31,7 @@ def validate_upload(file_bytes: bytes, filename: str, max_size_mb: int = 20) -> 
     if file_size == 0:
         errors.append("File is empty")
 
-    valid_extensions = {".pdf", ".xlsx", ".xls", ".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".json", ".csv"}
+    valid_extensions = {".pdf", ".xlsx", ".xls", ".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".json", ".csv", ".txt"}
     ext = filename[filename.rfind("."):].lower() if "." in filename else ""
     if ext and ext not in valid_extensions:
         errors.append(f"Unsupported file extension: {ext}")

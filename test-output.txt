@@ -1,0 +1,74 @@
+
+> enosis@0.1.0 test:e2e
+> npx playwright test --headed
+
+Error: Cannot find module '../pages/login.page'
+Require stack:
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/auth.spec.ts
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/common/index.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/program.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/@playwright/test/cli.js
+
+   at auth.spec.ts:2
+
+  1 | import { test, expect } from "@playwright/test";
+> 2 | import { LoginPage } from "../pages/login.page";
+    | ^
+  3 | import { uniqueEmail, registerUser } from "../helpers/api";
+  4 |
+  5 | test.describe("Authentication", () => {
+    at Object.<anonymous> (/Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/auth.spec.ts:2:1)
+Error: Cannot find module '../pages/documents.page'
+Require stack:
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/documents-list.spec.ts
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/common/index.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/program.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/@playwright/test/cli.js
+
+   at documents-list.spec.ts:2
+
+  1 | import { test, expect } from "@playwright/test";
+> 2 | import { DocumentsPage } from "../pages/documents.page";
+    | ^
+  3 | import { UploadPage } from "../pages/upload.page";
+  4 | import path from "path";
+  5 |
+    at Object.<anonymous> (/Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/documents-list.spec.ts:2:1)
+Error: Cannot find module '../pages/upload.page'
+Require stack:
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/processing.spec.ts
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/common/index.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/program.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/@playwright/test/cli.js
+
+   at processing.spec.ts:2
+
+  1 | import { test, expect } from "@playwright/test";
+> 2 | import { UploadPage } from "../pages/upload.page";
+    | ^
+  3 | import { ReviewPage } from "../pages/review.page";
+  4 | import { DocumentsPage } from "../pages/documents.page";
+  5 | import path from "path";
+    at Object.<anonymous> (/Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/processing.spec.ts:2:1)
+Error: Cannot find module '../pages/upload.page'
+Require stack:
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/upload.spec.ts
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/common/index.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/playwright/lib/program.js
+- /Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/node_modules/@playwright/test/cli.js
+
+   at upload.spec.ts:2
+
+  1 | import { test, expect } from "@playwright/test";
+> 2 | import { UploadPage } from "../pages/upload.page";
+    | ^
+  3 | import path from "path";
+  4 |
+  5 | const FIXTURES_DIR = path.resolve(__dirname, "fixtures");
+    at Object.<anonymous> (/Users/lewissimpson/Desktop/JonathanSimpson&Co/enosis-polyu-ifc/tests/e2e/upload.spec.ts:2:1)
+
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report tests/e2e/report[39m
+[36m[39m

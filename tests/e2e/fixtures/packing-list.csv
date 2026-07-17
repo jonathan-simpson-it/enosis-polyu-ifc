@@ -1,0 +1,6 @@
+item_no,description,hs_code,quantity,unit,unit_price_usd,total_value_usd,gross_weight_kg,country_of_origin
+001,Cotton knitted pullovers,6110.20.00,2000,pcs,15.00,30000.00,400.0,China
+002,Portable digital computers <=10kg,8471.30.00,150,units,920.00,138000.00,225.0,China
+003,Electronic integrated circuits,8542.31.00,5000,units,8.50,42500.00,25.0,Taiwan
+004,Medicaments in measured doses,3004.90.00,1000,bottles,45.00,45000.00,180.0,India
+005,Electrocardiographs,9018.11.00,50,units,3200.00,160000.00,350.0,Germany

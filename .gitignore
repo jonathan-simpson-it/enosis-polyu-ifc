@@ -35,6 +35,9 @@ Thumbs.db
 
 # Playwright
 .playwright/
+tests/e2e/.auth/
+tests/e2e/report/
+test-results/
 
 # Temp
 *.log

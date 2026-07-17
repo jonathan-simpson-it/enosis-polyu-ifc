@@ -11,14 +11,14 @@ from backend.src.core.database import Base
 
 
 def _utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class WCODeclaration(Base):
     __tablename__ = "wco_declarations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    declaration_id = Column(UUID(as_uuid=True), ForeignKey("declarations.id"), nullable=False, index=True)
+    declaration_id = Column(UUID(as_uuid=True), ForeignKey("declarations.id", ondelete="CASCADE"), nullable=False, index=True)
     wco_json = Column(JSONB, nullable=False)
     wco_xml = Column(Text, nullable=True)
     validation_status = Column(String(20), default="pending")
