@@ -56,13 +56,13 @@ export default function ExportsPage() {
   return (
     <div>
       <motion.div {...fadeUp()} className="mb-8">
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-2">
+        <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent mb-2">
           Exports
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">
           Export Documents
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-muted">
           Download reviewed declarations as WCO or TSW schemas
         </p>
       </motion.div>
@@ -70,24 +70,24 @@ export default function ExportsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
-            <div key={i} className="h-20 rounded-2xl bg-zinc-100 animate-pulse" />
+            <div key={i} className="h-20 rounded-xl bg-accent-soft animate-pulse" />
           ))}
         </div>
       ) : docs.length === 0 ? (
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl border border-zinc-200 bg-white p-16 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100">
-            <FileArrowDown weight="bold" className="h-6 w-6 text-zinc-400" />
+        <motion.div {...fadeUp(0.1)} className="rounded-xl border border-line bg-surface p-16 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft">
+            <FileArrowDown weight="bold" className="h-6 w-6 text-muted" />
           </div>
-          <p className="text-base font-medium text-zinc-700 mb-1">No documents ready for export</p>
-          <p className="text-sm text-zinc-400">
+          <p className="text-base font-medium text-ink mb-1">No documents ready for export</p>
+          <p className="text-sm text-muted">
             Review and approve documents first, then export them here
           </p>
         </motion.div>
       ) : (
-        <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-line bg-surface overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-zinc-400 border-b border-zinc-100">
+              <tr className="text-left text-xs uppercase tracking-wider text-muted border-b border-line">
                 <th className="px-6 py-4 font-medium">Filename</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium">Confidence</th>
@@ -101,28 +101,28 @@ export default function ExportsPage() {
                   initial={reduce ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                  className="border-t border-zinc-100 hover:bg-zinc-50 transition-colors"
+                  className="border-t border-line hover:bg-accent-soft transition-colors"
                 >
-                  <td className="px-6 py-4 text-sm text-zinc-800">{doc.filename}</td>
+                  <td className="px-6 py-4 text-sm text-ink">{doc.filename}</td>
                   <td className="px-6 py-4">
                     <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
                       {doc.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-zinc-600">
+                  <td className="px-6 py-4 text-sm text-muted">
                     {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "—"}
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <button
                       onClick={() => handleExport(doc.id, "wco_json")}
-                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-xs font-semibold text-white transition hover:bg-accent active:scale-[0.98]"
                     >
                       <Download weight="bold" className="h-3.5 w-3.5" />
                       WCO JSON
                     </button>
                     <button
                       onClick={() => handleExport(doc.id, "tsw_json")}
-                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-zinc-800 px-4 text-xs font-semibold text-white transition hover:bg-zinc-700 active:scale-[0.98]"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-ink px-4 text-xs font-semibold text-white transition hover:bg-ink/80 active:scale-[0.98]"
                     >
                       <Download weight="bold" className="h-3.5 w-3.5" />
                       TSW JSON

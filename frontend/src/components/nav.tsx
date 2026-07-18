@@ -15,7 +15,6 @@ const links = [
 export function Nav() {
   const path = usePathname();
 
-  // Hide marketing nav on app pages (sidebar handles nav there)
   if (APP_ROUTES.some((r) => path.startsWith(r))) return null;
 
   return (
@@ -23,14 +22,16 @@ export function Nav() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-xl"
+      className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-xl"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-bold transition-colors group-hover:bg-blue-700">
-            E
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-zinc-900">
+          <img
+            src="/enosis-logo-icon.png"
+            alt="Enosis"
+            className="h-8 w-8 rounded-lg object-cover"
+          />
+          <span className="text-lg font-semibold tracking-tight text-ink font-display">
             Enosis
           </span>
         </Link>
@@ -42,17 +43,17 @@ export function Nav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                className={`relative px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] rounded-lg transition-colors ${
                   active
-                    ? "text-blue-600"
-                    : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+                    ? "text-ink"
+                    : "text-muted hover:text-ink hover:bg-accent-soft"
                 }`}
               >
                 {link.label}
                 {active && (
                   <motion.div
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-lg bg-blue-50 -z-10"
+                    className="absolute inset-0 rounded-lg bg-accent-soft -z-10"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}

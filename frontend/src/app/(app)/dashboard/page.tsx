@@ -44,13 +44,13 @@ export default function DashboardPage() {
   return (
     <>
       <motion.div {...fadeUp()} className="mb-10">
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-3">
+        <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-3">
           Dashboard
         </p>
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-3xl sm:text-4xl font-display font-semibold tracking-tight text-ink">
           Trade Document Overview
         </h1>
-        <p className="mt-3 text-zinc-500 max-w-xl leading-relaxed">
+        <p className="mt-3 text-muted max-w-xl leading-relaxed">
           Real-time overview of your document processing, extraction accuracy, and export readiness.
         </p>
       </motion.div>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-2xl bg-zinc-100 animate-pulse" />
+            <div key={i} className="h-28 rounded-xl bg-accent-soft animate-pulse" />
           ))}
         </div>
       ) : (
@@ -66,42 +66,42 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: FileText, label: "Documents Processed", value: totalDocs, color: "text-blue-600", bg: "bg-blue-50" },
-              { icon: CheckCircle, label: "Avg Confidence", value: `${(avgConfidence * 100).toFixed(0)}%`, color: totalDocs > 0 ? "text-emerald-600" : "text-zinc-400", bg: totalDocs > 0 ? "bg-emerald-50" : "bg-zinc-50" },
-              { icon: Hash, label: "Export Ready", value: reviewed, color: reviewed > 0 ? "text-indigo-600" : "text-zinc-400", bg: reviewed > 0 ? "bg-indigo-50" : "bg-zinc-50" },
+              { icon: FileText, label: "Documents Processed", value: totalDocs, color: "text-accent", bg: "bg-accent-soft" },
+              { icon: CheckCircle, label: "Avg Confidence", value: `${(avgConfidence * 100).toFixed(0)}%`, color: totalDocs > 0 ? "text-emerald-600" : "text-muted", bg: totalDocs > 0 ? "bg-emerald-50" : "bg-bg" },
+              { icon: Hash, label: "Export Ready", value: reviewed, color: reviewed > 0 ? "text-indigo-600" : "text-muted", bg: reviewed > 0 ? "bg-indigo-50" : "bg-bg" },
               { icon: WarningCircle, label: "Pending Review", value: pendingReview, color: pendingReview > 0 ? "text-amber-600" : "text-emerald-600", bg: pendingReview > 0 ? "bg-amber-50" : "bg-emerald-50" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 {...fadeUp(0.1 + i * 0.05)}
-                className="rounded-2xl border border-zinc-200 bg-white p-5"
+                className="rounded-xl border border-line bg-surface p-5"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.bg} mb-3`}>
                   <stat.icon weight="bold" className={`h-5 w-5 ${stat.color}`} />
                 </div>
-                <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{stat.value}</p>
-                <p className="text-sm text-zinc-500 mt-1">{stat.label}</p>
+                <p className="text-2xl font-semibold text-ink tabular-nums">{stat.value}</p>
+                <p className="text-sm text-muted mt-1">{stat.label}</p>
               </motion.div>
             ))}
           </div>
 
           {/* Recent + Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <motion.div {...fadeUp(0.3)} className="lg:col-span-2 rounded-2xl border border-zinc-200 bg-white p-6">
+            <motion.div {...fadeUp(0.3)} className="lg:col-span-2 rounded-xl border border-line bg-surface p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-zinc-900">Recent Documents</h2>
+                <h2 className="text-base font-semibold text-ink">Recent Documents</h2>
                 {docs.length > 0 && (
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-muted">
                     {reviewed} reviewed · {pendingReview} pending
                   </span>
                 )}
               </div>
               {docs.length === 0 ? (
-                <p className="text-sm text-zinc-400 text-center py-8">
+                <p className="text-sm text-muted text-center py-8">
                   No documents yet. Upload your first trade invoice to get started.
                 </p>
               ) : (
-                <div className="divide-y divide-zinc-100">
+                <div className="divide-y divide-line">
                   {docs.slice(0, 5).map((doc, i) => (
                     <motion.div
                       key={doc.id}
@@ -114,20 +114,20 @@ export default function DashboardPage() {
                         doc.status === "reviewed" || doc.status === "submitted"
                           ? "bg-emerald-50 text-emerald-500"
                           : doc.status === "extracted"
-                          ? "bg-blue-50 text-blue-500"
-                          : "bg-zinc-100 text-zinc-500"
+                          ? "bg-accent-soft text-accent"
+                          : "bg-accent-soft text-muted"
                       }`}>
                         <div className="h-2 w-2 rounded-full bg-current" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-zinc-900 truncate">
+                        <p className="text-sm font-medium text-ink truncate">
                           {doc.filename || "Unnamed document"}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-muted">
                           {doc.status} · {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}% confidence` : "pending processing"}
                         </p>
                       </div>
-                      <span className="text-[11px] text-zinc-300 shrink-0">
+                      <span className="text-[11px] text-muted shrink-0">
                         {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : ""}
                       </span>
                     </motion.div>
@@ -136,26 +136,26 @@ export default function DashboardPage() {
               )}
             </motion.div>
 
-            <motion.div {...fadeUp(0.35)} className="rounded-2xl border border-zinc-200 bg-white p-6">
-              <h2 className="text-base font-semibold text-zinc-900 mb-4">Quick Actions</h2>
+            <motion.div {...fadeUp(0.35)} className="rounded-xl border border-line bg-surface p-6">
+              <h2 className="text-base font-semibold text-ink mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <a
                   href="/upload"
-                  className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 text-sm font-medium text-ink transition hover:bg-accent-soft"
                 >
-                  <FileText weight="bold" className="h-5 w-5 text-blue-600" />
+                  <FileText weight="bold" className="h-5 w-5 text-accent" />
                   Upload New Document
                 </a>
                 <a
                   href="/documents"
-                  className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 text-sm font-medium text-ink transition hover:bg-accent-soft"
                 >
                   <WarningCircle weight="bold" className="h-5 w-5 text-amber-600" />
                   Review Pending Documents
                 </a>
                 <a
                   href="/exports"
-                  className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 text-sm font-medium text-ink transition hover:bg-accent-soft"
                 >
                   <CheckCircle weight="bold" className="h-5 w-5 text-emerald-600" />
                   Export Reviewed Documents

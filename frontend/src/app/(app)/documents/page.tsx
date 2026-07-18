@@ -43,13 +43,13 @@ export default function DocumentsPage() {
 
   function statusBadge(status: string) {
     const map: Record<string, string> = {
-      uploaded: "bg-zinc-100 text-zinc-600",
+      uploaded: "bg-accent-soft text-muted",
       processing: "bg-amber-100 text-amber-700",
-      extracted: "bg-blue-100 text-blue-700",
+      extracted: "bg-accent-soft text-accent",
       reviewed: "bg-emerald-100 text-emerald-700",
       submitted: "bg-emerald-100 text-emerald-700",
     };
-    return map[status] || "bg-zinc-100 text-zinc-600";
+    return map[status] || "bg-accent-soft text-muted";
   }
 
   function confidenceColor(val: number | null) {
@@ -68,16 +68,16 @@ export default function DocumentsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-2">
+          <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent mb-2">
             Documents
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">
             Trade Documents
           </h1>
         </div>
         <Link
           href="/upload"
-          className="inline-flex h-10 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent active:scale-[0.98]"
         >
           + Upload New
         </Link>
@@ -86,30 +86,30 @@ export default function DocumentsPage() {
       {loading ? (
         <div className="grid gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-xl bg-zinc-100 animate-pulse" />
+            <div key={i} className="h-16 rounded-xl bg-accent-soft animate-pulse" />
           ))}
         </div>
       ) : docs.length === 0 ? (
-        <motion.div {...fadeUp()} className="rounded-2xl border border-zinc-200 bg-white p-16 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100">
-            <FileText weight="bold" className="h-6 w-6 text-zinc-400" />
+        <motion.div {...fadeUp()} className="rounded-xl border border-line bg-surface p-16 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft">
+            <FileText weight="bold" className="h-6 w-6 text-muted" />
           </div>
-          <p className="text-base font-medium text-zinc-700 mb-1">No documents uploaded yet</p>
-          <p className="text-sm text-zinc-400 mb-4">
+          <p className="text-base font-medium text-ink mb-1">No documents uploaded yet</p>
+          <p className="text-sm text-muted mb-4">
             Upload your first trade invoice or packing list
           </p>
           <Link
             href="/upload"
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+            className="inline-flex h-10 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent active:scale-[0.98]"
           >
             Upload a Document
           </Link>
         </motion.div>
       ) : (
-        <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-line bg-surface overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-zinc-400 border-b border-zinc-100">
+              <tr className="text-left text-xs uppercase tracking-wider text-muted border-b border-line">
                 <th className="px-6 py-4 font-medium">Filename</th>
                 <th className="px-6 py-4 font-medium">Type</th>
                 <th className="px-6 py-4 font-medium">Status</th>
@@ -125,17 +125,17 @@ export default function DocumentsPage() {
                   initial={reduce ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03, ease: [0.16, 1, 0.3, 1] }}
-                  className="border-t border-zinc-100 hover:bg-zinc-50 transition-colors"
+                  className="border-t border-line hover:bg-accent-soft transition-colors"
                 >
                   <td className="px-6 py-4">
                     <Link
                       href={`/documents/${doc.id}/review`}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="text-sm font-medium text-accent hover:text-accent"
                     >
                       {doc.filename || "Unnamed"}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-sm uppercase text-zinc-600">{doc.file_type}</td>
+                  <td className="px-6 py-4 text-sm uppercase text-muted">{doc.file_type}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${statusBadge(doc.status)}`}>
                       {doc.status}
@@ -144,7 +144,7 @@ export default function DocumentsPage() {
                   <td className={`px-6 py-4 text-sm font-medium ${confidenceColor(doc.confidence_avg)}`}>
                     {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "—"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-zinc-400">
+                  <td className="px-6 py-4 text-sm text-muted">
                     {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "—"}
                   </td>
                   <td className="px-6 py-4">
@@ -168,23 +168,23 @@ export default function DocumentsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-lg max-w-sm w-full mx-4"
+            className="rounded-xl border border-line bg-surface p-6 shadow-lg max-w-sm w-full mx-4"
           >
-            <h3 className="text-base font-semibold text-zinc-900 mb-2">Delete Document</h3>
-            <p className="text-sm text-zinc-500 mb-6">
+            <h3 className="text-base font-semibold text-ink mb-2">Delete Document</h3>
+            <p className="text-sm text-muted mb-6">
               Are you sure? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="inline-flex h-9 items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                className="inline-flex h-9 items-center justify-center rounded-full border border-line bg-surface px-4 text-sm font-medium text-ink transition hover:bg-accent-soft"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 disabled={deleting}
-                className="inline-flex h-9 items-center justify-center rounded-xl bg-red-600 px-4 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-red-600 px-4 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>

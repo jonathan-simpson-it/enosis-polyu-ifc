@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import { api, type Declaration, type ExtractionResult, type Commodity, type CommodityUpdate } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
+import ConfidenceExplainer from "@/components/confidence-explainer";
 
 const CONFIDENCE_THRESHOLD = 0.95;
 
@@ -245,6 +246,17 @@ export default function ReviewPage() {
     return { label: "Review required", color: "text-amber-600", bg: "bg-amber-50", icon: WarningCircle };
   };
 
+  const statusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      submitted: "bg-emerald-100 text-emerald-700",
+      reviewed: "bg-accent-soft text-accent",
+      extracted: "bg-amber-100 text-amber-700",
+      processing: "bg-amber-100 text-amber-700",
+      uploaded: "bg-accent-soft text-muted",
+    };
+    return map[status] || "bg-accent-soft text-muted";
+  };
+
   const fadeUp = (delay = 0) => ({
     initial: reduce ? false : { opacity: 0, y: 12 } as const,
     animate: { opacity: 1, y: 0 } as const,
@@ -255,7 +267,7 @@ export default function ReviewPage() {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse" />
+          <div key={i} className="h-24 rounded-xl bg-accent-soft animate-pulse" />
         ))}
       </div>
     );
@@ -263,7 +275,7 @@ export default function ReviewPage() {
 
   if (error && !doc) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
         <XCircle weight="bold" className="mx-auto h-8 w-8 text-red-400 mb-2" />
         <p className="text-red-700">{error}</p>
       </div>
@@ -278,23 +290,18 @@ export default function ReviewPage() {
     <div className="mx-auto max-w-5xl">
       {/* Header */}
       <motion.div {...fadeUp()} className="mb-8">
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-2">
+        <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-2">
           Document Review
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink font-display">
           {doc?.filename || "Trade Document"}
         </h1>
         <div className="mt-2 flex items-center gap-3">
-          <span className={`inline-block rounded-full px-3 py-0.5 text-xs font-medium ${
-            doc?.status === "submitted" ? "bg-emerald-100 text-emerald-700"
-            : doc?.status === "reviewed" ? "bg-blue-100 text-blue-700"
-            : doc?.status === "extracted" ? "bg-amber-100 text-amber-700"
-            : "bg-zinc-100 text-zinc-600"
-          }`}>
+          <span className={`inline-block rounded-full px-3 py-0.5 text-xs font-medium ${statusBadge(doc?.status || "")}`}>
             {doc?.status}
           </span>
           {doc?.confidence_avg != null && (
-            <span className="text-sm text-zinc-400">
+            <span className="text-sm text-muted">
               Avg confidence: {(doc.confidence_avg * 100).toFixed(0)}%
             </span>
           )}
@@ -303,12 +310,12 @@ export default function ReviewPage() {
 
       {/* Run Extraction CTA */}
       {doc?.status === "processing" && (
-        <motion.div {...fadeUp(0.05)} className="mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-8 text-center">
-          <p className="text-sm text-blue-700 mb-4">This document has been uploaded but not yet processed. Run extraction to parse trade data.</p>
+        <motion.div {...fadeUp(0.05)} className="mb-8 rounded-xl border border-accent bg-accent-soft p-8 text-center">
+          <p className="text-sm text-ink mb-4">This document has been uploaded but not yet processed. Run extraction to parse trade data.</p>
           <button
             onClick={handleProcess}
             disabled={processing}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-6 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98] disabled:opacity-50"
           >
             {processing ? (
               <>
@@ -330,17 +337,17 @@ export default function ReviewPage() {
 
       {/* Declaration Info Card - Editable */}
       {doc && (
-        <motion.div {...fadeUp(0.05)} className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6">
+        <motion.div {...fadeUp(0.05)} className="rounded-xl border border-line bg-surface p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <FileText weight="bold" className="h-5 w-5 text-zinc-400" />
-              <h2 className="text-sm font-semibold text-zinc-900">Declaration Info</h2>
+              <FileText weight="bold" className="h-5 w-5 text-muted" />
+              <h2 className="text-sm font-semibold text-ink">Declaration Info</h2>
             </div>
             {isEditable && (
               <button
                 onClick={handleSaveHeader}
                 disabled={savingHeader || !headerDirty}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:opacity-30"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-medium text-surface transition hover:bg-ink/80 disabled:opacity-30"
               >
                 <FloppyDisk weight="bold" className="h-3.5 w-3.5" />
                 {savingHeader ? "Saving..." : "Save"}
@@ -361,7 +368,7 @@ export default function ReviewPage() {
               ["number_of_packages", "Packages"],
             ] as const).map(([key, label]) => (
               <div key={key}>
-                <dt className="text-zinc-400 text-xs mb-0.5">{label}</dt>
+                <dt className="text-muted text-xs mb-0.5">{label}</dt>
                 {isEditable ? (
                   <input
                     type="text"
@@ -370,10 +377,10 @@ export default function ReviewPage() {
                       setHeader((prev) => ({ ...prev, [key]: e.target.value }));
                       setHeaderDirty(true);
                     }}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-800 outline-none focus:border-blue-400 focus:bg-white"
+                    className="w-full rounded-lg border border-line bg-accent-soft/30 px-2.5 py-1.5 text-sm text-ink outline-none focus:border-accent focus:bg-surface"
                   />
                 ) : (
-                  <dd className="text-zinc-800">{String((doc as any)[key] ?? "—")}</dd>
+                  <dd className="text-ink">{String((doc as any)[key] ?? "—")}</dd>
                 )}
               </div>
             ))}
@@ -383,14 +390,14 @@ export default function ReviewPage() {
 
       {/* Commodities Table */}
       {commodities.length > 0 && (
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6">
+        <motion.div {...fadeUp(0.1)} className="rounded-xl border border-line bg-surface p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Commodities ({commodities.length})</h2>
+            <h2 className="text-sm font-semibold text-ink">Commodities ({commodities.length})</h2>
             {isEditable && (
               <button
                 onClick={handleSaveCommodities}
                 disabled={savingCommodities || !commodityDirty}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:opacity-30"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-medium text-surface transition hover:bg-ink/80 disabled:opacity-30"
               >
                 <FloppyDisk weight="bold" className="h-3.5 w-3.5" />
                 {savingCommodities ? "Saving..." : "Save Changes"}
@@ -400,7 +407,7 @@ export default function ReviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                <tr className="border-b border-line text-left text-xs font-medium text-muted uppercase tracking-wider">
                   <th className="pb-2 pr-2">#</th>
                   <th className="pb-2 pr-2 min-w-[180px]">Description</th>
                   <th className="pb-2 pr-2">HS Code</th>
@@ -414,18 +421,18 @@ export default function ReviewPage() {
               </thead>
               <tbody>
                 {commodities.map((c, i) => (
-                  <tr key={c.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="py-2 pr-2 text-zinc-400 font-mono text-xs">{i + 1}</td>
+                  <tr key={c.id} className="border-b border-line last:border-0">
+                    <td className="py-2 pr-2 text-muted font-mono text-xs">{i + 1}</td>
                     <td className="py-2 pr-2">
                       {isEditable ? (
                         <input
                           type="text"
                           value={c.description || ""}
                           onChange={(e) => updateCommodity(i, "description", e.target.value)}
-                          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-full rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-zinc-800">{c.description || "—"}</span>
+                        <span className="text-ink">{c.description || "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2">
@@ -434,10 +441,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.hs_code || ""}
                           onChange={(e) => updateCommodity(i, "hs_code", e.target.value)}
-                          className="w-28 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-28 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 font-mono text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="font-mono text-xs text-zinc-800">{c.hs_code || "—"}</span>
+                        <span className="font-mono text-xs text-ink">{c.hs_code || "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2 text-right">
@@ -446,10 +453,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.quantity ?? ""}
                           onChange={(e) => updateCommodity(i, "quantity", e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-20 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-right text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-20 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-right text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-zinc-800">{c.quantity ?? "—"}</span>
+                        <span className="text-ink">{c.quantity ?? "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2">
@@ -458,10 +465,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.unit || ""}
                           onChange={(e) => updateCommodity(i, "unit", e.target.value)}
-                          className="w-14 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-14 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-zinc-800">{c.unit || "—"}</span>
+                        <span className="text-ink">{c.unit || "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2 text-right">
@@ -470,10 +477,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.declared_value ?? ""}
                           onChange={(e) => updateCommodity(i, "declared_value", e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-24 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-right text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-24 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-right text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-zinc-800">{c.declared_value != null ? `$${c.declared_value.toLocaleString()}` : "—"}</span>
+                        <span className="text-ink">{c.declared_value != null ? `$${c.declared_value.toLocaleString()}` : "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2 text-right">
@@ -482,10 +489,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.weight ?? ""}
                           onChange={(e) => updateCommodity(i, "weight", e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-20 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-right text-xs outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-20 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-right text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-zinc-800">{c.weight != null ? `${c.weight}kg` : "—"}</span>
+                        <span className="text-ink">{c.weight != null ? `${c.weight}kg` : "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2">
@@ -494,10 +501,10 @@ export default function ReviewPage() {
                           type="text"
                           value={c.country_of_origin || ""}
                           onChange={(e) => updateCommodity(i, "country_of_origin", e.target.value)}
-                          className="w-10 rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-center text-xs uppercase outline-none focus:border-blue-400 focus:bg-white"
+                          className="w-10 rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-center text-xs uppercase outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="font-mono text-xs text-zinc-800">{c.country_of_origin || "—"}</span>
+                        <span className="font-mono text-xs text-ink">{c.country_of_origin || "—"}</span>
                       )}
                     </td>
                     <td className="py-2 pr-2">
@@ -506,7 +513,7 @@ export default function ReviewPage() {
                           {(c.hs_code_confidence * 100).toFixed(0)}%
                         </span>
                       ) : (
-                        <span className="text-xs text-zinc-400">—</span>
+                        <span className="text-xs text-muted">—</span>
                       )}
                     </td>
                   </tr>
@@ -519,21 +526,21 @@ export default function ReviewPage() {
 
       {/* Confidence Scores */}
       {extraction && (
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6">
+        <motion.div {...fadeUp(0.15)} className="rounded-xl border border-line bg-surface p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Confidence Scores</h2>
-            <span className="text-xs text-zinc-400">
+            <h2 className="text-sm font-semibold text-ink">Confidence Scores</h2>
+            <span className="text-xs text-muted">
               Threshold: {(CONFIDENCE_THRESHOLD * 100).toFixed(0)}%
             </span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 mb-4">
             {Object.entries(extraction.confidence_scores).map(([key, val]) => {
               const status = fieldStatus(val);
               return (
                 <div key={key} className="flex items-center gap-3">
                   <status.icon weight="bold" className={`h-4 w-4 shrink-0 ${status.color}`} />
-                  <span className="text-sm w-28 capitalize text-zinc-700">{key.replace(/_/g, " ")}</span>
-                  <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                  <span className="text-sm w-28 capitalize text-ink">{key.replace(/_/g, " ")}</span>
+                  <div className="flex-1 h-2 rounded-full bg-line overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         val >= CONFIDENCE_THRESHOLD ? "bg-emerald-500" : val >= 0.8 ? "bg-amber-500" : "bg-red-500"
@@ -551,13 +558,15 @@ export default function ReviewPage() {
               );
             })}
           </div>
+
+          <ConfidenceExplainer scores={extraction.confidence_scores} showHeader={true} />
         </motion.div>
       )}
 
       {/* Actions */}
       {doc?.status !== "submitted" && (
-        <motion.div {...fadeUp(0.2)} className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6">
-          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Actions</h2>
+        <motion.div {...fadeUp(0.2)} className="rounded-xl border border-line bg-surface p-6 mb-6">
+          <h2 className="text-sm font-semibold text-ink mb-4">Actions</h2>
 
           {/* Re-run extraction */}
           {(doc?.status === "extracted") && (
@@ -565,7 +574,7 @@ export default function ReviewPage() {
               <button
                 onClick={handleProcess}
                 disabled={processing}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-4 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.98] disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-4 text-xs font-medium text-ink transition hover:bg-accent-soft active:scale-[0.98] disabled:opacity-50"
               >
                 Re-run Extraction
               </button>
@@ -578,7 +587,7 @@ export default function ReviewPage() {
               <button
                 onClick={handleApprove}
                 disabled={submitting}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50"
               >
                 <SealCheck weight="bold" className="h-4 w-4" />
                 {submitting ? "Approving..." : "Approve & Mark Reviewed"}
@@ -592,7 +601,7 @@ export default function ReviewPage() {
               <select
                 value={exportFormat}
                 onChange={(e) => setExportFormat(e.target.value)}
-                className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500"
+                className="rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none focus:border-accent"
               >
                 <option value="wco_json">WCO JSON</option>
                 <option value="tsw_json">TSW JSON</option>
@@ -600,7 +609,7 @@ export default function ReviewPage() {
               </select>
               <button
                 onClick={handleExport}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-ink px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98]"
               >
                 <Download weight="bold" className="h-4 w-4" />
                 Export
@@ -609,7 +618,7 @@ export default function ReviewPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-ink px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98] disabled:opacity-50"
                 >
                   {submitting ? "Submitting..." : "Submit to TSW (Mock)"}
                 </button>
@@ -647,7 +656,7 @@ export default function ReviewPage() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6"
+          className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-6"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">

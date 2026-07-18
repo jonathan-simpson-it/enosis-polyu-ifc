@@ -61,51 +61,51 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <motion.div {...fadeUp()} className="mb-8">
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-blue-600 mb-2">
+        <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-2">
           Settings
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">
           Account & Organization
         </h1>
       </motion.div>
 
       {user && (
-        <motion.div {...fadeUp(0.05)} className="rounded-2xl border border-zinc-200 bg-white p-6 mb-6">
+        <motion.div {...fadeUp(0.05)} className="rounded-xl border border-line bg-surface p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <User weight="bold" className="h-5 w-5 text-zinc-400" />
-            <h2 className="text-sm font-semibold text-zinc-900">Account</h2>
+            <User weight="bold" className="h-5 w-5 text-muted" />
+            <h2 className="text-sm font-semibold text-ink">Account</h2>
           </div>
           <dl className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-20 shrink-0">Email:</dt>
-              <dd className="text-zinc-800">{user.email}</dd>
+              <dt className="text-muted w-20 shrink-0">Email:</dt>
+              <dd className="text-ink">{user.email}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-20 shrink-0">Name:</dt>
-              <dd className="text-zinc-800">{user.full_name || "—"}</dd>
+              <dt className="text-muted w-20 shrink-0">Name:</dt>
+              <dd className="text-ink">{user.full_name || "—"}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-20 shrink-0">Role:</dt>
-              <dd className="capitalize text-zinc-800">{user.role}</dd>
+              <dt className="text-muted w-20 shrink-0">Role:</dt>
+              <dd className="capitalize text-ink">{user.role}</dd>
             </div>
             <div className="flex gap-3 items-start">
-              <dt className="text-zinc-400 w-20 shrink-0 pt-0.5">API Key:</dt>
+              <dt className="text-muted w-20 shrink-0 pt-0.5">API Key:</dt>
               <dd className="flex-1 min-w-0">
                 {user.api_key ? (
                   <div className="flex items-center gap-2">
-                    <code className="font-mono text-xs text-zinc-600 bg-zinc-50 rounded-lg px-2 py-1.5 border border-zinc-200 truncate max-w-[280px] block">
+                    <code className="font-mono text-xs text-muted bg-accent-soft rounded-lg px-2 py-1.5 border border-line truncate max-w-[280px] block">
                       {showKey ? user.api_key : `${user.api_key.slice(0, 12)}...${user.api_key.slice(-4)}`}
                     </code>
                     <button
                       onClick={() => setShowKey(!showKey)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition"
+                      className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-accent-soft transition"
                       title={showKey ? "Hide" : "Show"}
                     >
                       {showKey ? <EyeSlash weight="bold" className="h-4 w-4" /> : <Eye weight="bold" className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={handleCopyKey}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition"
+                      className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-accent-soft transition"
                       title="Copy"
                     >
                       <CopySimple weight="bold" className="h-4 w-4" />
@@ -113,14 +113,14 @@ export default function SettingsPage() {
                     {copied && <span className="text-[11px] text-emerald-600">Copied!</span>}
                   </div>
                 ) : (
-                  <span className="text-zinc-400">N/A</span>
+                  <span className="text-muted">N/A</span>
                 )}
               </dd>
             </div>
           </dl>
           <button
             onClick={handleRegenerateKey}
-            className="mt-4 inline-flex h-9 items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.98]"
+            className="mt-4 inline-flex h-9 items-center justify-center rounded-full border border-line bg-surface px-4 text-sm font-medium text-ink transition hover:bg-accent-soft active:scale-[0.98]"
           >
             Regenerate API Key
           </button>
@@ -128,27 +128,27 @@ export default function SettingsPage() {
       )}
 
       {org && (
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <motion.div {...fadeUp(0.1)} className="rounded-xl border border-line bg-surface p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Gear weight="bold" className="h-5 w-5 text-zinc-400" />
-            <h2 className="text-sm font-semibold text-zinc-900">Organization</h2>
+            <Gear weight="bold" className="h-5 w-5 text-muted" />
+            <h2 className="text-sm font-semibold text-ink">Organization</h2>
           </div>
           <dl className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-24 shrink-0">Name:</dt>
-              <dd className="text-zinc-800">{org.name}</dd>
+              <dt className="text-muted w-24 shrink-0">Name:</dt>
+              <dd className="text-ink">{org.name}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-24 shrink-0">BR Number:</dt>
-              <dd className="text-zinc-800">{org.br_number || "—"}</dd>
+              <dt className="text-muted w-24 shrink-0">BR Number:</dt>
+              <dd className="text-ink">{org.br_number || "—"}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-24 shrink-0">Plan:</dt>
-              <dd className="capitalize text-zinc-800">{org.subscription_tier}</dd>
+              <dt className="text-muted w-24 shrink-0">Plan:</dt>
+              <dd className="capitalize text-ink">{org.subscription_tier}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="text-zinc-400 w-24 shrink-0">Usage:</dt>
-              <dd className="text-zinc-800">
+              <dt className="text-muted w-24 shrink-0">Usage:</dt>
+              <dd className="text-ink">
                 {org.usage_current} / {org.usage_limit}
               </dd>
             </div>
