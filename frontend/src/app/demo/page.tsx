@@ -10,31 +10,18 @@ import {
   Download,
   MagnifyingGlass,
   Database,
+  Eye,
   ArrowSquareOut,
 } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
 import ConfidenceExplainer from "@/components/confidence-explainer";
-
-const SAMPLE_FILES = [
-  {
-    id: "invoice",
-    label: "Trade Invoice",
-    desc: "PDF extract: HS codes, weights, containers",
-    preview: "INV-2026-0715-0042  |  Lenovo ThinkPad X1  |  HS: 8471.30.00  |  USD 639,000.00",
-  },
-  {
-    id: "packing",
-    label: "Packing List",
-    desc: "CSV: 5 commodity lines with HS codes",
-    preview: "6110.20.00 Cotton pullovers  |  8471.30.00 Laptops  |  9018.11.00 ECG",
-  },
-  {
-    id: "wechat",
-    label: "WeChat Screenshot",
-    desc: "OCR text: messy Chinese cargo manifest",
-    preview: "东莞华强电子 → 香港捷运物流  |  HS: 85423100  |  USD ~85,000",
-  },
-];
+import DocViewer from "@/components/demo/doc-viewer";
+import {
+  DEMO_DOCS,
+  buildWcoJson,
+  buildTswJson,
+  generateDemoTswReference,
+} from "@/lib/demo-data";
+import type { DemoDoc, DemoExtraction } from "@/lib/demo-data";
 
 const CORE_TECH = [
   { id: "docformer", name: "DocFormer-Trade", desc: "Layout-aware multi-modal model analysing document structure and visual cues", color: "bg-accent-soft text-accent border-accent" },
@@ -43,30 +30,6 @@ const CORE_TECH = [
   { id: "metaschema", name: "MetaSchema", desc: "Zero-shot schema transfer adapting output to TSW/WCO format", color: "bg-accent-soft text-accent border-accent" },
   { id: "tradebench", name: "TradeBench", desc: "Multi-vertical benchmark validating extraction quality", color: "bg-accent-soft text-accent border-accent" },
 ];
-
-const MOCK_EXTRACTION = {
-  declaration_id: "demo-mock-0001",
-  status: "extracted",
-  confidence_avg: 0.84,
-  entities: {
-    hs_codes: ["8471.30.00", "8523.51.00", "8542.31.00", "6110.20.00"],
-    container_numbers: ["MSCU4820137", "OOLU8125479"],
-    weights: [915.0, 120.0, 45.0, 400.0],
-    quantities: [500, 1000, 10000, 2000],
-    dates: ["2026-07-15", "2026-07-14"],
-    invoice_numbers: ["INV-2026-0715-0042"],
-    total_values: [639000.0, 89000.0, 125000.0, 30000.0],
-  },
-  confidence_scores: {
-    hs_codes: 0.94,
-    containers: 0.88,
-    weights: 0.92,
-    dates: 0.96,
-    invoice_numbers: 0.97,
-    overall: 0.84,
-  },
-  needs_review: true,
-};
 
 const STEPS = [
   { num: 1, label: "Unstructured Intake" },
@@ -79,16 +42,16 @@ export default function DemoPage() {
   const reduce = useReducedMotion();
 
   const [step, setStep] = useState(1);
-  const [selectedFile, setSelectedFile] = useState<typeof SAMPLE_FILES[0] | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<DemoDoc | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [extraction, setExtraction] = useState<any>(null);
-  const [exportResult, setExportResult] = useState<any>(null);
+  const [extraction, setExtraction] = useState<DemoExtraction | null>(null);
+  const [exportResult, setExportResult] = useState<Record<string, unknown> | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [offlineMode, setOfflineMode] = useState(false);
 
   const [activeEngine, setActiveEngine] = useState(-1);
   const [showEngineDetails, setShowEngineDetails] = useState(false);
+
+  const [viewerDoc, setViewerDoc] = useState<DemoDoc | null>(null);
 
   const fadeUp = (delay = 0) =>
     reduce
@@ -100,9 +63,10 @@ export default function DemoPage() {
         } as const);
 
   const handleProcess = useCallback(async () => {
-    if (!selectedFile) return;
+    if (!selectedDoc) return;
     setProcessing(true);
-    setError(null);
+    setExtraction(null);
+    setExportResult(null);
     setStep(2);
     setActiveEngine(-1);
     setShowEngineDetails(false);
@@ -117,80 +81,42 @@ export default function DemoPage() {
     await new Promise((r) => setTimeout(r, 600));
     setActiveEngine(-1);
 
-    if (offlineMode) {
-      setExtraction(MOCK_EXTRACTION);
-      setStep(4);
-      setProcessing(false);
-      return;
-    }
-
-    try {
-      const blob = await fetch(
-        `/data/mock/${selectedFile.id === "wechat" ? "wechat-scan.txt" : selectedFile.id === "packing" ? "packing-list.csv" : "invoice-sample.txt"}`
-      ).then((r) => {
-        if (!r.ok) throw new Error(`File not found (${r.status})`);
-        return r.blob();
-      });
-
-      const file = new File([blob], `${selectedFile.label.replace(/\s/g, "_")}.txt`, {
-        type: "text/plain",
-      });
-
-      const upload = await api.uploadDocument(file);
-      setStep(3);
-      const res = await api.processDocument(upload.declaration_id);
-      setExtraction(res);
-      setStep(4);
-    } catch (err: any) {
-      setError(err.message);
-      setStep(1);
-    } finally {
-      setProcessing(false);
-    }
-  }, [selectedFile, offlineMode]);
+    setExtraction(selectedDoc.extraction);
+    setStep(4);
+    setProcessing(false);
+  }, [selectedDoc]);
 
   const handleExport = useCallback(
-    async (format: string) => {
+    (format: string) => {
       if (!extraction) return;
-      try {
-        const res = await api.exportDocument(extraction.declaration_id, format);
-        setExportResult(res);
-        const blob = new Blob([JSON.stringify(res.export, null, 2)], {
-          type: "application/json",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `enosis-demo-${format}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (err: any) {
-        setError(err.message);
-      }
+      const data =
+        format === "tsw_json" ? buildTswJson(extraction) : buildWcoJson(extraction);
+      setExportResult({ exported: true });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `enosis-demo-${format === "tsw_json" ? "tsw-phase-3" : "wco-v3-11"}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
     },
     [extraction]
   );
 
   const handleSubmit = useCallback(async () => {
-    if (!extraction) return;
     setSubmitting(true);
-    setError(null);
-    try {
-      const res = await api.submitToTsw(extraction.declaration_id);
-      setExportResult({ tsw_reference: res.tsw_reference });
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  }, [extraction]);
+    await new Promise((r) => setTimeout(r, 1200));
+    setExportResult({ tsw_reference: generateDemoTswReference() });
+    setSubmitting(false);
+  }, []);
 
   const handleReset = useCallback(() => {
     setStep(1);
-    setSelectedFile(null);
+    setSelectedDoc(null);
     setExtraction(null);
     setExportResult(null);
-    setError(null);
     setActiveEngine(-1);
     setShowEngineDetails(false);
   }, []);
@@ -222,31 +148,26 @@ export default function DemoPage() {
     <div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
       {/* Header */}
       <motion.div {...fadeUp()} className="mb-10">
-        <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-3">
-          Interactive Pipeline Demo
-        </p>
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink font-display">
-          Ingestion &amp; Normalization Pipeline
-        </h1>
-        <p className="mt-3 text-muted max-w-2xl leading-relaxed text-sm">
-          From unstructured trade documents to verified, structured data — powered by 5 novel
-          research contributions.
-        </p>
-      </motion.div>
-
-      {/* Offline mode toggle */}
-      <motion.div {...fadeUp(0.03)} className="mb-6 flex items-center justify-end gap-3">
-        <span className="text-xs text-muted">API backend unavailable?</span>
-        <button
-          onClick={() => setOfflineMode(!offlineMode)}
-          className={`inline-flex h-7 items-center rounded-full px-3 text-[11px] font-medium transition ${
-            offlineMode
-              ? "bg-accent-soft text-accent border border-accent"
-              : "bg-accent-soft/50 text-muted border border-line"
-          }`}
-        >
-          {offlineMode ? "Offline Demo Mode" : "Use Mock Data"}
-        </button>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-3">
+              Interactive Pipeline Demo
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink font-display">
+              Ingestion &amp; Normalization Pipeline
+            </h1>
+            <p className="mt-3 text-muted max-w-2xl leading-relaxed text-sm">
+              From unstructured trade documents to verified, structured data — powered by 5 novel
+              research contributions.
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2 border border-accent/30 shrink-0">
+            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-[11px] font-medium text-accent uppercase tracking-wider">
+              Demo — no account needed
+            </span>
+          </div>
+        </div>
       </motion.div>
 
       {/* Step indicator */}
@@ -311,48 +232,68 @@ export default function DemoPage() {
                   <p className="text-sm text-muted">Select a sample SME trade document to process</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {SAMPLE_FILES.map((f) => {
-                  const active = selectedFile?.id === f.id;
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {DEMO_DOCS.map((doc) => {
+                  const active = selectedDoc?.id === doc.id;
                   return (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setSelectedFile(f);
-                      }}
-                      className={`text-left rounded-xl border-2 p-5 transition-all ${
-                        active
-                          ? "border-accent bg-accent-soft/50"
-                          : "border-line bg-surface hover:border-accent/50"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg mb-3 ${
-                          active ? "bg-accent-soft text-accent" : "bg-accent-soft/50 text-muted"
+                    <div key={doc.id}>
+                      <button
+                        onClick={() => setSelectedDoc(doc)}
+                        className={`w-full text-left rounded-xl border-2 p-5 transition-all ${
+                          active
+                            ? "border-accent bg-accent-soft/50"
+                            : "border-line bg-surface hover:border-accent/50"
                         }`}
                       >
-                        <FileText weight="bold" className="h-5 w-5" />
-                      </div>
-                      <p className="text-sm font-semibold text-ink">{f.label}</p>
-                      <p className="text-xs text-muted mt-1 mb-2">{f.desc}</p>
-                      <div className="rounded-lg bg-accent-soft/20 p-2.5 border border-line">
-                        <p className="text-[11px] font-mono text-muted leading-relaxed truncate">
-                          {f.preview}
-                        </p>
-                      </div>
-                      {active && (
-                        <div className="mt-3 flex items-center gap-1.5 text-xs text-accent font-medium">
-                          <CheckCircle weight="bold" className="h-3.5 w-3.5" />
-                          Selected
+                        <div className="flex items-center justify-between mb-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                              active ? "bg-accent-soft text-accent" : "bg-accent-soft/50 text-muted"
+                            }`}
+                          >
+                            <FileText weight="bold" className="h-5 w-5" />
+                          </div>
+                          <span
+                            className={`text-[11px] font-mono font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                              active
+                                ? "bg-accent-soft text-accent border-accent/30"
+                                : "bg-accent-soft/30 text-muted border-line"
+                            }`}
+                          >
+                            {doc.fileType}
+                          </span>
                         </div>
-                      )}
-                    </button>
+                        <p className="text-sm font-semibold text-ink">{doc.label}</p>
+                        <p className="text-xs text-muted mt-1 mb-2">{doc.desc}</p>
+                        <div className="rounded-lg bg-accent-soft/20 p-2.5 border border-line">
+                          <p className="text-[11px] font-mono text-muted leading-relaxed truncate">
+                            {doc.preview}
+                          </p>
+                        </div>
+                        {active && (
+                          <div className="mt-3 flex items-center gap-1.5 text-xs text-accent font-medium">
+                            <CheckCircle weight="bold" className="h-3.5 w-3.5" />
+                            Selected
+                          </div>
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewerDoc(doc);
+                        }}
+                        className="mt-2 w-full inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-line text-xs text-muted hover:text-ink hover:bg-accent-soft transition-colors"
+                      >
+                        <Eye weight="bold" className="h-3.5 w-3.5" />
+                        View document
+                      </button>
+                    </div>
                   );
                 })}
               </div>
             </div>
 
-            {selectedFile && (
+            {selectedDoc && (
               <div className="flex justify-center">
                 <button
                   onClick={handleProcess}
@@ -478,19 +419,8 @@ export default function DemoPage() {
         )}
       </AnimatePresence>
 
-      {/* Error banner */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
-        >
-          {error}. Using mock data for demonstration.
-        </motion.div>
-      )}
-
       {/* Step 3-4: Verification API + Export */}
-      {extraction && step >= 3 && (
+      {extraction && step >= 4 && (
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -507,6 +437,15 @@ export default function DemoPage() {
                 <p className="text-base font-semibold text-ink">Verification API</p>
                 <p className="text-sm text-muted">HS code labeling &amp; structure validation</p>
               </div>
+              {selectedDoc && (
+                <button
+                  onClick={() => setViewerDoc(selectedDoc)}
+                  className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg border border-line px-3 text-xs text-muted hover:text-ink hover:bg-accent-soft transition-colors"
+                >
+                  <Eye weight="bold" className="h-3.5 w-3.5" />
+                  View source
+                </button>
+              )}
             </div>
 
             {/* HS Codes detected */}
@@ -515,7 +454,7 @@ export default function DemoPage() {
                 HS Codes Detected
               </p>
               <div className="flex flex-wrap gap-2">
-                {extraction.entities?.hs_codes?.length > 0 ? (
+                {extraction.entities.hs_codes?.length > 0 ? (
                   extraction.entities.hs_codes.map((code: string, i: number) => (
                     <motion.span
                       key={i}
@@ -528,13 +467,16 @@ export default function DemoPage() {
                     </motion.span>
                   ))
                 ) : (
-                  <span className="text-sm text-muted">No HS codes detected</span>
+                  <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                    <WarningCircle weight="bold" className="h-4 w-4 shrink-0" />
+                    <span>No HS codes detected — document needs human review</span>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Container Numbers */}
-            {extraction.entities?.container_numbers?.length > 0 && (
+            {extraction.entities.container_numbers?.length > 0 && (
               <div className="mb-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">
                   Container Numbers
@@ -653,7 +595,7 @@ export default function DemoPage() {
             </div>
           </div>
 
-          {/* Completion state with AI Insight CTA */}
+          {/* Completion state */}
           {exportResult && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -666,11 +608,11 @@ export default function DemoPage() {
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-emerald-800 mb-1 font-display">
-                {exportResult.tsw_reference ? "Submitted to Mock TSW" : "Export Complete"}
+                {"tsw_reference" in exportResult ? "Submitted to Mock TSW" : "Export Complete"}
               </h3>
-              {exportResult.tsw_reference && (
+              {"tsw_reference" in exportResult && (
                 <p className="text-sm text-emerald-600 font-mono mb-4">
-                  Reference: {exportResult.tsw_reference}
+                  Reference: {String(exportResult.tsw_reference)}
                 </p>
               )}
 
@@ -718,6 +660,17 @@ export default function DemoPage() {
           ))}
         </div>
       </motion.div>
+
+      {/* Document viewer modal */}
+      {viewerDoc && (
+        <DocViewer
+          open={!!viewerDoc}
+          onClose={() => setViewerDoc(null)}
+          href={viewerDoc.href}
+          viewerType={viewerDoc.viewerType}
+          label={viewerDoc.label}
+        />
+      )}
     </div>
   );
 }
