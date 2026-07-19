@@ -10,7 +10,7 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend",
     "lint": "npm run lint --prefix frontend",
-    "db:up": "docker compose -f docker/docker-compose.yml up db -d --wait && sleep 1",
+    "db:up": "docker info &>/dev/null || { open -a Docker && echo 'Waiting for Docker...' && until docker info &>/dev/null 2>&1; do sleep 2; done; } && sleep 1 && docker compose -f docker/docker-compose.yml up db -d --wait && sleep 1",
     "db:down": "docker compose -f docker/docker-compose.yml down db",
     "db:migrate": "cd backend && PYTHONPATH=.. .venv/bin/alembic upgrade head",
     "db:seed": "PYTHONPATH=. backend/.venv/bin/python backend/scripts/seed_hs_codes.py",
