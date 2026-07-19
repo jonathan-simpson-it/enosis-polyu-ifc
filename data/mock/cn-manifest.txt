@@ -1,0 +1,43 @@
+中国出口货物报关清单
+====================================
+
+发货人 (Consignor):
+深圳智造科技有限公司
+广东省深圳市宝安区西乡街道
+固戍社区宝安大道5010号
+统一社会信用代码: 91440300MA5DABCD12
+
+收货人 (Consignee):
+HK Smart Logistics Ltd.
+Flat B, 15/F, Yip Fung Building
+18 D'Aguilar Street, Central, Hong Kong
+
+运输信息:
+========
+运输方式 (Transport): 陆运 (Truck via Shenzhen Bay Port)
+车牌号 (Vehicle): 粤Z 3HK27 港
+集装箱号 (Container): COSU8192637
+启运地 (Loading): 深圳宝安综合保税区
+目的地 (Discharge): 香港葵涌货柜码头
+贸易条款 (Incoterms): FOB Shenzhen
+日期 (Date): 2026-07-18
+
+货物明细 (Commodity List):
+--------------------------
+序号  品名                         HS编码     数量      单位  单价(USD)  总价(USD)  重量(kg)  原产地
+1    "锂离子电池组 48V 20Ah"      8507.60.00  800       组    120.00     96,000.00  1,200.0   中国
+2    "直流无刷电机 1000W"          8501.40.00  350       台    450.00     157,500.00 560.0     中国
+3    "碳纤维螺旋桨 15英寸"         8803.90.00  3,000     个    8.50      25,500.00  60.0      中国
+4    "印刷电路板 多层PCB"          8534.00.00  12,000    片    3.20      38,400.00  180.0     中国
+5    "锂聚合物电池 3.7V 5000mAh"   8507.60.00  5,000     个    5.80      29,000.00  95.0      中国
+6    "无人机零件-电机底座"         8803.90.00  500       个    22.00     11,000.00  45.0      中国
+
+总申报价值 (Total Declared Value): USD 357,400.00
+总毛重 (Total Gross Weight): 2,140.0 kg
+总净重 (Total Net Weight): 2,050.0 kg
+件数 (Number of Packages): 85 cartons
+币种 (Currency): USD
+
+申报人: 陈伟强 (Chen Weiqiang)
+联系电话: +86 13823786921
+备注: 货物为无人机配件，非危险品。全部采用UN38.3认证电池包装。

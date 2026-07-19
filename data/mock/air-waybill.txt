@@ -1,0 +1,81 @@
+AIR WAYBILL
+===========
+
+AW B #: 160-1234-5678
+HAWB #: HK20260719-SZX0892
+
+CARRIER INFORMATION:
+Shipper / Consignor:
+  Global Fashion Sourcing (HK) Ltd.
+  33/F, Lee Garden One
+  33 Hysan Avenue, Causeway Bay
+  Hong Kong
+  Phone: +852 2893 7200
+
+Consignee:
+  FastFashion Retail GmbH
+  Mariahilfer Strasse 77
+  1060 Vienna
+  Austria
+  Phone: +43 1 598 1600
+
+Issuing Carrier: Cathay Pacific Airways (CX)
+Flight: CX207
+Date: 19-JUL-2026
+Routing: HKG → LHR (London Heathrow)
+Airport of Departure: Hong Kong International (HKG)
+Airport of Destination: London Heathrow (LHR)
+Final Destination: Vienna International (VIE)
+Service: Express (P1)
+
+CARGO DETAILS:
+Nature of Goods: Womens & Mens Apparel — Non-Hazardous
+Gross Weight: 680.0 kg
+Chargeable Weight: 720.0 kg
+Number of Pieces: 24 cartons
+Dimensions: 24 x 120cm x 80cm x 60cm
+Volume: 13.82 cbm
+
+DECLARED VALUE FOR CARRIAGE:
+Currency: HKD
+Declared Value: HKD 1,560,000.00
+Incoterms: FCA Hong Kong International Airport
+
+COMMODITY BREAKDOWN:
+------------------
+1. "Womens dresses, synthetic fibres, summer collection"
+   HS Code: 6204.43.00
+   Quantity: 800 pcs
+   Unit Price (HKD): 450.00
+   Total Value (HKD): 360,000.00
+   Weight: 180.0 kg
+   Country of Origin: China
+
+2. "Womens trousers, cotton, casual line"
+   HS Code: 6204.62.00
+   Quantity: 1,200 pcs
+   Unit Price (HKD): 320.00
+   Total Value (HKD): 384,000.00
+   Weight: 200.0 kg
+   Country of Origin: China
+
+3. "Mens T-shirts, cotton, premium basics"
+   HS Code: 6109.10.00
+   Quantity: 2,000 pcs
+   Unit Price (HKD): 180.00
+   Total Value (HKD): 360,000.00
+   Weight: 150.0 kg
+   Country of Origin: Bangladesh
+
+4. "Ladies leather handbags, calfskin"
+   HS Code: 4202.22.00
+   Quantity: 300 pcs
+   Unit Price (HKD): 1,520.00
+   Total Value (HKD): 456,000.00
+   Weight: 150.0 kg
+   Country of Origin: Italy
+
+TOTAL ITEMS: 4,300 pcs
+TOTAL DECLARED VALUE: HKD 1,560,000.00 (~USD 200,000.00)
+HANDLING: Keep dry. Fragile — Do not stack.
+PREPARED BY: Emily Lau, Air Freight Desk

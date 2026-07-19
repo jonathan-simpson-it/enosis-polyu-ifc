@@ -78,7 +78,7 @@ export default function UploadPage() {
               const file = e.target.files?.[0];
               if (file) upload(file);
             }}
-            accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.json,.csv"
+            accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.json,.csv,.txt"
           />
           <label htmlFor="file-input" className="cursor-pointer">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent-soft">
@@ -95,7 +95,7 @@ export default function UploadPage() {
               {uploading ? "Uploading..." : "Drop your file here or click to browse"}
             </p>
             <p className="text-sm text-muted">
-              PDF, Excel, Image, JSON, or CSV — up to 20MB
+              PDF, Excel, Image, JSON, CSV, or TXT — up to 20MB
             </p>
           </label>
         </div>

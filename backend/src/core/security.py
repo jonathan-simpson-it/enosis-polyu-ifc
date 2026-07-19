@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -9,7 +10,7 @@ from typing import Any, Optional
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,17 +18,16 @@ from backend.src.core.config import settings
 from backend.src.core.database import get_db
 from backend.src.core.models.auth import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 api_key_header = APIKeyHeader(name=settings.api_key_header, auto_error=False)
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(hashlib.sha256(password.encode()).digest(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(hashlib.sha256(plain.encode()).digest(), hashed.encode())
 
 
 def create_access_token(data: dict[str, Any]) -> str:

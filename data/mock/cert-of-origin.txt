@@ -1,0 +1,75 @@
+CERTIFICATE OF ORIGIN
+====================
+Under CEPA (Closer Economic Partnership Arrangement)
+Between Hong Kong, China and Mainland China
+
+Certificate No.: CEPA-HK-2026-08421
+Date of Issue: 18-JUL-2026
+Issuing Authority: Hong Kong Trade and Industry Department
+
+EXPORTER / CONSIGNOR:
+  HK Precision Metals Ltd.
+  Units 8-10, 22/F, Technology Park
+  18 Tat Hong Avenue, Tai Po
+  New Territories, Hong Kong
+  BR: 55446622
+
+CONSIGNEE:
+  Shanghai Automotive Components Co., Ltd.
+  888 Zhangyang Road, Pudong New Area
+  Shanghai 200120, China
+  USC: 91310000607312345A
+
+TRANSPORT DETAILS:
+  Port of Loading: Hong Kong
+  Port of Discharge: Shanghai (Waigaoqiao)
+  Vessel: COSCO SHIPPING STAR V.201W
+  Container: TCLU6091823
+  Transport Mode: Sea
+  Date of Departure: 20-JUL-2026
+
+GOODS ORIGINATING FROM: Hong Kong, China
+
+COMMODITIES COVERED BY THIS CERTIFICATE:
+-----------------------------------------
+
+1. "Aluminium alloy profiles, precision-milled, for automotive window frames"
+   HS Code: 7604.29.90
+   Quantity: 15,000 metres
+   Net Weight: 4,200 kg
+   FOB Value: HKD 1,260,000.00
+   Origin Criteria: Wholly Obtained (WO)
+
+2. "Stamped iron brackets for vehicle brake system mounting"
+   HS Code: 8708.30.00
+   Quantity: 40,000 pcs
+   Net Weight: 1,800 kg
+   FOB Value: HKD 960,000.00
+   Origin Criteria: Wholly Obtained (WO)
+
+3. "Steel screws and bolts, M8-M12, automotive grade"
+   HS Code: 7318.15.00
+   Quantity: 200,000 pcs
+   Net Weight: 850 kg
+   FOB Value: HKD 340,000.00
+   Origin Criteria: Wholly Obtained (WO)
+
+TOTAL FOB VALUE: HKD 2,560,000.00
+TOTAL NET WEIGHT: 6,850 kg
+TOTAL GROSS WEIGHT: 7,500 kg
+NUMBER OF PACKAGES: 32 pallets
+CURRENCY: HKD
+
+CERTIFICATION:
+  We hereby certify that the above-mentioned goods originate
+  from Hong Kong, China and qualify for preferential tariff
+  treatment under CEPA.
+
+  Signed: Cheung Tai Ming
+  Position: Export Manager
+  Company Chop: [HK Precision Metals Ltd.]
+
+FOR OFFICIAL USE:
+  Verified by: Trade and Industry Department, HKSAR
+  Official Stamp: [CEPA Certification Stamp]
+  Verification Date: 18-JUL-2026

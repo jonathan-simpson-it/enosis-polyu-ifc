@@ -1,0 +1,91 @@
+INVOICE #: INV-2026-0720-0089
+DATE: 20-JUL-2026
+DUE DATE: 20-AUG-2026
+
+SELLER / CONSIGNOR:
+Asia Medical Devices (HK) Ltd.
+Unit 1205, 12/F, Tower 6, The Gateway
+9 Canton Road, Tsim Sha Tsui
+Kowloon, Hong Kong
+BR: 33998877
+
+BUYER / CONSIGNEE:
+EuroMed Healthcare GmbH
+Kaiserstrasse 148
+60329 Frankfurt am Main
+Germany
+VAT: DE293847562
+
+BANK DETAILS:
+Bank: HSBC Hong Kong
+SWIFT: HSBCHKHH
+Account: 652-389401-838
+IBAN: HK12002000652389401838
+
+SHIPPING DETAILS:
+===============
+Carrier: Hapag-Lloyd
+Vessel: HAMBURG EXPRESS V.047E
+Voyage: HKHKG → DEHAM
+Container: HLBU2059183 (40ft HC Reefer)
+Port of Loading: Hong Kong International Terminals
+Port of Discharge: Hamburg, Germany
+Incoterms: CIF Hamburg
+Transport Mode: Sea
+L/C Number: LC20260715-HKDE-0392
+
+COMMODITIES:
+-----------
+1. "Electrocardiographs, 12-channel, GE MAC 2000"
+   HS Code: 9018.11.00
+   Quantity: 30 units
+   Unit Price: USD 3,200.00
+   Total Value: USD 96,000.00
+   Gross Weight: 270.0 kg
+   Net Weight: 240.0 kg
+   Country of Origin: United States
+
+2. "Diagnostic laboratory reagents, COVID/Flu combo test kits"
+   HS Code: 3822.00.00
+   Quantity: 50,000 kits
+   Unit Price: USD 2.40
+   Total Value: USD 120,000.00
+   Gross Weight: 380.0 kg
+   Net Weight: 350.0 kg
+   Country of Origin: China
+
+3. "Orthopaedic fracture appliances, titanium bone plates"
+   HS Code: 9021.10.00
+   Quantity: 2,000 pcs
+   Unit Price: USD 45.00
+   Total Value: USD 90,000.00
+   Gross Weight: 180.0 kg
+   Net Weight: 160.0 kg
+   Country of Origin: Germany
+
+4. "Syringes with needles, 3ml, sterile, single-use"
+   HS Code: 9018.39.00
+   Quantity: 100,000 units
+   Unit Price: USD 0.18
+   Total Value: USD 18,000.00
+   Gross Weight: 420.0 kg
+   Net Weight: 400.0 kg
+   Country of Origin: China
+
+5. "Portable digital blood pressure monitors, Bluetooth-enabled"
+   HS Code: 9018.90.00
+   Quantity: 1,500 units
+   Unit Price: USD 28.00
+   Total Value: USD 42,000.00
+   Gross Weight: 195.0 kg
+   Net Weight: 180.0 kg
+   Country of Origin: China
+
+TOTAL DECLARED VALUE: USD 366,000.00
+TOTAL GROSS WEIGHT: 1,445.0 kg
+TOTAL NET WEIGHT: 1,330.0 kg
+NUMBER OF PACKAGES: 45 pallets
+CURRENCY: USD
+
+DECLARATION: Goods are of non-hazardous nature. All items comply with EU Medical Device Regulation (EU) 2017/745.
+PREPARED BY: Alice Wong, Export Documentation
