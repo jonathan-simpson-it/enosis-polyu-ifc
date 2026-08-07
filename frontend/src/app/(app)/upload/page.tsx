@@ -95,7 +95,7 @@ export default function UploadPage() {
               {uploading ? "Uploading..." : "Drop your file here or click to browse"}
             </p>
             <p className="text-sm text-muted">
-              PDF, Excel, Image, JSON, CSV, or TXT — up to 20MB
+              PDF, Excel, Image, JSON, CSV, or TXT, up to 20MB
             </p>
           </label>
         </div>

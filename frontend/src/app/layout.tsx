@@ -15,9 +15,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Enosis — Universal Document Intelligence Engine",
+  title: "Enosis | Universal Document Intelligence Engine",
   description:
-    "Translate any trade document into TSW-compliant schemas — PDF invoices, Excel packing lists, or WeChat screenshots — one click to WCO XML.",
+    "Translate any trade document into TSW-compliant schemas. PDF invoices, Excel packing lists, or WeChat screenshots, one click to WCO XML.",
 };
 
 export default function RootLayout({

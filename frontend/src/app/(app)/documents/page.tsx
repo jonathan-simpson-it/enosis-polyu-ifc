@@ -142,10 +142,10 @@ export default function DocumentsPage() {
                     </span>
                   </td>
                   <td className={`px-6 py-4 text-sm font-medium ${confidenceColor(doc.confidence_avg)}`}>
-                    {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "—"}
+                    {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "Not provided"}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">
-                    {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "—"}
+                    {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Not provided"}
                   </td>
                   <td className="px-6 py-4">
                     <button

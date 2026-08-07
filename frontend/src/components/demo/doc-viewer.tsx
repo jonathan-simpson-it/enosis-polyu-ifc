@@ -216,7 +216,7 @@ export default function DocViewer({ open, onClose, href, viewerType, label }: Do
                       <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                       </svg>
-                      OCR extract — confidence 78%
+                      OCR extract, confidence 78%
                     </div>
                   )}
                   <pre className="text-xs font-mono text-ink leading-relaxed whitespace-pre-wrap bg-accent-soft/20 p-4 rounded-xl border border-line max-h-[60vh] overflow-auto">

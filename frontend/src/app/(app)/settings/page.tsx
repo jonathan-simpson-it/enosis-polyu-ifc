@@ -82,7 +82,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex gap-3">
               <dt className="text-muted w-20 shrink-0">Name:</dt>
-              <dd className="text-ink">{user.full_name || "—"}</dd>
+              <dd className="text-ink">{user.full_name || "Not provided"}</dd>
             </div>
             <div className="flex gap-3">
               <dt className="text-muted w-20 shrink-0">Role:</dt>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex gap-3">
               <dt className="text-muted w-24 shrink-0">BR Number:</dt>
-              <dd className="text-ink">{org.br_number || "—"}</dd>
+              <dd className="text-ink">{org.br_number || "Not provided"}</dd>
             </div>
             <div className="flex gap-3">
               <dt className="text-muted w-24 shrink-0">Plan:</dt>

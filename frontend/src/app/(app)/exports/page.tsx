@@ -110,7 +110,7 @@ export default function ExportsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">
-                    {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "—"}
+                    {doc.confidence_avg ? `${(doc.confidence_avg * 100).toFixed(0)}%` : "Not provided"}
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <button

@@ -20,7 +20,7 @@ const steps = [
   {
     icon: FileText,
     title: "Ingest",
-    desc: "Drop any document — PDF invoice, Excel packing list, or WeChat screenshot. No integration needed.",
+    desc: "Drop any document: PDF invoice, Excel packing list, or WeChat screenshot. No integration needed.",
   },
   {
     icon: MagnifyingGlass,
@@ -81,8 +81,7 @@ export default function Home() {
       ? {}
       : ({
           initial: { opacity: 0, y: 24 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.3 },
+          animate: { opacity: 1, y: 0 },
           transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] },
         } as const);
 
@@ -153,32 +152,45 @@ export default function Home() {
       {/* How it works */}
       <section className="border-b border-line">
         <div className="mx-auto max-w-7xl px-6 py-24">
-          <motion.div {...fadeUp()} className="text-center mb-16">
+          <motion.div {...fadeUp()} className="max-w-2xl mb-16">
             <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink font-display">
               From messy document to compliant schema
             </h2>
-            <p className="mt-3 text-muted max-w-2xl mx-auto leading-relaxed text-sm">
-              Three steps. No training. No IT setup.
+            <p className="mt-3 text-muted max-w-2xl leading-relaxed text-sm">
+              Three steps. No training. No IT setup. The middle step is the engine, the other two
+              are yours.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.title}
-                {...fadeUp(i * 0.1)}
-                className="group relative rounded-xl border border-line bg-surface p-8 transition-all hover:shadow-soft"
-              >
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft">
-                  <step.icon weight="bold" className="h-6 w-6 text-accent" />
-                </div>
-                <h3 className="text-lg font-semibold text-ink mb-2">{step.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
-              </motion.div>
-            ))}
+          <div className="relative">
+            <div className="hidden md:block absolute top-12 left-[16.6%] right-[16.6%] h-px bg-line" aria-hidden />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {steps.map((step, i) => (
+                <motion.div
+                  key={step.title}
+                  {...fadeUp(i * 0.1)}
+                  className={`relative rounded-xl border p-8 ${
+                    i === 1
+                      ? "border-accent bg-accent-soft/40"
+                      : "border-line bg-surface"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-5xl font-display font-normal text-line select-none">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ink">
+                      <step.icon weight="bold" className="h-6 w-6 text-surface" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-ink mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          <motion.div {...fadeUp(0.3)} className="mt-10 flex justify-center">
+          <motion.div {...fadeUp(0.3)} className="mt-12 flex justify-center">
             <img
               src="https://images.pexels.com/photos/669610/pexels-photo-669610.jpeg"
               alt="Team processing documents"
@@ -200,13 +212,13 @@ export default function Home() {
               <p className="mt-4 text-muted leading-relaxed text-sm">
                 Since May 1 2026, all road cargo advance information must be submitted through the
                 Trade Single Window. Enosis translates your existing invoices and packing lists into
-                TSW-compliant WCO XML schemas — no software installation, no API rewrites.
+                TSW-compliant WCO XML schemas. No software installation, no API rewrites.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
                   "40+ trade document types supported",
                   "System-to-system (S2S) submission ready",
-                  "VASP partnership model — we translate, they submit",
+                  "VASP partnership model: we translate, they submit",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-muted">
                     <SealCheck weight="bold" className="h-5 w-5 text-accent shrink-0 mt-0.5" />
@@ -246,7 +258,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Beyond trade — One engine, every domain */}
+      {/* Beyond trade: One engine, every domain */}
       <section className="border-b border-line">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <motion.div {...fadeUp()} className="max-w-2xl mb-14">
@@ -255,7 +267,7 @@ export default function Home() {
             </h2>
             <p className="mt-3 text-muted text-sm leading-relaxed">
               The same infrastructure that parses shipping manifests today can parse carbon invoices
-              tomorrow. Enosis is a horizontal schema-normalisation engine — our
+              tomorrow. Enosis is a horizontal schema-normalisation engine. Our
               <span className="text-accent font-medium"> MetaSchema </span>
               zero-shot transfer adapts to any vertical without retraining.
             </p>
@@ -267,23 +279,46 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {DOMAINS.map((domain, i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <motion.div
+              {...fadeUp(0)}
+              className="lg:col-span-2 rounded-xl border border-accent bg-surface p-8 flex flex-col justify-between"
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ink">
+                  <Cube weight="bold" className="h-6 w-6 text-surface" />
+                </div>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-accent">
+                  Today
+                </span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-ink mb-2">Trade &amp; TSW</h3>
+                <p className="text-sm text-muted leading-relaxed max-w-xl">
+                  Translate invoices and packing lists into compliant WCO XML. Submission-ready for
+                  Hong Kong&apos;s Trade Single Window, Phase 3 mandate live since May 2026.
+                </p>
+              </div>
+            </motion.div>
+
+            {DOMAINS.slice(1).map((domain, i) => (
               <motion.div
                 key={domain.title}
-                {...fadeUp(i * 0.08)}
-                className="rounded-xl border border-line bg-surface p-6 transition-all hover:shadow-soft"
+                {...fadeUp(0.08 * (i + 1))}
+                className="rounded-xl border border-line bg-surface p-6 flex items-start gap-4"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-soft">
-                    <domain.icon weight="bold" className="h-5 w-5 text-accent" />
-                  </div>
-                  <span className={`text-[11px] font-mono uppercase tracking-wider ${domain.tagColor}`}>
-                    {domain.tag}
-                  </span>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+                  <domain.icon weight="bold" className="h-5 w-5 text-accent" />
                 </div>
-                <h3 className="text-base font-semibold text-ink mb-1.5">{domain.title}</h3>
-                <p className="text-xs text-muted leading-relaxed">{domain.desc}</p>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-base font-semibold text-ink">{domain.title}</h3>
+                    <span className={`text-[11px] font-mono uppercase tracking-wider ${domain.tagColor}`}>
+                      {domain.tag}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted leading-relaxed">{domain.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -310,19 +345,28 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <motion.div {...fadeUp(0.1)} className="rounded-xl border border-line bg-surface overflow-hidden">
             {research.map((item, i) => (
               <motion.div
                 key={item.title}
-                {...fadeUp(i * 0.06)}
-                className="rounded-xl border border-line bg-surface p-5 transition-all hover:shadow-soft"
+                initial={reduce ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className={`flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 px-6 py-4 ${
+                  i > 0 ? "border-t border-line" : ""
+                }`}
               >
-                <p className="text-sm font-semibold text-ink">{item.title}</p>
-                <p className="text-xs text-muted mt-1">{item.desc}</p>
-                <p className="text-xs font-mono text-accent mt-2">{item.metric}</p>
+                <div className="flex items-baseline gap-3 min-w-0 flex-1">
+                  <span className="text-xs font-mono text-muted w-8 shrink-0">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm font-semibold text-ink shrink-0">{item.title}</span>
+                  <span className="text-xs text-muted truncate">{item.desc}</span>
+                </div>
+                <span className="text-xs font-mono text-accent sm:pl-0 pl-11">{item.metric}</span>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

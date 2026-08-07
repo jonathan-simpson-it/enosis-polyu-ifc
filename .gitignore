@@ -53,3 +53,9 @@ node_modules/
 frontend/.next/
 frontend/out/
 frontend/next-env.d.ts
+
+# Demo media
+*.mp4
+
+# Tesseract traineddata (downloaded at runtime)
+frontend/*.traineddata
