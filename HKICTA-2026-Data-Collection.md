@@ -676,7 +676,6 @@ Review page with full editable header fields and commodities table. Low-confiden
 python -m venv .venv && source .venv/bin/activate
 pip install -r backend/requirements.txt
 cp .env.example .env   # Edit DEEPSEEK_API_KEY
-docker compose -f docker/docker-compose.yml up db -d
 uvicorn backend.src.main:app --reload --port 8000
 
 # Frontend (separate terminal)
