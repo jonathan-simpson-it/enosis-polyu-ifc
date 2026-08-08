@@ -15,24 +15,25 @@ Universal data ingestion engine for GBA trade documents. Turns messy paper, PDFs
 ## Quick start
 
 ```bash
-npm install --prefix frontend
+npm install
 npm run dev
 ```
 
 - Demo: http://localhost:3000/demo (interactive pipeline, live engine included)
 - App: http://localhost:3000 (sign in with any email + 4+ char password)
-- API docs: see the route handlers under `frontend/src/app/api/`
+- API docs: see the route handlers under `src/app/api/`
 
 ## Architecture
 
 ```
-frontend/
 ├── src/lib/engine/          # The ingestion engine (pure TS)
 │   ├── parser.ts            # format dispatch: pdf / excel / image / csv / json / text
 │   ├── pdf.ts               # pdfjs-dist text extraction (Node-safe polyfills)
 │   ├── excel.ts             # read-excel-file + header-row detection
 │   ├── ocr.ts               # sharp pre-process + tesseract.js
-│   ├── ner.ts               # regex NER + flattened-table fallback
+│   ├── ner.ts               # regex NER + flattened-table fallback + shop-note patterns
+│   ├── vision.ts            # OpenRouter vision fallback for handwriting
+│   ├── translate.ts         # zh-Hant-HK / zh-Hans-CN / en translation
 │   ├── confidence.ts        # deterministic per-field scoring
 │   ├── hsCodes.ts           # 101 embedded HS codes + fuzzy match
 │   ├── wco.ts / validator.ts / sanitizer.ts
@@ -41,9 +42,13 @@ frontend/
 │   ├── documents/           # upload, process (stateless), list, CRUD
 │   ├── extraction/          # process/[id], commodities, approve/[id]
 │   ├── export/              # formats, [id] (wco_json/wco_xml/tsw_json), [id]/submit
+│   ├── translate/           # text translation endpoint
 │   └── auth/                # demo-mode tokens
 ├── src/app/demo/            # interactive pipeline demo (theater + live engine)
-└── src/app/                 # landing, dashboard, upload, review, exports, settings
+├── src/app/                 # landing, dashboard, upload, review, exports, settings
+├── public/data/mock/        # sample documents for the demo
+├── public/data/paper/       # messy-paper OCR test fixtures
+└── legacy/                  # the original FastAPI + Postgres implementation
 ```
 
 Notes:

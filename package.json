@@ -4,16 +4,36 @@
   "private": true,
   "description": "Enosis: Next.js data ingestion engine for GBA trade documents",
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "start": "npm run start --prefix frontend",
-    "lint": "npm run lint --prefix frontend",
-    "typecheck": "tsc --noEmit --prefix frontend",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test:e2e": "npx playwright test --headed",
     "test:e2e:headless": "npx playwright test"
   },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.3",
+    "@phosphor-icons/react": "^2.1.10",
+    "motion": "^12.42.2",
+    "next": "16.2.10",
+    "pdfjs-dist": "^6.2.108",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "read-excel-file": "^9.3.5",
+    "sharp": "^0.35.3",
+    "tesseract.js": "^7.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "concurrently": "^9.1.2"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.1.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

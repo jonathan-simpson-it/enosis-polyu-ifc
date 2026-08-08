@@ -19,6 +19,10 @@ env/
 
 # Environment
 .env
+.env.prod
+.env.production
+*.env.local
+*.env.*.local
 
 # IDE
 .vscode/
@@ -50,12 +54,12 @@ node_modules/
 *.tsbuildinfo
 
 # Frontend
-frontend/.next/
-frontend/out/
-frontend/next-env.d.ts
+.next/
+out/
+next-env.d.ts
 
 # Demo media
 *.mp4
 
 # Tesseract traineddata (downloaded at runtime)
-frontend/*.traineddata
+*.traineddata
