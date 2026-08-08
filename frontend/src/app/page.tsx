@@ -149,6 +149,25 @@ export default function Home() {
         </div>
       </motion.div>
 
+      {/* Impact strip */}
+      <motion.div {...fadeUp(0.15)} className="border-b border-line">
+        <div className="mx-auto max-w-7xl px-6 py-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
+            {[
+              { value: "95%", label: "accuracy guarantee", note: "p<0.05, per field, per document" },
+              { value: "<120s", label: "per document", note: "from paper in hand to verified JSON" },
+              { value: "HK$349", label: "flat rate per month", note: "no per-document fees, no setup cost" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-surface p-6">
+                <p className="text-3xl font-semibold text-ink font-display tracking-tight">{stat.value}</p>
+                <p className="mt-1 text-xs font-medium text-ink">{stat.label}</p>
+                <p className="mt-0.5 text-xs text-muted">{stat.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
       {/* How it works */}
       <section className="border-b border-line">
         <div className="mx-auto max-w-7xl px-6 py-24">

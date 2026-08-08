@@ -13,6 +13,8 @@ import {
   FloppyDisk,
   XCircle,
   ArrowSquareOut,
+  Translate,
+  ArrowsClockwise,
 } from "@phosphor-icons/react";
 import {
   api,
@@ -68,6 +70,8 @@ export default function ReviewPage() {
   });
   const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [headerDirty, setHeaderDirty] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, { text: string; target: string }>>({});
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [commodityDirty, setCommodityDirty] = useState(false);
   const [savingHeader, setSavingHeader] = useState(false);
   const [savingCommodities, setSavingCommodities] = useState(false);
@@ -233,6 +237,39 @@ export default function ReviewPage() {
     });
     setCommodityDirty(true);
   };
+
+  const handleTranslate = useCallback(
+    async (commodity: Commodity, target: string) => {
+      if (!commodity.description || translatingId) return;
+      setTranslatingId(commodity.id);
+      try {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: commodity.description, target }),
+        });
+        if (!res.ok) throw new Error("translate failed");
+        const data = await res.json();
+        setTranslations((prev) => ({
+          ...prev,
+          [commodity.id]: { text: data.translated, target },
+        }));
+      } catch {
+        setError("Translation unavailable. Check the OpenRouter key and try again.");
+      } finally {
+        setTranslatingId(null);
+      }
+    },
+    [translatingId]
+  );
+
+  const clearTranslation = useCallback((commodityId: string) => {
+    setTranslations((prev) => {
+      const next = { ...prev };
+      delete next[commodityId];
+      return next;
+    });
+  }, []);
 
   const handleApprove = useCallback(async () => {
     setSubmitting(true);
@@ -548,7 +585,54 @@ export default function ReviewPage() {
                           className="w-full rounded-lg border border-line bg-accent-soft/20 px-2 py-1 text-xs outline-none focus:border-accent focus:bg-surface"
                         />
                       ) : (
-                        <span className="text-ink">{c.description || "Not provided"}</span>
+                        <div className="flex items-start gap-2">
+                          <span className="text-ink">
+                            {translations[c.id]?.text || c.description || "Not provided"}
+                          </span>
+                          {translations[c.id] && (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-medium text-accent">
+                              {translations[c.id].target === "zh-Hant-HK"
+                                ? "繁體中文"
+                                : translations[c.id].target === "zh-Hans-CN"
+                                  ? "简体中文"
+                                  : "English"}
+                              <button
+                                onClick={() => clearTranslation(c.id)}
+                                className="hover:text-ink transition-colors"
+                                title="Restore original"
+                              >
+                                <ArrowsClockwise weight="bold" className="h-2.5 w-2.5" />
+                              </button>
+                            </span>
+                          )}
+                          {!translations[c.id] && c.description && (
+                            <span className="group relative shrink-0">
+                              <button
+                                onClick={() => handleTranslate(c, "zh-Hant-HK")}
+                                disabled={!!translatingId}
+                                className="flex h-5 w-5 items-center justify-center rounded-md border border-line text-muted hover:border-accent hover:text-accent transition-colors disabled:opacity-40"
+                                title="Translate"
+                              >
+                                <Translate weight="bold" className="h-3 w-3" />
+                              </button>
+                              <span className="absolute left-0 top-6 z-10 hidden group-hover:flex flex-col gap-0.5 rounded-lg border border-line bg-surface p-1 shadow-sm">
+                                {[
+                                  ["en", "English"],
+                                  ["zh-Hant-HK", "繁體中文"],
+                                  ["zh-Hans-CN", "简体中文"],
+                                ].map(([code, label]) => (
+                                  <button
+                                    key={code}
+                                    onClick={() => handleTranslate(c, code)}
+                                    className="whitespace-nowrap rounded-md px-2 py-1 text-[11px] text-ink hover:bg-accent-soft transition-colors"
+                                  >
+                                    {label}
+                                  </button>
+                                ))}
+                              </span>
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="py-2 pr-2">

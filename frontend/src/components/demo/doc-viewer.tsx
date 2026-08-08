@@ -161,11 +161,11 @@ export default function DocViewer({ open, onClose, href, viewerType, label }: Do
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-6 overflow-x-hidden">
               {viewerType === "pdf" ? (
                 <iframe
                   src={href}
-                  className="w-full h-[65vh] rounded-xl border border-line"
+                  className="w-full h-[65vh] rounded-xl border border-line overflow-hidden"
                   title={label}
                 />
               ) : viewerType === "table" && href.endsWith(".xlsx") ? (

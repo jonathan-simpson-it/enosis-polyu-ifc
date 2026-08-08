@@ -84,7 +84,7 @@ export default function ExportsPage() {
           </p>
         </motion.div>
       ) : (
-        <div className="rounded-xl border border-line bg-surface overflow-hidden">
+        <div className="rounded-xl border border-line bg-surface overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted border-b border-line">

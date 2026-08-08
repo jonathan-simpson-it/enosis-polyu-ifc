@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDocument } from "@/lib/engine/store";
 import { buildWcoJson, buildWcoXml, buildTswPayload } from "@/lib/engine/wco";
 import { validateTswReady } from "@/lib/engine/validator";
+import { translateText, type TargetLang } from "@/lib/engine/translate";
 import type { DeclarationHeader } from "@/lib/engine/wco";
 
 export async function POST(
@@ -16,6 +17,20 @@ export async function POST(
 
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format") || "wco_json";
+  const translateTo = searchParams.get("translate_to") as TargetLang | null;
+
+  let commodities = doc.commodities;
+  if (translateTo && ["en", "zh-Hant-HK", "zh-Hans-CN"].includes(translateTo)) {
+    const descriptions = await Promise.all(
+      commodities.map((c) =>
+        translateText(c.description, translateTo).then((r) => r?.translated || c.description)
+      )
+    );
+    commodities = commodities.map((c, i) => ({
+      ...c,
+      description: descriptions[i],
+    }));
+  }
 
   const header: DeclarationHeader = {
     declaration_number: doc.decl_number || doc.id,
@@ -38,12 +53,12 @@ export async function POST(
   let xml: string | null = null;
 
   if (format === "tsw_json") {
-    payload = buildTswPayload(header, doc.commodities, doc.decl_number || "");
+    payload = buildTswPayload(header, commodities, doc.decl_number || "");
   } else if (format === "wco_xml") {
-    payload = buildWcoJson(header, doc.commodities);
-    xml = buildWcoXml(header, doc.commodities);
+    payload = buildWcoJson(header, commodities);
+    xml = buildWcoXml(header, commodities);
   } else {
-    payload = buildWcoJson(header, doc.commodities);
+    payload = buildWcoJson(header, commodities);
   }
 
   const validation = validateTswReady(payload as Record<string, unknown>);

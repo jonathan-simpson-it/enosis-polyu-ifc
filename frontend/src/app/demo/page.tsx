@@ -51,6 +51,7 @@ export default function DemoPage() {
 
   const [liveFile, setLiveFile] = useState<File | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [waitingOnEngine, setWaitingOnEngine] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeEngine, setActiveEngine] = useState(-1);
@@ -97,7 +98,9 @@ export default function DemoPage() {
     setLiveError(null);
     setExtraction(null);
     setExportResult(null);
+    setWaitingOnEngine(false);
     await runEngineTheater();
+    setWaitingOnEngine(true);
     try {
       const form = new FormData();
       form.append("file", liveFile);
@@ -116,6 +119,7 @@ export default function DemoPage() {
       setStep(1);
     } finally {
       setProcessing(false);
+      setWaitingOnEngine(false);
     }
   }, [liveFile, runEngineTheater]);
 
@@ -158,6 +162,13 @@ export default function DemoPage() {
   }, []);
 
   const fieldStatus = (score: number) => {
+    if (score <= 0.05)
+      return {
+        icon: WarningCircle,
+        label: "Not detected",
+        color: "text-muted",
+        bar: "bg-line/40",
+      };
     if (score >= 0.95)
       return {
         icon: CheckCircle,
@@ -181,21 +192,17 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+    <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-6xl flex-col px-6 py-6 sm:px-8">
       {/* Header */}
-      <motion.div {...fadeUp()} className="mb-10">
-        <div className="flex items-center justify-between">
+      <motion.div {...fadeUp()} className="mb-6">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-3">
+            <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-2">
               Interactive Pipeline Demo
             </p>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink font-display">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink font-display">
               Ingestion &amp; Normalization Pipeline
             </h1>
-            <p className="mt-3 text-muted max-w-2xl leading-relaxed text-sm">
-              From unstructured trade documents to verified, structured data, powered by 5 novel
-              research contributions.
-            </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2 border border-accent/30 shrink-0">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -204,25 +211,10 @@ export default function DemoPage() {
             </span>
           </div>
         </div>
-
-        {/* Guarantee strip */}
-        <motion.div {...fadeUp(0.08)} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
-          {[
-            { value: "95%", label: "accuracy guarantee, p<0.05", note: "UncertaintyGuard flags anything below it" },
-            { value: "<120s", label: "per document", note: "from paper to verified JSON" },
-            { value: "HK$349", label: "flat rate per month", note: "no per-document fees, no setup" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-surface p-5">
-              <p className="text-2xl font-semibold text-ink font-display tracking-tight">{stat.value}</p>
-              <p className="mt-1 text-xs font-medium text-ink">{stat.label}</p>
-              <p className="mt-0.5 text-xs text-muted">{stat.note}</p>
-            </div>
-          ))}
-        </motion.div>
       </motion.div>
 
       {/* Step indicator */}
-      <motion.div {...fadeUp(0.05)} className="mb-10">
+      <motion.div {...fadeUp(0.05)} className="mb-5">
         <div className="flex items-center justify-between gap-0">
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center gap-2 flex-1">
@@ -274,38 +266,38 @@ export default function DemoPage() {
             className="mb-8"
           >
             <div className="rounded-xl border border-line bg-surface p-8 mb-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-soft">
-                <FileText weight="bold" className="h-5 w-5 text-accent" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-soft">
+                <FileText weight="bold" className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <p className="text-base font-semibold text-ink">Unstructured Intake</p>
-                <p className="text-sm text-muted">Select a sample SME trade document to process</p>
+                <p className="text-sm font-semibold text-ink">Unstructured Intake</p>
+                <p className="text-xs text-muted">Pick a sample document, or upload your own below</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {DEMO_DOCS.map((doc) => {
                 const active = selectedDoc?.id === doc.id;
                 return (
                   <div key={doc.id}>
                     <button
                       onClick={() => setSelectedDoc(doc)}
-                      className={`w-full text-left rounded-xl border-2 p-5 transition-all ${
+                      className={`w-full text-left rounded-xl border-2 p-3.5 transition-all ${
                         active
                           ? "border-accent bg-accent-soft/50"
                           : "border-line bg-surface hover:border-accent/50"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                             active ? "bg-accent-soft text-accent" : "bg-accent-soft/50 text-muted"
                           }`}
                         >
-                          <FileText weight="bold" className="h-5 w-5" />
+                          <FileText weight="bold" className="h-4 w-4" />
                         </div>
                         <span
-                          className={`text-[11px] font-mono font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                          className={`text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                             active
                               ? "bg-accent-soft text-accent border-accent/30"
                               : "bg-accent-soft/30 text-muted border-line"
@@ -314,16 +306,16 @@ export default function DemoPage() {
                           {doc.fileType}
                         </span>
                       </div>
-                      <p className="text-sm font-semibold text-ink">{doc.label}</p>
-                      <p className="text-xs text-muted mt-1 mb-2">{doc.desc}</p>
-                      <div className="rounded-lg bg-accent-soft/20 p-2.5 border border-line">
-                        <p className="text-[11px] font-mono text-muted leading-relaxed truncate">
+                      <p className="text-sm font-semibold text-ink truncate">{doc.label}</p>
+                      <p className="text-[11px] text-muted mt-0.5 truncate">{doc.desc}</p>
+                      <div className="mt-2 rounded-lg bg-accent-soft/20 px-2.5 py-1.5 border border-line">
+                        <p className="text-[10px] font-mono text-muted leading-relaxed truncate">
                           {doc.preview}
                         </p>
                       </div>
                       {active && (
-                        <div className="mt-3 flex items-center gap-1.5 text-xs text-accent font-medium">
-                          <CheckCircle weight="bold" className="h-3.5 w-3.5" />
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-accent font-medium">
+                          <CheckCircle weight="bold" className="h-3 w-3" />
                           Selected
                         </div>
                       )}
@@ -333,9 +325,9 @@ export default function DemoPage() {
                         e.stopPropagation();
                         setViewerDoc(doc);
                       }}
-                      className="mt-2 w-full inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-line text-xs text-muted hover:text-ink hover:bg-accent-soft transition-colors"
+                      className="mt-1.5 w-full inline-flex h-7 items-center justify-center gap-1.5 rounded-lg border border-line text-[11px] text-muted hover:text-ink hover:bg-accent-soft transition-colors"
                     >
-                      <Eye weight="bold" className="h-3.5 w-3.5" />
+                      <Eye weight="bold" className="h-3 w-3" />
                       View document
                     </button>
                   </div>
@@ -343,15 +335,7 @@ export default function DemoPage() {
               })}
             </div>
 
-            <div className="mt-8 flex items-center gap-4">
-              <div className="h-px flex-1 bg-line" />
-              <span className="text-xs font-mono uppercase tracking-[0.1em] text-muted">
-                or process a real document
-              </span>
-              <div className="h-px flex-1 bg-line" />
-            </div>
-
-            <div className="mt-6 rounded-xl border border-dashed border-line bg-surface/60 p-6">
+            <div className="mt-5 rounded-xl border border-dashed border-line bg-surface/60 p-4">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -364,7 +348,7 @@ export default function DemoPage() {
                   setLiveError(null);
                 }}
               />
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <label
                     htmlFor="live-file-input"
@@ -373,15 +357,16 @@ export default function DemoPage() {
                     <CloudArrowUp weight="bold" className="h-4 w-4 text-accent" />
                     {liveFile ? liveFile.name : "Upload your own invoice, receipt, or manifest"}
                   </label>
-                  <p className="mt-1 text-xs text-muted">
-                    PDF, image, CSV, Excel, or text. Runs through the live engine in this browser session.
+                  <p className="mt-0.5 text-xs text-muted">
+                    PDF, image, CSV, Excel, or text. Handwritten notes route through the vision
+                    model and can take a minute or two on the free tier.
                   </p>
                 </div>
                 {liveFile && (
                   <button
                     onClick={handleProcessLive}
                     disabled={processing}
-                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition-all hover:bg-accent/80 active:scale-[0.98] disabled:opacity-50"
+                    className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-4 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition-all hover:bg-accent/80 active:scale-[0.98] disabled:opacity-50"
                   >
                     {processing ? "Processing..." : "Process live"}
                     {!processing && <ArrowRight weight="bold" className="h-4 w-4" />}
@@ -389,7 +374,7 @@ export default function DemoPage() {
                 )}
               </div>
               {liveError && (
-                <p className="mt-3 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                   Live engine error: {liveError}
                 </p>
               )}
@@ -446,6 +431,17 @@ export default function DemoPage() {
             <p className="text-sm text-muted mb-6 max-w-md mx-auto">
               Processing via 5 core research contributions
             </p>
+            {waitingOnEngine && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="text-xs text-accent mb-4"
+              >
+                Vision model reading the document. Handwritten notes take a minute or two on the
+                free tier.
+              </motion.p>
+            )}
 
             <div className="flex flex-col gap-2 max-w-lg mx-auto">
               {CORE_TECH.map((tech, i) => {
@@ -528,31 +524,91 @@ export default function DemoPage() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-6"
+          className="space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0"
         >
           {/* Step 3: Verification API */}
-          <div className="rounded-xl border border-line bg-surface p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-soft">
-                <MagnifyingGlass weight="bold" className="h-5 w-5 text-accent" />
+          <div className="rounded-xl border border-line bg-surface p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-soft">
+                <MagnifyingGlass weight="bold" className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <p className="text-base font-semibold text-ink">Verification API</p>
-                <p className="text-sm text-muted">HS code labeling &amp; structure validation</p>
+                <p className="text-sm font-semibold text-ink">Verification API</p>
+                <p className="text-xs text-muted">HS code labeling &amp; structure validation</p>
               </div>
               {selectedDoc && (
                 <button
                   onClick={() => setViewerDoc(selectedDoc)}
-                  className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg border border-line px-3 text-xs text-muted hover:text-ink hover:bg-accent-soft transition-colors"
+                  className="ml-auto inline-flex h-7 items-center gap-1.5 rounded-lg border border-line px-2.5 text-[11px] text-muted hover:text-ink hover:bg-accent-soft transition-colors"
                 >
-                  <Eye weight="bold" className="h-3.5 w-3.5" />
+                  <Eye weight="bold" className="h-3 w-3" />
                   View source
                 </button>
               )}
             </div>
 
+            {/* Low-confidence panel */}
+            {extraction.needs_review && extraction.confidence_avg < 0.5 && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-800 mb-1">
+                  The engine flagged this document for review
+                </p>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  This document was read, but the engine could not verify it automatically.
+                  Handwriting, photo angle, and paper condition affect extraction. The fields
+                  below are unverified.
+                </p>
+              </div>
+            )}
+
+            {/* Vision source badge */}
+            {extraction.labeled_fields.vision_source && (
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-[11px] font-medium text-accent border border-accent/30">
+                <Database weight="bold" className="h-3 w-3" />
+                Read via vision model, {extraction.confidence_avg >= 0.8 ? "verified" : "needs human review"}
+              </div>
+            )}
+
+            {/* Extracted line items */}
+            {extraction.commodities.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">
+                  Line Items ({extraction.commodities.length})
+                </p>
+                <div className="rounded-lg border border-line overflow-hidden">
+                  <div className="max-h-36 overflow-y-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-accent-soft/50">
+                        <tr className="text-left text-muted">
+                          <th className="px-3 py-1.5 font-medium">Description</th>
+                          <th className="px-3 py-1.5 font-medium text-right">Qty</th>
+                          <th className="px-3 py-1.5 font-medium text-right">Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {extraction.commodities.slice(0, 8).map((c) => (
+                          <tr key={c.id} className="border-t border-line/50">
+                            <td className="px-3 py-1.5 text-ink truncate max-w-[220px]">{c.description || "Not provided"}</td>
+                            <td className="px-3 py-1.5 text-right text-muted">{c.quantity ?? "Not provided"}</td>
+                            <td className="px-3 py-1.5 text-right font-mono text-ink">
+                              {c.declared_value != null ? c.declared_value.toLocaleString() : "Not provided"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {extraction.commodities.length > 8 && (
+                    <p className="px-3 py-1.5 text-[10px] text-muted border-t border-line/50">
+                      {extraction.commodities.length - 8} more items in the full extraction
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* HS Codes detected */}
-            <div className="mb-5">
+            <div className="mb-4">
               <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">
                 HS Codes Detected
               </p>
@@ -580,7 +636,7 @@ export default function DemoPage() {
 
             {/* Container Numbers */}
             {extraction.entities.container_numbers?.length > 0 && (
-              <div className="mb-5">
+              <div className="mb-4">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">
                   Container Numbers
                 </p>
@@ -617,7 +673,7 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              <div className="space-y-2.5 mb-4">
+              <div className="space-y-2 mb-4">
                 {Object.entries(extraction.confidence_scores || {})
                   .filter(([k]) => k !== "overall")
                   .map(([key, val]) => {
@@ -631,23 +687,29 @@ export default function DemoPage() {
                         className="flex items-center gap-3"
                       >
                         <status.icon weight="bold" className={`h-4 w-4 shrink-0 ${status.color}`} />
-                        <span className="text-sm w-28 capitalize text-muted">
+                        <span className="text-sm w-24 sm:w-28 capitalize text-muted min-w-0 truncate">
                           {key.replace(/_/g, " ")}
                         </span>
-                        <div className="flex-1 h-2.5 rounded-full bg-line overflow-hidden">
-                          <motion.div
-                            className={`h-full rounded-full ${status.bar}`}
-                            initial={{ width: "0%" }}
-                            animate={{ width: `${score * 100}%` }}
-                            transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                          />
-                        </div>
+                        {score > 0.05 ? (
+                          <div className="flex-1 h-2.5 rounded-full bg-line overflow-hidden min-w-0">
+                            <motion.div
+                              className={`h-full rounded-full ${status.bar}`}
+                              initial={{ width: "0%" }}
+                              animate={{ width: `${score * 100}%` }}
+                              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-1 h-2.5 rounded-full bg-line/40 min-w-0" />
+                        )}
                         <span
-                          className={`text-sm w-12 text-right font-medium ${status.color}`}
+                          className={`text-sm w-10 sm:w-12 text-right font-medium ${status.color}`}
                         >
-                          {(score * 100).toFixed(0)}%
+                          {score > 0.05 ? `${(score * 100).toFixed(0)}%` : "0%"}
                         </span>
-                        <span className={`text-xs w-24 text-right ${status.color}`}>
+                        <span
+                          className={`hidden sm:block text-xs w-24 text-right ${status.color}`}
+                        >
                           {status.label}
                         </span>
                       </motion.div>
@@ -663,17 +725,17 @@ export default function DemoPage() {
           </div>
 
           {/* Step 4: Structured Export */}
-          <div className="rounded-xl border border-line bg-surface p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-soft">
-                <Database weight="bold" className="h-5 w-5 text-accent" />
+          <div className="rounded-xl border border-line bg-surface p-5 flex flex-col">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-soft">
+                <Database weight="bold" className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <p className="text-base font-semibold text-ink">Structured Export</p>
-                <p className="text-sm text-muted">Instant handoff to TSW, WCO, HKMA CDI</p>
+                <p className="text-sm font-semibold text-ink">Structured Export</p>
+                <p className="text-xs text-muted">Instant handoff to TSW, WCO, HKMA CDI</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => handleExport("wco_json")}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-ink px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98]"
@@ -696,6 +758,11 @@ export default function DemoPage() {
                 {submitting ? "Submitting..." : "Submit to Mock TSW"}
               </button>
             </div>
+
+            <div className="mt-auto pt-4 text-xs text-muted">
+              Exports include the 95% verified fields only. Unverified fields are marked for
+              review, never silently dropped.
+            </div>
           </div>
 
           {/* Completion state */}
@@ -703,7 +770,7 @@ export default function DemoPage() {
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-8 text-center"
+              className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-8 text-center lg:col-span-2"
             >
               <div className="flex justify-center mb-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
@@ -742,27 +809,6 @@ export default function DemoPage() {
           )}
         </motion.div>
       )}
-
-      {/* Core Technologies Footer */}
-      <motion.div {...fadeUp(0.2)} className="mt-12 pt-8 border-t border-line">
-        <p className="text-xs font-mono uppercase tracking-[0.1em] text-muted mb-4 text-center">
-          Platform Core Technologies
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {CORE_TECH.map((tech, i) => (
-            <motion.div
-              key={tech.id}
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-xl border border-line bg-surface p-4 text-center"
-            >
-              <p className="text-sm font-semibold text-ink">{tech.name}</p>
-              <p className="text-xs text-muted mt-1">{tech.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
 
       {/* Document viewer modal */}
       {viewerDoc && (

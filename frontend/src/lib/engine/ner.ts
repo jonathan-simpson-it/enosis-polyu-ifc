@@ -29,9 +29,11 @@ const HS_CODE_PATTERN = /\b(\d{4}\.\d{2}(?:\.\d{2,4})?)\b/g;
 const CONTAINER_PATTERN = /\b([A-Z]{4}\d{7})\b/g;
 const WEIGHT_PATTERN = /(\d+[\d,.]*(?:\.\d+)?)\s*(?:KG|KGS|KILO|TON|TONNE|LB|LBS)/gi;
 const VALUE_PATTERN = /(?:HKD|USD|CNY|EUR)\s*([\d,]+(?:\.\d{2})?)/g;
-const QUANTITY_PATTERN = /(\d+[\d,]*)\s*(?:PCS|PCE|CTN|BOX|SET|PRS|UNITS?|KGS|KGM)/gi;
+const QUANTITY_PATTERN = /(\d+[\d,]*)\s*(?:PCS|PCE|CTN|BOX|SET|PRS|UNITS?|KGS|KGM|BUAH|BTL|LUSIN|PAK)/gi;
 const DATE_PATTERN = /\b(\d{4}[-/]\d{2}[-/]\d{2})\b/g;
 const DATE_ALT_PATTERN = /\b(\d{2}-[A-Z]{3}-\d{4})\b/gi;
+const DATE_DOT_PATTERN = /\b(\d{1,2})[./](\d{1,2})[./](\d{2,4})\b/g;
+const RUPIAH_PATTERN = /Rp\.?\s*([\d.,]+)/gi;
 const COUNTRY_CODE_PATTERN = /\b(CN|HK|MO|TW|JP|KR|US|DE|SG|VN|TH|IN|GB|FR)\b/g;
 
 const LABEL_PATTERNS: Record<string, RegExp> = {
@@ -43,9 +45,11 @@ const LABEL_PATTERNS: Record<string, RegExp> = {
   vessel: /Vessel:\s*(.+)$/im,
   container_number: /(?:Container|CTNR?):\s*(\S+)/i,
   invoice_number: /INVOICE\s*#:\s*(\S+)/i,
+  nota_number: /NOTA\s*No\.?\s*:?\s*(\S+)/i,
   declaration_date: /DATE:\s*(.+)$/im,
   total_value:
     /TOTAL\s+(?:DECLARED\s+)?VALUE:\s*(?:USD|HKD|CNY|EUR)\s*([\d,]+(?:\.\d{2})?)/im,
+  total_rupiah: /(?:JUMLAH|TOTAL)\s*Rp\.?\s*([\d.,]+)/i,
   gross_weight:
     /TOTAL\s+(?:GROSS\s+)?WEIGHT:\s*(\d+[\d,.]*(?:\.\d+)?)\s*(?:KG|KGS)/im,
   net_weight: /TOTAL\s+NET\s+WEIGHT:\s*(\d+[\d,.]*(?:\.\d+)?)\s*(?:KG|KGS)/im,
@@ -118,7 +122,7 @@ export function extractLabeledFields(
     if (!m || !m[1]) continue;
     const val = m[1].trim();
     if (!val) continue;
-    if (key === "total_value" || key === "gross_weight" || key === "net_weight") {
+    if (key === "total_value" || key === "total_rupiah" || key === "gross_weight" || key === "net_weight") {
       fields[key] = parseNumber(val);
     } else if (key === "number_of_packages") {
       const n = parseInt(val.replace(/,/g, ""), 10);
@@ -253,8 +257,23 @@ export function extractEntities(
   for (const match of text.matchAll(DATE_ALT_PATTERN)) {
     entities.dates.push(match[1]);
   }
+  for (const match of text.matchAll(DATE_DOT_PATTERN)) {
+    const [, dd, mm, yy] = match;
+    const year = yy.length === 2 ? `20${yy}` : yy;
+    const date = `${year}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+    if (!entities.dates.includes(date)) entities.dates.push(date);
+  }
+  for (const match of text.matchAll(RUPIAH_PATTERN)) {
+    entities.values.push(match[1]);
+  }
   if (entities.labeled_fields.invoice_number) {
     entities.invoice_numbers.push(String(entities.labeled_fields.invoice_number));
+  }
+  if (entities.labeled_fields.nota_number) {
+    const nota = String(entities.labeled_fields.nota_number);
+    if (!entities.invoice_numbers.includes(nota)) {
+      entities.invoice_numbers.push(nota);
+    }
   }
   for (const match of text.matchAll(COUNTRY_REVERSE)) {
     const code = COUNTRY_MAP[match[1].toUpperCase()];

@@ -31,14 +31,24 @@ export function scoreExtractionConfidence(
     "port_of_discharge",
     "incoterms",
     "total_value",
+    "total_rupiah",
+    "nota_number",
   ].filter((k) => labeled[k]).length;
 
   const commodityCount = commodities.length;
+  const hasValues = entities.values.length > 0;
+  const hasDates = entities.dates.length > 0;
+  const hasInvoiceNo = entities.invoice_numbers.length > 0;
+
   let overall: number;
   if (commodityCount >= 3 && headerFieldsFound >= 4) overall = 0.88;
   else if (commodityCount >= 2) overall = 0.8;
   else if (commodityCount >= 1) overall = 0.7;
+  else if (hasValues && hasDates && (hasInvoiceNo || labeled.total_rupiah)) {
+    overall = 0.72;
+  } else if (hasValues && hasDates) overall = 0.65;
   else if (hsCount) overall = 0.6;
+  else if (hasValues) overall = 0.55;
   else if (rawText.length > 100) overall = 0.5;
   else if (rawText.length > 50) overall = 0.4;
   else overall = 0.3;
