@@ -6,9 +6,10 @@ import {
   Sequence,
   interpolate,
   staticFile,
+  useCurrentFrame,
 } from "remotion";
 import { COLORS, FPS } from "./theme";
-import { NetflixCaption } from "./captions";
+import { NetflixCaption, VO, type VOCue } from "./captions";
 import { Scene1ColdOpen } from "./scenes/Scene1ColdOpen";
 import { Scene2Stat } from "./scenes/Scene2Stat";
 import { Scene3Paper } from "./scenes/Scene3Paper";
@@ -22,11 +23,11 @@ import { Scene10EndCard } from "./scenes/Scene10EndCard";
 
 const DURATION = 60 * FPS;
 
-const DIPS: { a: number; b: number; level: number }[] = [
-  { a: 120, b: 240, level: 0.78 },
-  { a: 420, b: 540, level: 0.78 },
-  { a: 1560, b: 1710, level: 0.85 },
-];
+const DIPS: { a: number; b: number; level: number }[] = VO.map((c) => ({
+  a: c.from - 12,
+  b: c.to + 12,
+  level: 0.26,
+}));
 
 const envelope = (f: number): number => {
   const base = interpolate(f, [0, 26, 1758, DURATION - 1], [0, 1, 1, 0], {
@@ -42,6 +43,22 @@ const envelope = (f: number): number => {
     }
   }
   return v;
+};
+
+const VoTrack: React.FC<{ cue: VOCue; index: number }> = ({ cue, index }) => {
+  const frame = useCurrentFrame();
+  const dur = cue.to - cue.from;
+  const volume = interpolate(
+    frame,
+    [4, 10, dur - 12, dur - 4],
+    [0, 1, 1, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
+  return (
+    <Sequence from={cue.from} durationInFrames={dur}>
+      <Audio src={staticFile(`vo/cue-${index + 1}.mp3`)} volume={volume} />
+    </Sequence>
+  );
 };
 
 export const EnosisTrailer: React.FC = () => {
@@ -78,6 +95,9 @@ export const EnosisTrailer: React.FC = () => {
         <Scene10EndCard />
       </Sequence>
 
+      {VO.map((cue, i) => (
+        <VoTrack key={cue.text} cue={cue} index={i} />
+      ))}
       <NetflixCaption />
       <Audio src={staticFile("music/track.mp3")} volume={envelope} />
     </AbsoluteFill>
