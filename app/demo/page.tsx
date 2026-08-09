@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   FileText,
@@ -13,6 +13,7 @@ import {
   Eye,
   ArrowSquareOut,
   CloudArrowUp,
+  Stack,
 } from "@phosphor-icons/react";
 import ConfidenceExplainer from "@/components/confidence-explainer";
 import DocViewer from "@/components/demo/doc-viewer";
@@ -23,6 +24,7 @@ import {
   generateDemoTswReference,
 } from "@/lib/demo-data";
 import type { DemoDoc, DemoExtraction } from "@/lib/demo-data";
+import { prepareUploadFile } from "@/lib/client/file-prep";
 
 const CORE_TECH = [
   { id: "docformer", name: "DocFormer-Trade", desc: "Multi-modal layout transformer. Outperforms LayoutLM by 14% on trade manifests", color: "bg-accent-soft text-accent border-accent" },
@@ -51,8 +53,30 @@ export default function DemoPage() {
 
   const [liveFile, setLiveFile] = useState<File | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [liveVisionNote, setLiveVisionNote] = useState<string | null>(null);
+  const [liveModel, setLiveModel] = useState<string | null>(null);
   const [waitingOnEngine, setWaitingOnEngine] = useState(false);
+  const [retryingVision, setRetryingVision] = useState(false);
+  const [waitElapsed, setWaitElapsed] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const liveAbortRef = useRef<AbortController | null>(null);
+
+  // Abort any in-flight live request on unmount so we never set state on an
+  // unmounted component (and the browser stops holding the connection).
+  useEffect(() => {
+    return () => liveAbortRef.current?.abort();
+  }, []);
+
+  // Elapsed-seconds counter for the analysis wait state: the user always
+  // sees movement and a concrete sense of how long the free tier is taking.
+  useEffect(() => {
+    if (!waitingOnEngine) return;
+    const started = Date.now();
+    const id = setInterval(() => {
+      setWaitElapsed(Math.round((Date.now() - started) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [waitingOnEngine]);
 
   const [activeEngine, setActiveEngine] = useState(-1);
   const [showEngineDetails, setShowEngineDetails] = useState(false);
@@ -92,36 +116,111 @@ export default function DemoPage() {
     setProcessing(false);
   }, [selectedDoc, runEngineTheater]);
 
+  const sendRequest = useCallback(
+    async (controller: AbortController) => {
+      try {
+        const form = new FormData();
+        form.append("file", liveFile!);
+        const res = await fetch("/api/documents/process", {
+          method: "POST",
+          body: form,
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        return { res, data };
+      } catch (err) {
+        return { err: err instanceof Error ? err : new Error("Live engine failed") };
+      }
+    },
+    [liveFile]
+  );
+
   const handleProcessLive = useCallback(async () => {
     if (!liveFile) return;
+    // Bound the whole flow — theater included — so the spinner can never
+    // spin forever. Server races at 58s, vision aborts at 55s, so 65s here
+    // is the outermost backstop per attempt.
+    let controller = new AbortController();
+    let timer = setTimeout(() => controller.abort(), 65000);
+    liveAbortRef.current = controller;
+
     setProcessing(true);
     setLiveError(null);
+    setLiveVisionNote(null);
+    setLiveModel(null);
+    setRetryingVision(false);
     setExtraction(null);
     setExportResult(null);
     setWaitingOnEngine(false);
+    setWaitElapsed(0);
+
+    // Start the request and the theater at the same time: the research-step
+    // animation plays while the engine actually works, instead of pretending
+    // to be done before the work begins.
+    let settled = false;
+    const request = sendRequest(controller);
+    request.then(() => {
+      settled = true;
+    });
+
     await runEngineTheater();
-    setWaitingOnEngine(true);
+
+    // Theater finished but the engine is still working: show the honest
+    // analysis state with model + elapsed time instead of green ticks.
+    if (!settled) {
+      setWaitingOnEngine(true);
+    }
+
+    let outcome = await request;
+
+    // 422 = the engine read nothing AND every vision model failed within
+    // budget. Free-tier models sometimes answer just past the deadline, so
+    // give the document one automatic second chance with a fresh budget
+    // before surfacing the error.
+    if (!outcome.err && outcome.res?.status === 422) {
+      clearTimeout(timer);
+      if (liveAbortRef.current === controller) liveAbortRef.current = null;
+      setRetryingVision(true);
+      setWaitingOnEngine(true);
+      setWaitElapsed(0);
+      controller = new AbortController();
+      timer = setTimeout(() => controller.abort(), 65000);
+      liveAbortRef.current = controller;
+      outcome = await sendRequest(controller);
+    }
+
     try {
-      const form = new FormData();
-      form.append("file", liveFile);
-      const res = await fetch("/api/documents/process", {
-        method: "POST",
-        body: form,
-      });
-      if (!res.ok) throw new Error(`Engine returned ${res.status}`);
-      const data = await res.json();
+      if (outcome.err) throw outcome.err;
+      const { res, data } = outcome;
+      if (!res.ok) {
+        throw new Error(data?.detail || `Engine returned ${res.status}`);
+      }
       setExtraction(data.extraction as DemoExtraction);
+      if (data.vision?.model) setLiveModel(data.vision.model);
+      if (data.vision?.status === "timed_out") {
+        setLiveVisionNote(
+          "The vision model timed out. Showing partial extraction — try again with a clearer image."
+        );
+      }
       setStep(4);
     } catch (err) {
-      setLiveError(
-        err instanceof Error ? err.message : "Live engine failed"
-      );
+      if (err instanceof Error && err.name === "AbortError") {
+        setLiveError(
+          "The engine took too long. Please try again or upload a smaller image."
+        );
+      } else {
+        setLiveError(err instanceof Error ? err.message : "Live engine failed");
+      }
       setStep(1);
     } finally {
+      clearTimeout(timer);
+      if (liveAbortRef.current === controller) liveAbortRef.current = null;
+      setRetryingVision(false);
       setProcessing(false);
       setWaitingOnEngine(false);
+      setWaitElapsed(0);
     }
-  }, [liveFile, runEngineTheater]);
+  }, [liveFile, runEngineTheater, sendRequest]);
 
   const handleExport = useCallback(
     (format: string) => {
@@ -158,6 +257,10 @@ export default function DemoPage() {
     setShowEngineDetails(false);
     setLiveFile(null);
     setLiveError(null);
+    setLiveVisionNote(null);
+    setLiveModel(null);
+    setRetryingVision(false);
+    setWaitElapsed(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
@@ -342,10 +445,20 @@ export default function DemoPage() {
                 accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.txt,.json"
                 className="hidden"
                 id="live-file-input"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0] || null;
-                  setLiveFile(file);
+                  if (!file) return;
+                  const prepared = await prepareUploadFile(file);
+                  if ("error" in prepared) {
+                    setLiveFile(null);
+                    setLiveError(prepared.error);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                    return;
+                  }
+                  setLiveFile(prepared.file);
                   setLiveError(null);
+                  setLiveVisionNote(null);
+                  setLiveModel(null);
                 }}
               />
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -359,7 +472,7 @@ export default function DemoPage() {
                   </label>
                   <p className="mt-0.5 text-xs text-muted">
                     PDF, image, CSV, Excel, or text. Handwritten notes route through the vision
-                    model and can take a minute or two on the free tier.
+                    model and usually take ~5-30s. Images over 4MB are compressed automatically.
                   </p>
                 </div>
                 {liveFile && (
@@ -432,21 +545,58 @@ export default function DemoPage() {
               Processing via 5 core research contributions
             </p>
             {waitingOnEngine && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="text-xs text-accent mb-4"
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="mb-4 rounded-xl border border-accent/30 bg-accent-soft/20 px-4 py-3.5"
               >
-                Vision model reading the document. Handwritten notes take a minute or two on the
-                free tier.
-              </motion.p>
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span
+                      className={`absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 ${
+                        reduce ? "" : "animate-ping"
+                      }`}
+                    />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+                  </span>
+                  <p className="text-xs font-medium text-ink">
+                    {retryingVision
+                      ? "First attempt timed out — retrying once more"
+                      : "Reading via vision model"}
+                    {liveModel ? ` (${liveModel})` : ""}
+                  </p>
+                </div>
+                {/* Indeterminate sweep — the eye has something moving for the
+                    whole wait, not just a ticking counter. */}
+                <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-line/60">
+                  <motion.div
+                    className="h-full w-1/3 rounded-full bg-accent"
+                    animate={
+                      reduce
+                        ? { x: "0%" }
+                        : { x: ["-100%", "400%"] }
+                    }
+                    transition={
+                      reduce
+                        ? undefined
+                        : { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                    }
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted">
+                  Reading usually completes in 5-30s. Elapsed:{" "}
+                  <span className="font-mono text-ink">{waitElapsed}s</span>
+                </p>
+              </motion.div>
             )}
 
             <div className="flex flex-col gap-2 max-w-lg mx-auto">
               {CORE_TECH.map((tech, i) => {
                 const isActive = activeEngine >= i;
-                const isDone = activeEngine > i;
+                // Never show a green "Complete" checkmark during analysis:
+                // the work isn't done until the engine actually answers.
+                const isDone = false;
                 return (
                   <motion.div
                     key={tech.id}
@@ -547,6 +697,23 @@ export default function DemoPage() {
               )}
             </div>
 
+            {/* Classification strip */}
+            {extraction.classification && (
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-[11px] font-medium text-ink border border-accent/30">
+                  <Stack weight="bold" className="h-3 w-3 text-accent" />
+                  {extraction.classification.doc_type.replace(/_/g, " ")}
+                </span>
+                <span className="text-[11px] text-muted">
+                  {extraction.classification.method === "llm"
+                    ? "classified by language model"
+                    : "classified by rule engine"}
+                  {" · "}
+                  {Math.round(extraction.classification.confidence * 100)}% category confidence
+                </span>
+              </div>
+            )}
+
             {/* Low-confidence panel */}
             {extraction.needs_review && extraction.confidence_avg < 0.5 && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
@@ -563,9 +730,22 @@ export default function DemoPage() {
 
             {/* Vision source badge */}
             {extraction.labeled_fields.vision_source && (
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-[11px] font-medium text-accent border border-accent/30">
+              <div className="mb-4 inline-flex flex-wrap items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-[11px] font-medium text-accent border border-accent/30">
                 <Database weight="bold" className="h-3 w-3" />
-                Read via vision model, {extraction.confidence_avg >= 0.8 ? "verified" : "needs human review"}
+                <span>
+                  Read via {liveModel || "vision model"},{" "}
+                  {extraction.confidence_avg >= 0.8 ? "verified" : "needs human review"}
+                </span>
+              </div>
+            )}
+
+            {/* Vision timed out banner */}
+            {liveVisionNote && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-800 mb-1">
+                  Partial extraction
+                </p>
+                <p className="text-xs text-amber-700 leading-relaxed">{liveVisionNote}</p>
               </div>
             )}
 
@@ -736,24 +916,32 @@ export default function DemoPage() {
               </div>
             </div>
             <div className="flex flex-col gap-2.5">
+              {extraction.commodities.length === 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  Nothing was extracted from this document, so there is nothing to export.
+                  Re-process it or try a clearer image.
+                </div>
+              )}
               <button
                 onClick={() => handleExport("wco_json")}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-ink px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98]"
+                disabled={extraction.commodities.length === 0}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-ink px-5 text-xs font-semibold text-surface uppercase tracking-[0.06em] transition hover:bg-ink/80 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-ink disabled:active:scale-100"
               >
                 <Download weight="bold" className="h-4 w-4" />
                 WCO Data Model v3.11
               </button>
               <button
                 onClick={() => handleExport("tsw_json")}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 text-xs font-medium text-ink uppercase tracking-[0.06em] transition hover:bg-accent-soft active:scale-[0.98]"
+                disabled={extraction.commodities.length === 0}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 text-xs font-medium text-ink uppercase tracking-[0.06em] transition hover:bg-accent-soft active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-surface disabled:active:scale-100"
               >
                 <Download weight="bold" className="h-4 w-4" />
                 TSW Phase 3 JSON
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={submitting}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 text-xs font-medium text-ink uppercase tracking-[0.06em] transition hover:bg-accent-soft active:scale-[0.98] disabled:opacity-50"
+                disabled={submitting || extraction.commodities.length === 0}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 text-xs font-medium text-ink uppercase tracking-[0.06em] transition hover:bg-accent-soft active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-surface disabled:active:scale-100"
               >
                 {submitting ? "Submitting..." : "Submit to Mock TSW"}
               </button>

@@ -16,8 +16,7 @@ import {
   Translate,
   ArrowsClockwise,
 } from "@phosphor-icons/react";
-import {
-  api,
+import { api,
   type Declaration,
   type ExtractionResult,
   type Commodity,
@@ -25,6 +24,7 @@ import {
 } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import ConfidenceExplainer from "@/components/confidence-explainer";
+import DocumentTypeCard from "@/components/document-type-card";
 
 const CONFIDENCE_THRESHOLD = 0.95;
 
@@ -121,6 +121,8 @@ export default function ReviewPage() {
           ...prev,
           status: res.status,
           confidence_avg: res.confidence_avg,
+          doc_type: res.classification?.doc_type ?? prev.doc_type,
+          classification: res.classification ?? prev.classification,
         };
         if (res.labeled_fields) {
           const lf = res.labeled_fields as Record<string, any>;
@@ -467,6 +469,19 @@ export default function ReviewPage() {
               </>
             )}
           </button>
+        </motion.div>
+      )}
+
+      {/* Document Type — category-based standard structuring */}
+      {doc && (
+        <motion.div {...fadeUp(0.05)}>
+          <DocumentTypeCard
+            documentId={doc.id}
+            docType={doc.doc_type}
+            classification={doc.classification}
+            editable={isEditable}
+            onChanged={() => setDoc((prev) => (prev ? { ...prev, status: prev.status } : prev))}
+          />
         </motion.div>
       )}
 

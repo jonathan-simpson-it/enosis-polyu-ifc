@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import {
@@ -13,6 +14,7 @@ import {
   Building,
   Heartbeat,
   ArrowsIn,
+  Play,
 } from "@phosphor-icons/react";
 import ConvergenceAnimation from "@/components/convergence-animation";
 
@@ -75,6 +77,14 @@ const research = [
 
 export default function Home() {
   const reduce = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+
+  const handlePlay = () => {
+    if (playing) return;
+    videoRef.current?.play();
+  };
 
   const fadeUp = (delay = 0) =>
     reduce
@@ -216,6 +226,66 @@ export default function Home() {
               className="rounded-xl border border-line w-full max-w-3xl h-48 sm:h-64 object-cover opacity-80"
               loading="lazy"
             />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* See it in action */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <motion.div {...fadeUp()} className="max-w-2xl mb-12">
+            <p className="text-xs font-mono uppercase tracking-[0.1em] text-accent mb-3">
+              Watch the film
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink font-display">
+              See Enosis in action
+            </h2>
+            <p className="mt-3 text-muted text-sm leading-relaxed">
+              Sixty seconds from paper document to verified, submission-ready
+              data.
+            </p>
+          </motion.div>
+
+          <motion.div {...fadeUp(0.1)}>
+            <div className="rounded-xl border border-line bg-surface overflow-hidden">
+              <div
+                className="relative aspect-video bg-ink cursor-pointer group"
+                onClick={handlePlay}
+                role="button"
+                aria-label="Play the Enosis trailer"
+              >
+                <video
+                  ref={videoRef}
+                  src="/video/enosis-trailer.mp4"
+                  poster="/video/poster.jpg"
+                  preload="metadata"
+                  playsInline
+                  className="absolute inset-0 h-full w-full object-cover"
+                  onPlay={() => {
+                    setPlaying(true);
+                    setShowControls(true);
+                  }}
+                  onPause={() => setPlaying(false)}
+                  onEnded={() => setPlaying(false)}
+                  controls={showControls}
+                />
+                {!playing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-ink/25 transition-colors group-hover:bg-ink/40">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface text-ink shadow-xl transition-transform group-hover:scale-105">
+                      <Play weight="bold" className="ml-0.5 h-6 w-6" />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-4">
+                <span className="text-xs font-mono uppercase tracking-wider text-muted">
+                  60 seconds · with voice-over
+                </span>
+                <span className="text-xs text-muted">
+                  Upload → extract → review → export
+                </span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>

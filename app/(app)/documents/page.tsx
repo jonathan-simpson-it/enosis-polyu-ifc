@@ -137,6 +137,15 @@ export default function DocumentsPage() {
                   </td>
                   <td className="px-6 py-4 text-sm uppercase text-muted">{doc.file_type}</td>
                   <td className="px-6 py-4">
+                    {doc.doc_type && doc.doc_type !== "other" ? (
+                      <span className="inline-flex items-center rounded-full bg-accent-soft px-2.5 py-0.5 text-[11px] font-medium text-accent">
+                        {doc.doc_type.replace(/_/g, " ")}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted">Unclassified</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${statusBadge(doc.status)}`}>
                       {doc.status}
                     </span>

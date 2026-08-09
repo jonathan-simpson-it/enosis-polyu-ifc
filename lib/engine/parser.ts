@@ -18,9 +18,6 @@ export function detectFileType(filename: string, contentType?: string | null): s
   return "text";
 }
 
-const OCR_LANGS =
-  process.env.ENOSIS_OCR_LANGS || "eng+chi_sim+chi_tra";
-
 export async function parseDocument(
   fileBytes: Buffer,
   filename: string,
@@ -45,10 +42,12 @@ export async function parseDocument(
     const parsed = await extractExcel(fileBytes);
     result.raw_text = parsed.text;
     result.structured_data = { sheets: parsed.sheets, rows: parsed.rows };
-  } else if (fileType === "image") {    const { extractImage } = await import("./ocr");
-    const parsed = await extractImage(fileBytes);
-    result.raw_text = parsed.text;
-    result.structured_data = parsed.structured;
+  } else if (fileType === "image") {
+    // OCR (tesseract.js) is removed: its worker never boots on serverless
+    // runtimes (Vercel) and hung requests indefinitely. Images are left to
+    // the vision model in processBuffer, which routes low-confidence images
+    // through extractWithVision.
+    result.raw_text = "";
   } else if (fileType === "json") {
     result.raw_text = fileBytes.toString("utf-8");
     try {

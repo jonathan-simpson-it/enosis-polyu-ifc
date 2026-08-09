@@ -71,12 +71,22 @@ export interface Commodity {
   reviewed: boolean;
 }
 
+export interface DocumentClassification {
+  doc_type: string;
+  confidence: number;
+  method: string;
+  signals: string[];
+  overridden?: boolean;
+}
+
 export interface Declaration {
   id: string;
   filename: string | null;
   file_type: string | null;
   status: string;
   confidence_avg: number | null;
+  doc_type?: string | null;
+  classification?: DocumentClassification | null;
   decl_number: string | null;
   consignor_name: string | null;
   consignee_name: string | null;
@@ -115,6 +125,7 @@ export interface ExtractionResult {
   needs_review: boolean;
   commodities: Commodity[];
   labeled_fields: Record<string, unknown>;
+  classification?: DocumentClassification;
 }
 
 export interface ExtractionEntities {
@@ -135,6 +146,14 @@ export interface ExportResult {
   format: string;
   export: Record<string, unknown>;
   validation: { valid: boolean; errors?: string[] };
+  classification?: {
+    doc_type: string;
+    label: string;
+    target_standards: string[];
+    purpose: string;
+    confidence: number | null;
+    overridden: boolean;
+  };
 }
 
 export interface SubmitResult {
@@ -195,7 +214,7 @@ export const api = {
   getOrg: (orgId: string) => request<Organization>(`/api/orgs/${orgId}`),
 
   // Documents
-  uploadDocument: async (file: File) => {
+  uploadDocument: async (file: File, opts?: { signal?: AbortSignal }) => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -203,18 +222,38 @@ export const api = {
       ...getAuthHeaders(),
     };
 
-    const res = await fetch(`${API_BASE}/api/documents/upload`, {
-      method: "POST",
-      headers,
-      body: formData,
-    });
+    // Server races at 35s and the vision module aborts at 30s; 50s here is
+    // the outermost backstop so the upload spinner can never spin forever.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 50000);
+    const onOuterAbort = () => controller.abort();
+    opts?.signal?.addEventListener("abort", onOuterAbort, { once: true });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      throw new Error(body?.detail || `Upload failed: ${res.status}`);
+    try {
+      const res = await fetch(`${API_BASE}/api/documents/upload`, {
+        method: "POST",
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.detail || `Upload failed: ${res.status}`);
+      }
+
+      return res.json() as Promise<UploadResult>;
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new Error(
+          "The engine took too long. Please try again or upload a smaller image."
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+      opts?.signal?.removeEventListener("abort", onOuterAbort);
     }
-
-    return res.json() as Promise<UploadResult>;
   },
 
   listDocuments: () =>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDocument, upsertDocument } from "@/lib/engine/store";
 import { extractEntities } from "@/lib/engine/ner";
 import { scoreExtractionConfidence, needsHumanReview, scoreHsCodeConfidence } from "@/lib/engine/confidence";
+import { classifyDeterministic } from "@/lib/engine/classify";
 import type { ExtractionResult } from "@/lib/engine/types";
 
 export async function POST(
@@ -45,6 +46,7 @@ export async function POST(
       },
       confidence_scores: { overall: doc.confidence_avg ?? 0.3 },
       needs_review: needsHumanReview(doc.confidence_avg ?? 0.3),
+      classification: doc.classification ?? undefined,
       commodities: doc.commodities,
       labeled_fields: {
         consignor_name: doc.consignor_name || "",
@@ -112,6 +114,8 @@ export async function POST(
   doc.status = "extracted";
   doc.confidence_avg = confidenceScores.overall ?? 0.3;
   doc.commodities = commodities;
+  doc.classification = classifyDeterministic(rawText, doc.filename || "");
+  doc.doc_type = doc.classification.doc_type;
   upsertDocument(doc);
 
   const result: ExtractionResult = {
@@ -121,6 +125,7 @@ export async function POST(
     entities: { ...entities, commodities },
     confidence_scores: confidenceScores,
     needs_review: needsHumanReview(doc.confidence_avg),
+    classification: doc.classification,
     commodities,
     labeled_fields: labeled,
   };

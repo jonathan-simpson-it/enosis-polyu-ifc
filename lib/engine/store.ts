@@ -1,5 +1,14 @@
 import { DEMO_DOCS } from "../demo-data";
-import type { Commodity, Declaration } from "./types";
+import type { Commodity, Declaration, DocType } from "./types";
+
+const DEMO_DOC_TYPES: Record<string, DocType> = {
+  invoice: "commercial_invoice",
+  "invoice-pdf": "commercial_invoice",
+  xlsx: "commercial_invoice",
+  packing: "packing_list",
+  borderless: "packing_list",
+  wechat: "receipt",
+};
 
 const documents = new Map<string, Declaration>();
 
@@ -12,12 +21,23 @@ function seedFromDemoDocs(): void {
       ...c,
       id: c.id || `seed-${Math.random().toString(36).slice(2, 10)}`,
     }));
+    const docType: DocType = DEMO_DOC_TYPES[demo.id] || "other";
     const decl: Declaration = {
       id: demo.extraction.declaration_id,
       filename: demo.label,
       file_type: demo.fileType.toLowerCase(),
       status: demo.extraction.needs_review ? "extracted" : "reviewed",
       confidence_avg: demo.extraction.confidence_avg,
+      doc_type: docType,
+      classification: {
+        doc_type: docType,
+        confidence:
+          docType === "other"
+            ? 0.4
+            : Math.min(0.97, (demo.extraction.confidence_avg ?? 0.8) + 0.05),
+        method: "deterministic",
+        signals: ["seeded_demo"],
+      },
       decl_number: demo.extraction.entities.invoice_numbers?.[0] || null,
       consignor_name: (lf.consignor_name as string) || null,
       consignee_name: (lf.consignee_name as string) || null,

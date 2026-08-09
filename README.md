@@ -8,9 +8,10 @@ Universal data ingestion engine for GBA trade documents. Turns messy paper, PDFs
 |---|---|
 | Upload | Drag and drop PDF, image, Excel, CSV, or text |
 | Parse | pdfjs-dist for PDFs, read-excel-file for XLSX, sharp + tesseract.js for images (eng + chi_sim + chi_tra) |
+| Classify | `lib/engine/classify.ts` detects the document category (invoice, packing list, B/L, CoO, PO, customs declaration, bank statement, receipt) via zh/en rule signals + filename hints, with an optional LLM fallback; `lib/engine/registry.ts` maps category → target standards (WCO v3.11 / TSW Phase 3) |
 | Extract | Regex NER: HS codes, containers, weights, values, dates, countries, commodity blocks, labeled header fields |
-| Verify | Deterministic confidence scoring per field, 95% review threshold (p<0.05 framing) |
-| Export | WCO Data Model v3.11 JSON/XML, TSW Phase 3 JSON, mock TSW submission |
+| Verify | Deterministic confidence scoring per field + category confidence, 95% review threshold (p<0.05 framing) |
+| Export | WCO Data Model v3.11 JSON/XML, TSW Phase 3 JSON, mock TSW submission; default format follows the detected category |
 
 ## Quick start
 
@@ -31,6 +32,8 @@ npm run dev
 │   ├── pdf.ts               # pdfjs-dist text extraction (Node-safe polyfills)
 │   ├── excel.ts             # read-excel-file + header-row detection
 │   ├── ocr.ts               # sharp pre-process + tesseract.js
+│   ├── classify.ts          # document-type classification (rule signals + LLM fallback)
+│   ├── registry.ts          # doc_type → target standards / schema mapping
 │   ├── ner.ts               # regex NER + flattened-table fallback + shop-note patterns
 │   ├── vision.ts            # OpenRouter vision fallback for handwriting
 │   ├── translate.ts         # zh-Hant-HK / zh-Hans-CN / en translation

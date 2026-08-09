@@ -57,6 +57,8 @@ next-env.d.ts
 
 # Demo media
 *.mp4
+!public/video/
+!public/video/*.mp4
 
 # Tesseract traineddata (downloaded at runtime)
 *.traineddata

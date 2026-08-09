@@ -13,6 +13,12 @@ export interface DemoExtraction {
   declaration_id: string;
   status: string;
   confidence_avg: number;
+  classification?: {
+    doc_type: string;
+    confidence: number;
+    method: string;
+    signals: string[];
+  };
   entities: {
     hs_codes: string[];
     container_numbers: string[];
@@ -84,6 +90,12 @@ const INVOICE_DOC: DemoDoc = {
       overall: 0.91,
     },
     needs_review: false,
+    classification: {
+      doc_type: "commercial_invoice",
+      confidence: 0.93,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -176,6 +188,12 @@ const PACKING_DOC: DemoDoc = {
       overall: 0.88,
     },
     needs_review: false,
+    classification: {
+      doc_type: "packing_list",
+      confidence: 0.9,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -283,6 +301,12 @@ const WECHAT_DOC: DemoDoc = {
       overall: 0.72,
     },
     needs_review: true,
+    classification: {
+      doc_type: "receipt",
+      confidence: 0.82,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -357,6 +381,12 @@ const PDF_INVOICE_DOC: DemoDoc = {
       overall: 0.93,
     },
     needs_review: false,
+    classification: {
+      doc_type: "commercial_invoice",
+      confidence: 0.91,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -449,6 +479,12 @@ const BORDERLESS_DOC: DemoDoc = {
       overall: 0.45,
     },
     needs_review: true,
+    classification: {
+      doc_type: "packing_list",
+      confidence: 0.88,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -557,6 +593,12 @@ const XLSX_DOC: DemoDoc = {
       overall: 0.89,
     },
     needs_review: false,
+    classification: {
+      doc_type: "commercial_invoice",
+      confidence: 0.92,
+      method: "deterministic",
+      signals: ["seeded_demo"],
+    },
     commodities: [
       {
         id: uid(),
@@ -657,7 +699,7 @@ export function buildWcoJson(extraction: DemoExtraction): Record<string, unknown
       },
       total_declared_value: {
         value: (lf.total_value as number) || 0,
-        currency: "USD",
+        currency: (lf.currency as string) || "USD",
       },
       incoterms: (lf.incoterms as string) || "",
       number_of_packages: (lf.number_of_packages as number) || 0,

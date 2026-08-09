@@ -3,6 +3,7 @@ import { getDocument } from "@/lib/engine/store";
 import { buildWcoJson, buildWcoXml, buildTswPayload } from "@/lib/engine/wco";
 import { validateTswReady } from "@/lib/engine/validator";
 import { translateText, type TargetLang } from "@/lib/engine/translate";
+import { getDocTypeDefinition, defaultExportFormatFor } from "@/lib/engine/registry";
 import type { DeclarationHeader } from "@/lib/engine/wco";
 
 export async function POST(
@@ -16,8 +17,13 @@ export async function POST(
   }
 
   const { searchParams } = new URL(request.url);
-  const format = searchParams.get("format") || "wco_json";
+  const requestedFormat = searchParams.get("format");
   const translateTo = searchParams.get("translate_to") as TargetLang | null;
+
+  const docType = doc.doc_type || "other";
+  const typeDef = getDocTypeDefinition(docType);
+  const format =
+    requestedFormat || defaultExportFormatFor(docType);
 
   let commodities = doc.commodities;
   if (translateTo && ["en", "zh-Hant-HK", "zh-Hans-CN"].includes(translateTo)) {
@@ -69,5 +75,13 @@ export async function POST(
     export: payload,
     xml,
     validation,
+    classification: {
+      doc_type: docType,
+      label: typeDef.label,
+      target_standards: typeDef.target_standards,
+      purpose: typeDef.purpose,
+      confidence: doc.classification?.confidence ?? null,
+      overridden: doc.classification?.overridden ?? false,
+    },
   });
 }

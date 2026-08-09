@@ -1,3 +1,22 @@
+export type DocType =
+  | "commercial_invoice"
+  | "packing_list"
+  | "bill_of_lading"
+  | "certificate_of_origin"
+  | "purchase_order"
+  | "customs_declaration"
+  | "bank_statement"
+  | "receipt"
+  | "other";
+
+export interface DocumentClassification {
+  doc_type: DocType;
+  confidence: number;
+  method: "deterministic" | "llm" | "fallback";
+  signals: string[];
+  overridden?: boolean;
+}
+
 export interface Commodity {
   id: string;
   description: string;
@@ -34,6 +53,7 @@ export interface ExtractionResult {
   needs_review: boolean;
   commodities: Commodity[];
   labeled_fields: Record<string, string | number | null>;
+  classification?: DocumentClassification;
 }
 
 export interface ParsedDocument {
@@ -69,4 +89,6 @@ export interface Declaration {
   parsed_data?: Record<string, unknown>;
   created_at: string;
   commodities: Commodity[];
+  doc_type?: DocType | null;
+  classification?: DocumentClassification | null;
 }

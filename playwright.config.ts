@@ -1,7 +1,8 @@
+import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./tests/e2e",
+  testDir: "./tests",
   timeout: 120000,
   expect: { timeout: 15000 },
   fullyParallel: false,
@@ -21,11 +22,16 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "unit",
+      testMatch: "unit/**/*.spec.ts",
+    },
+    {
       name: "setup",
-      testMatch: "auth.setup.ts",
+      testMatch: "e2e/auth.setup.ts",
     },
     {
       name: "chromium",
+      testMatch: "e2e/**/*.spec.ts",
       use: {
         ...devices["Desktop Chrome"],
         headless: false,

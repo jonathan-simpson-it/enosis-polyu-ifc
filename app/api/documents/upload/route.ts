@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { processBuffer } from "@/lib/engine/process";
 import { upsertDocument, nextDeclarationId } from "@/lib/engine/store";
 import { validateUpload } from "@/lib/engine/sanitizer";
+import { withTimeout, ProcessingTimeoutError } from "@/lib/engine/timeout";
 import type { Declaration } from "@/lib/engine/types";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const form = await request.formData().catch(() => null);
@@ -20,7 +23,31 @@ export async function POST(request: Request) {
     );
   }
 
-  const { extraction, parsed } = await processBuffer(bytes, file.name, file.type);
+  let outcome;
+  try {
+    outcome = await withTimeout(
+      processBuffer(bytes, file.name, file.type, { signal: request.signal }),
+      40000
+    );
+  } catch (err) {
+    if (err instanceof ProcessingTimeoutError) {
+      return NextResponse.json(
+        {
+          detail:
+            "The engine took too long on this document. Try again, or upload a smaller or clearer image.",
+          vision: { status: "timed_out" },
+        },
+        { status: 504 }
+      );
+    }
+    console.error("[enosis-upload] processing failed:", err);
+    return NextResponse.json(
+      { detail: err instanceof Error ? err.message : "Processing failed" },
+      { status: 500 }
+    );
+  }
+
+  const { extraction, parsed, vision } = outcome;
 
   const id = nextDeclarationId();
   const decl: Declaration = {
@@ -29,6 +56,8 @@ export async function POST(request: Request) {
     file_type: parsed.file_type,
     status: "extracted",
     confidence_avg: extraction.confidence_avg,
+    doc_type: extraction.classification?.doc_type ?? null,
+    classification: extraction.classification ?? null,
     decl_number: extraction.entities.invoice_numbers?.[0] || null,
     consignor_name: (extraction.labeled_fields.consignor_name as string) || null,
     consignee_name: (extraction.labeled_fields.consignee_name as string) || null,
@@ -59,5 +88,6 @@ export async function POST(request: Request) {
     char_count: parsed.raw_text.length,
     has_tables: parsed.tables.length > 0,
     structured_fields: Object.keys(parsed.structured_data),
+    vision,
   });
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDocument, deleteDocument, upsertDocument } from "@/lib/engine/store";
+import { isKnownDocType } from "@/lib/engine/registry";
+import type { DocumentClassification } from "@/lib/engine/types";
 
 export async function GET(
   _request: Request,
@@ -46,6 +48,17 @@ export async function PATCH(
     if (body[key] !== undefined) {
       (doc as unknown as Record<string, unknown>)[key] = body[key];
     }
+  }
+
+  if (body.doc_type !== undefined && isKnownDocType(String(body.doc_type))) {
+    doc.doc_type = String(body.doc_type) as DocumentClassification["doc_type"];
+    doc.classification = {
+      doc_type: doc.doc_type,
+      confidence: 1,
+      method: "deterministic",
+      signals: ["manual_override"],
+      overridden: true,
+    };
   }
   upsertDocument(doc);
   return NextResponse.json({ status: "ok", id });

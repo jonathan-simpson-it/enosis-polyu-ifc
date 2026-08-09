@@ -1,22 +1,30 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { UploadSimple, FileText } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { api, type UploadResult } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
+import { prepareUploadFile } from "@/lib/client/file-prep";
 
 export default function UploadPage() {
   const router = useRouter();
   const reduce = useReducedMotion();
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) router.push("/login");
   }, [router]);
+
+  // Abort any in-flight upload on unmount so we never set state on an
+  // unmounted component.
+  useEffect(() => {
+    return () => uploadAbortRef.current?.abort();
+  }, []);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState("");
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
@@ -30,12 +38,20 @@ export default function UploadPage() {
     setUploading(true);
     setError("");
     setResult(null);
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
     try {
-      const res = await api.uploadDocument(file);
+      const prepared = await prepareUploadFile(file);
+      if ("error" in prepared) {
+        setError(prepared.error);
+        return;
+      }
+      const res = await api.uploadDocument(prepared.file, { signal: controller.signal });
       setResult(res);
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
+      if (uploadAbortRef.current === controller) uploadAbortRef.current = null;
       setUploading(false);
     }
   }
@@ -95,7 +111,8 @@ export default function UploadPage() {
               {uploading ? "Uploading..." : "Drop your file here or click to browse"}
             </p>
             <p className="text-sm text-muted">
-              PDF, Excel, Image, JSON, CSV, or TXT, up to 20MB
+              PDF, Excel, Image, JSON, CSV, or TXT, up to 4MB (images are compressed
+              automatically)
             </p>
           </label>
         </div>
