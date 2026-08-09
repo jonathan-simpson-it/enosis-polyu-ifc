@@ -6,7 +6,6 @@ import {
   Sequence,
   interpolate,
   staticFile,
-  useCurrentFrame,
 } from "remotion";
 import { COLORS, FPS } from "./theme";
 import { NetflixCaption, VO, type VOCue } from "./captions";
@@ -46,17 +45,18 @@ const envelope = (f: number): number => {
 };
 
 const VoTrack: React.FC<{ cue: VOCue; index: number }> = ({ cue, index }) => {
-  const frame = useCurrentFrame();
   const dur = cue.to - cue.from;
-  const volume = interpolate(
-    frame,
-    [4, 10, dur - 12, dur - 4],
-    [0, 1, 1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
   return (
     <Sequence from={cue.from} durationInFrames={dur}>
-      <Audio src={staticFile(`vo/cue-${index + 1}.mp3`)} volume={volume} />
+      <Audio
+        src={staticFile(`vo/cue-${index + 1}.mp3`)}
+        volume={(f) =>
+          interpolate(f, [4, 10, dur - 12, dur - 4], [0, 1, 1, 0], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          })
+        }
+      />
     </Sequence>
   );
 };
