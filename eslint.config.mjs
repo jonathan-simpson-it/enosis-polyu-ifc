@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     "tests/e2e/report/**",
     "test-results/**",
     "public/**",
+    "legacy/**",
+    "enosis-trailer/**",
   ]),
 ]);
 

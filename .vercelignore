@@ -4,6 +4,7 @@ test-results
 tests
 scripts
 skills
+enosis-trailer
 *.mp4
 *.pdf
 *.traineddata
