@@ -1,0 +1,23 @@
+{
+  "trained": true,
+  "label_source": "synthetic-weak (no conversion data exists)",
+  "valid_ndcg_at_10": 0.8818,
+  "n_groups": 65,
+  "n_pairs": 6500,
+  "features": [
+    "bm25_norm",
+    "tfidf_norm",
+    "profile_norm",
+    "struct_norm",
+    "visual_norm",
+    "market_fit",
+    "export_match",
+    "cert_fit",
+    "target_bonus",
+    "feasibility",
+    "moq_log"
+  ],
+  "trained_at": "2026-10-22T05:40:10.407122Z",
+  "shap_available": true,
+  "honesty_note": "Trained on weak labels derived from catalog similarity, NOT on real conversions. Demonstrated as a pipeline scaffold."
+}

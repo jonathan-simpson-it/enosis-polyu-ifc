@@ -24,6 +24,25 @@ npm run dev
 - App: http://localhost:3000 (sign in with any email + 4+ char password)
 - API docs: see the route handlers under `src/app/api/`
 
+## Deep Bridge: trading and logistics B2B intelligence
+
+An explainable B2B product recommendation engine for cross-border trade, mounted at
+http://localhost:3000/deepbridge. It matches factory supplier products to overseas buyers using
+content similarity (BM25, TF-IDF, structured attributes, CLIP visual embeddings), a weighted linear
+scorer with exact additive attribution, an optional fitted ridge regression, an optional LightGBM
+LambdaMART scaffold, and a business policy layer (MMR diversity, per-country concentration caps).
+Every score decomposes into weights, features, evidence and constraints in the UI.
+
+```bash
+npm run trading:setup      # python3.12 venv + core ML deps (no torch needed)
+npm run trading:ingest     # build SQLite + pair features from data/trading/raw
+npm run trading:ml         # FastAPI ML service on :8000
+npm run dev                # Enosis + the /deepbridge app on :3000
+```
+
+Full details, honesty notes (no conversion labels exist in the sample data), architecture and
+test commands: [docs/trading.md](docs/trading.md).
+
 ## Architecture
 
 ```

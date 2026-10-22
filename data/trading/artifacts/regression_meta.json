@@ -1,0 +1,37 @@
+{
+  "fitted": true,
+  "model": "ridge regression (L2), closed-form solution",
+  "target": "weak relevance grade in {0, 1, 2, 3}",
+  "label_source": "weak labels derived from catalog similarity; NOT conversions",
+  "n_pairs": 6500,
+  "n_groups": 65,
+  "alpha": 1.0,
+  "r2_in_sample": 0.344,
+  "r2_grouped_cv": 0.3364,
+  "cv_folds": "5-fold GroupKFold by buyer (leave-buyer-out)",
+  "rmse": 0.6479,
+  "mean_grade": 0.2866,
+  "grade_distribution": {
+    "0": 5727,
+    "1": 8,
+    "2": 440,
+    "3": 325
+  },
+  "intercept": -0.5032,
+  "coefficients": {
+    "bm25_norm": 0.5649,
+    "tfidf_norm": 0.7578,
+    "profile_norm": 1.7126,
+    "struct_norm": 1.2016,
+    "visual_norm": -0.1096,
+    "market_fit": -0.0293,
+    "export_match": 0.0419,
+    "cert_fit": -0.2102,
+    "target_bonus": 0.1269,
+    "feasibility": -0.0398,
+    "moq_log": 0.0045
+  },
+  "trained_at": "2026-10-22T10:45:05.220673Z",
+  "serving": "score = clip((intercept + beta . v) / 3, 0, 1); contributions shown on cards are exact beta_k * v_k / 3",
+  "honesty_note": "The weak target correlates with features by construction, so in-sample R2 overstates predictive power. The grouped cross-validated R2 is the conservative number."
+}

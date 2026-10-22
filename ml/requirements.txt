@@ -1,0 +1,11 @@
+fastapi==0.159.1
+uvicorn[standard]==0.54.0
+numpy==2.5.4
+scikit-learn==1.9.1
+rank-bm25==0.2.2
+
+# Optional extras (not required for the demo; committed artifacts cover vision + fitted models):
+# lightgbm        -> LTR scaffold training (npm run trading:train)
+# torch           -> CLIP image embeddings regeneration (npm run trading:vision)
+# open_clip_torch -> CLIP model loading
+# pillow          -> image decoding for CLIP precompute

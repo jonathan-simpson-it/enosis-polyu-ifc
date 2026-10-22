@@ -8,3 +8,8 @@ enosis-trailer
 *.mp4
 *.pdf
 *.traineddata
+ml
+data/trading
+tests/trading
+playwright.trading.config.ts
+docs/trading.md
