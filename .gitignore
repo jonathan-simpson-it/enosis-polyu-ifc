@@ -15,6 +15,8 @@ env/
 
 # Database
 *.db
+*.db-wal
+*.db-shm
 *.sqlite3
 
 # Environment
@@ -62,3 +64,10 @@ next-env.d.ts
 
 # Tesseract traineddata (downloaded at runtime)
 *.traineddata
+
+# Trading B2B Intelligence (Deep Bridge)
+data/trading/img_cache/
+data/trading/artifacts/clip_cache/
+.pytest_cache/
+tests/trading/report/
+playwright-report/
