@@ -1,0 +1,14 @@
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+  margin: 0.2rem 0;
+}
+
+.katex {
+  font-size: 1.02em;
+}

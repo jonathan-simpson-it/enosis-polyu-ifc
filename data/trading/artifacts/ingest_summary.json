@@ -1,0 +1,17 @@
+{
+  "suppliers": 57,
+  "supplier_products": 100,
+  "buyers": 65,
+  "buyer_products": 100,
+  "fx_as_of": "static demo rates (2024-06)",
+  "subcluster_sizes": {
+    "0": 11,
+    "1": 32,
+    "2": 45,
+    "3": 22,
+    "4": 7,
+    "5": 28,
+    "6": 11,
+    "7": 44
+  }
+}

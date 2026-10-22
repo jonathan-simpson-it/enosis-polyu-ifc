@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const APP_ROUTES = ["/dashboard", "/upload", "/documents", "/exports", "/settings"];
+const APP_ROUTES = ["/dashboard", "/upload", "/documents", "/exports", "/settings", "/deepbridge"];
 
 const links = [
   { href: "/", label: "Home" },

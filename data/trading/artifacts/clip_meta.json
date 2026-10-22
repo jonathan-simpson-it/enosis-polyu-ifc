@@ -1,0 +1,12 @@
+{
+  "model": "ViT-B-32 laion2b_s34b_b79k",
+  "device": "mps",
+  "supplier_images": 100,
+  "buyer_images": 100,
+  "tagging": "hybrid \u2014 keyword base, CLIP fills general/other/empty gaps",
+  "tags_applied": {
+    "applied": 51,
+    "kept_keyword": 549
+  },
+  "runtime_seconds": 14.4
+}
